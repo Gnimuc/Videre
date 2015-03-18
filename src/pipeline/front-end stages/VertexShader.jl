@@ -18,4 +18,14 @@ vertexGLSL = """#version 330 core
                  }"""
 
 
+vertexGLSL★ = """#version 330 core
+                 // "offset" and "color" are input vertex attributes
+                 layout (location = 0) in vec4 offset;
+                 layout (location = 1) in vec4 color;
+                 // "vs_color" is an output that will be sent to the next shader stage
+                 out vec4 vs_color
 
+
+
+
+"""
