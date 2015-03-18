@@ -30,12 +30,19 @@ window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullW
 GLFW.MakeContextCurrent(window)
 GLFW.SetKeyCallback(window, key_callback)
 glViewport(0, 0, WIDTH, HEIGHT)
+
+## Testing ##
+
+
+
 # Loop #
 while !GLFW.WindowShouldClose(window)
   # Check and call events
   GLFW.PollEvents()
   # Rendering commands here
-
+  color = GLfloat[0.5abs(sin(time())), 0.3abs(cos(time())), 1, 1.0]
+  println(0.5abs(sin(time())))
+  glClearBufferfv(GL_COLOR, 0, color)
   # draw
 
   # Swap the buffers
