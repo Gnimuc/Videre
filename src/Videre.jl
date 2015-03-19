@@ -5,7 +5,8 @@ using ModernGL
 using GLAbstraction
 
 
-include("./pipeline/VertexShader.jl")
+include("./pipeline/front-end stages/VertexShader.jl")
+include("./pipeline/back-end stages/FragmentShader.jl")
 
 # Callbacks #
 # Key callbacks : Press Esc to escape
