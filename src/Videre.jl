@@ -34,14 +34,21 @@ GLFW.SetKeyCallback(window, key_callback)
 glViewport(0, 0, WIDTH, HEIGHT)
 
 ## Testing ##
-attrib = GLfloat[0.5sin(time()), 0.6cos(time()) ,0.0, 0.0]
-
-vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexGLSL))
+vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexGLSL★★★))
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
 glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
 glCompileShader(vertexShader)
 
+VAO = GLuint[0]
+glGenVertexArrays(1,VAO)
+glBindVertexArray(pointer(VAO))
 
+
+VBO = GLuint[0]
+glGenBuffers(1, VBO)
+glBindBuffer(GL_ARRAY_BUFFER, pointer(VBO))
+glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
+glEnableVertexAttribArray(0)
 
 # Loop #
 while !GLFW.WindowShouldClose(window)

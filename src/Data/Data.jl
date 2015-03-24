@@ -35,3 +35,15 @@ static const float data[] =
 void * ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 memcpy(ptr, data, sizeof(data));
 glUnmapBuffer(GL_ARRAY_BUFFER);
+
+
+
+
+
+
+
+
+
+
+
+
