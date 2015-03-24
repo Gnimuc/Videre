@@ -92,3 +92,12 @@ y = min(0.0,x);   // return the lesser of x and 0.0
 y = max(1.0,x);   // return the greater of x and 1.0
 
 
+## uniform ##
+# declare a uniform that isn't used anywhere in your GLSL code the compiler will silently remove the variable from the compiled version
+
+
+
+
+
+
+
