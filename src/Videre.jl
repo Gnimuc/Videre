@@ -40,12 +40,20 @@ vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexΔ))
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
 glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
 glCompileShader(vertexShader)
-
+success = GLuint[0]
+infolog = GLchar[512]
+glGetShaderiv(vertexShader, GL_COMPILE_STATUS, pointer(success))
+success
 # fragment shader
 fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(fragmentΔ))
 fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
 glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
 glCompileShader(fragmentShader)
+success = GLuint[0]
+infolog = GLchar[512]
+glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, pointer(success) )
+
+success
 
 # link shaders
 shaderProgram = glCreateProgram()
@@ -82,6 +90,10 @@ while !GLFW.WindowShouldClose(window)
   GLFW.SwapBuffers(window)
 end
 # Terminate
+glDeleteShader(vertexShader)
+glDeleteShader(fragmentShader)
+glDeleteProgram(shaderProgram)
+
 GLFW.Terminate()
 
 

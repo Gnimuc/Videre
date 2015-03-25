@@ -1,7 +1,7 @@
 ## Vertex Shader ##
 # In the pipeline, vertex shader is the second stage and the first programmable stage. #
 # The first stage of the pipeline is vertex fetching/pulling which generates inputs to the vertex shader. #
-# Vertex shader is the only mandatory in the pipeline #
+# Vertex shader is the only mandatory in the pipeline, but in many cases, you have to write a fragment shader #
 
 # Note that you may need to modify the version number(ex. 330 here) to fit your specific case.
 
