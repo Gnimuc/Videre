@@ -1,0 +1,1 @@
+## Triangle Cumbersome Δ2 ##

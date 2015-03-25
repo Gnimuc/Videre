@@ -1,3 +1,4 @@
+## Triangle Cumbersome Δ ##
 # Deps #
 using GLFW, ModernGL, GLAbstraction
 
@@ -19,12 +20,12 @@ const HEIGHT = convert(GLuint, 600)
 
 # Window Initialization #
 GLFW.Init()
-#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
-#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
-#GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
-#GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
+GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
+GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
-#GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 # debug
 #GLFW.DefaultWindowHints()
 
@@ -58,7 +59,7 @@ glCompileShader(fragmentShader)
 # checkout compile status
 glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, pointer(success) )
 if success[1] != 1
-  println("Vertex shader compile failed.")
+  println("Fragment shader compile failed.")
 end
 
 # Link Shaders #
@@ -72,39 +73,24 @@ VAO = GLuint[0]
 glGenVertexArrays(1,VAO)
 glBindVertexArray(pointer(VAO))
 
-
-#VBO
-#VBO = GLuint[0]
-#glGenBuffers(1, VBO)
-#glBindBuffer(GL_ARRAY_BUFFER, pointer(VBO))
-#glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
-#glEnableVertexAttribArray(0)
-
 # Loop #
 while !GLFW.WindowShouldClose(window)
-  # Check and call events
+  # check and call events
   GLFW.PollEvents()
-  # Rendering commands here
-  glClearColor(0.2, 0.5, 0.5, 1.0)
+  # rendering commands here
+  glClearColor(0.7, 0.4, 0.2, 1.0)
   glClear(GL_COLOR_BUFFER_BIT)
   # draw
   glUseProgram(shaderProgram)
-  #glBindVertexArray(pointer(VAO))
   glDrawArrays(GL_TRIANGLES, 0, 3)
-  #glBindVertexArray(0)
-  # Swap the buffers
+  # swap the buffers
   GLFW.SwapBuffers(window)
 end
-# Terminate
+# Clean up and Terminate #
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
-
 GLFW.Terminate()
-
-
-
-
 
 
 
