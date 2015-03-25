@@ -34,16 +34,32 @@ GLFW.SetKeyCallback(window, key_callback)
 glViewport(0, 0, WIDTH, HEIGHT)
 
 ## Testing ##
-vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexGLSL★★★))
+
+# vertex shader
+vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexΔ))
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
 glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
 glCompileShader(vertexShader)
 
+# fragment shader
+fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(fragmentΔ))
+fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
+glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
+glCompileShader(fragmentShader)
+
+# link shaders
+shaderProgram = glCreateProgram()
+glAttachShader(shaderProgram, vertexShader)
+glAttachShader(shaderProgram, fragmentShader)
+glLinkProgram(shaderProgram)
+
+# VAO
 VAO = GLuint[0]
 glGenVertexArrays(1,VAO)
 glBindVertexArray(pointer(VAO))
 
 
+#VBO
 VBO = GLuint[0]
 glGenBuffers(1, VBO)
 glBindBuffer(GL_ARRAY_BUFFER, pointer(VBO))
@@ -55,9 +71,13 @@ while !GLFW.WindowShouldClose(window)
   # Check and call events
   GLFW.PollEvents()
   # Rendering commands here
-
+  glClearColor(0.2, 0.5, 0.5, 1.0)
+  glClear(GL_COLOR_BUFFER_BIT)
   # draw
-
+  glUseProgram(shaderProgram)
+  #glBindVertexArray(pointer(VAO))
+  glDrawArrays(GL_TRIANGLES, 0, 3)
+  #glBindVertexArray(0)
   # Swap the buffers
   GLFW.SwapBuffers(window)
 end

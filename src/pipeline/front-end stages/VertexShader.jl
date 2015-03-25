@@ -3,23 +3,21 @@
 # The first stage of the pipeline is vertex fetching/pulling which generates inputs to the vertex shader. #
 # Vertex shader is the only mandatory in the pipeline #
 
+# Note that you may need to modify the version number(ex. 330 here) to fit your specific case.
 
-# GLSL #
-vertexGLSL = """#version 330 core
-                // "offset" is an input vertex attribute
-                layout (location = 0) in vec4 offset;
+# GLSL Strings #
+vertexΔ =    """#version 330 core
                 void main(void)
                 {
-                     const vec4 vertices[3] = vec4[3](vec4( 0.25, -0.25, 0.5, 1.0),
-                                                      vec4(-0.25, -0.25, 0.5, 1.0),
-                                                      vec4( 0.25, 0.25, 0.5, 1.0));
-                     // Add "offset" to our hard-coded vertex position
-                     gl_Position = vertices[gl_VertexID] + offset;
+                     const vec4 vertices[3] = vec4[3](vec4( 0.5, -0.5, 0, 1.0),
+                                                      vec4(-0.5, 0.5, 0, 1.0),
+                                                      vec4( 0.5, 0.5, 0, 1.0));
+                     gl_Position = vertices[gl_VertexID];
                  }"""
 
 
-vertexGLSL★ = """#version 330 core
-                 // "offset" and "color" are input vertex attributes
+vertexΔ2 =    """#version 330 core
+                 // "offset" and "color" are two input vertex attributes
                  layout (location = 0) in vec4 offset;
                  layout (location = 1) in vec4 color;
                  // "vs_color" is an output that will be sent to the next shader stage
@@ -35,8 +33,7 @@ vertexGLSL★ = """#version 330 core
                       vs_color = color;
                  }"""
 
-vertexGLSL★★ = """#version 330 core
-                 // "offset" and "color" are input vertex attributes
+vertexΔ3 =    """#version 330 core
                  layout (location = 0) in vec4 offset;
                  layout (location = 1) in vec4 color;
                  // Declare VS_OUT as an output interface block out VS_OUT
@@ -55,7 +52,7 @@ vertexGLSL★★ = """#version 330 core
                       this_out = color;
                  }"""
 
-vertexGLSL★★★ = """#version 330 core
+vertex★ =     """#version 330 core
 
                  layout (location = 0) in vec4 position;
 
@@ -65,6 +62,12 @@ vertexGLSL★★★ = """#version 330 core
                  }"""
 
 
+vertexShaderSource = """#version 330 core
+                        layout (location = 0) in vec3 position;
+                        void main()
+                        {
+                            gl_Position = vec4(position.x, position.y, position.z, 1.0);
+                        }"""
 
 
 

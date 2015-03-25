@@ -7,7 +7,14 @@
 
 
 # GLSL #
-fragmentGLSL★ = """#version 330 core
+fragmentΔ =    """#version 330 core
+                  out vec4 color;
+                  void main(void)
+                  {
+                      color = vec4(0.0, 0.8, 1.0, 1.0);
+                  }"""
+
+fragmentΔ2 =   """#version 330 core
                   // Input from the vertex shader
                   in vec4 vs_color;
 
@@ -21,7 +28,7 @@ fragmentGLSL★ = """#version 330 core
                        color = vs_color;
                   }"""
 
-fragmentGLSL★★ = """#version 330 core
+fragmentΔ3 =   """#version 330 core
                   // Declare VS_OUT as an input interface block
                   in VS_OUT
                   {
@@ -38,3 +45,15 @@ fragmentGLSL★★ = """#version 330 core
                        color = fs_in.color;
                   }"""
 
+
+
+
+
+
+
+fragShaderScoure = """#version 330 core
+                       out vec4 color;
+                       void main()
+                       {
+                           color = vec4(1.0, 0.5, 0.2, 1.0);
+                       }"""
