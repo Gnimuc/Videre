@@ -4,7 +4,7 @@
 # Δ3: use Interface Block
 
 # Deps #
-using GLFW, ModernGL, GLAbstraction
+using GLFW, ModernGL
 
 # Load Source #
 include("./pipeline/front-end stages/VertexShader.jl")

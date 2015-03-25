@@ -3,6 +3,6 @@
 # works on Windows, failed on Mac
 include("../src/TriangleCum.jl")
 
-# testing
+# failed on Mac
 include("../src/TriangleSim.jl")
 

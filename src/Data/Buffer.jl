@@ -2,18 +2,19 @@
 # Buffers are linear allocations of memory in OpenGL world. #
 # We can use these buffers to store data. #
 
+## Specify Data ##
+data = GLfloat[-0.5, -0.5, 0.0, 1.0,
+                0.5, -0.5, 0.0, 1.0,
+                0.0, 0.5, 0.0, 1.0]
+
 ## Initialize Buffer ##
 buffer = GLuint[0]
-glGenBuffers(1, pointer(buffer))
-glBindBuffer(GL_ARRAY_BUFFER, buffer)
-glBufferData(GL_ARRAY_BUFFER, 1024 * 1024, C_NULL, GL_STATIC_DRAW)
+glGenBuffers(1, buffer)
+glBindBuffer(GL_ARRAY_BUFFER, pointer(buffer) )
+glBufferData(GL_ARRAY_BUFFER, 1024*1024, C_NULL, GL_STATIC_DRAW)
 
-## Specify Data ##
-const data = GLfloat[-0.5, -0.5, 0.0, 1.0,
-                     0.5, -0.5, 0.0, 1.0,
-                     0.0, 0.5, 0.0, 1.0]
 ## Pass Data ##
-glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), pointer(data))
+glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data)
 
 # or copy data directly from memory
 #ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
