@@ -41,7 +41,7 @@ vertexΔ3 =    """#version 330 core
                  // Declare VS_OUT as an output interface block out VS_OUT
                  out VS_OUT
                  {
-                     vec4 color    // Send color to the next stage
+                     vec4 color;    // Send color to the next stage
                  } this_out;
 
                  void main(void)
@@ -49,9 +49,10 @@ vertexΔ3 =    """#version 330 core
                       const vec4 vertices[3] = vec4[3](vec4( 0.25, -0.25, 0.5, 1.0),
                                                        vec4(-0.25, -0.25, 0.5, 1.0),
                                                        vec4( 0.25, 0.25, 0.5, 1.0));
-                      // Add "offset" to our hard-coded vertex position gl_Position = vertices[gl_VertexID] + offset;
+                      // Add "offset" to our hard-coded vertex position
+                      gl_Position = vertices[gl_VertexID] + offset;
                       // Output a fixed value for vs_color
-                      this_out = color;
+                      this_out.color = color;
                  }"""
 
 vertex★ =     """#version 330 core

@@ -1,5 +1,8 @@
 ## Test ##
 
 # works on Windows, failed on Mac
-include("../src/Triangle.jl")
+include("../src/TriangleCum.jl")
+
+# testing
+include("../src/TriangleSim.jl")
 

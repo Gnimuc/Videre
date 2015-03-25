@@ -1,4 +1,8 @@
 ## Triangle Cumbersome Δ ##
+# Δ : simplest
+# Δ2: set color in vertexShader
+# Δ3: use Interface Block
+
 # Deps #
 using GLFW, ModernGL, GLAbstraction
 
@@ -20,12 +24,12 @@ const HEIGHT = convert(GLuint, 600)
 
 # Window Initialization #
 GLFW.Init()
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
-GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
-GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
+#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
+#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
+#GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
+#GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
-GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+#GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 # debug
 #GLFW.DefaultWindowHints()
 
