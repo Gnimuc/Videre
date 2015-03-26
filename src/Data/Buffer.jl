@@ -3,14 +3,15 @@
 # We can use these buffers to store data. #
 
 ## Specify Data ##
-data = GLfloat[-0.5, -0.5, 0.0, 1.0,
-                0.5, -0.5, 0.0, 1.0,
-                0.0, 0.5, 0.0, 1.0]
+data = GLfloat[-0.5, -0.5, 0.5, 1.0,
+                0.5, -0.5, 0.5, 1.0,
+                0.0, 0.5, 0.5, 1.0]
 
+sizeof(data)
 ## Initialize Buffer ##
 buffer = GLuint[0]
-glGenBuffers(1, buffer)
-glBindBuffer(GL_ARRAY_BUFFER, pointer(buffer) )
+glGenBuffers(1, pointer(buffer) )
+glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
 glBufferData(GL_ARRAY_BUFFER, 1024*1024, C_NULL, GL_STATIC_DRAW)
 
 ## Pass Data ##

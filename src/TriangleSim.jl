@@ -5,7 +5,6 @@
 
 # Deps #
 using GLFW, ModernGL
-#, GLAbstraction
 
 # Load Source #
 include("./pipeline/front-end stages/VertexShader.jl")
@@ -25,12 +24,12 @@ const HEIGHT = convert(GLuint, 600)
 
 # Window Initialization #
 GLFW.Init()
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
-GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
-GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
+#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
+#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
+#GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
+#GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
-GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+#GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 # debug
 #GLFW.DefaultWindowHints()
 
@@ -76,22 +75,13 @@ glLinkProgram(shaderProgram)
 # Data Buffer #
 include("./Data/Buffer.jl")
 
-## Initialize Buffer ##
-buffer = GLuint[0]
-glGenBuffers(1, buffer)
-glBindBuffer(GL_ARRAY_BUFFER, pointer(buffer) )
-glBufferData(GL_ARRAY_BUFFER, 1024*1024, C_NULL, GL_STATIC_DRAW)
-
-
 # VAO #
 VAO = GLuint[0]
-glGenVertexArrays(1,VAO)
-glBindVertexArray(pointer(VAO))
-
+glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
+glBindVertexArray(VAO[1])
+# set vertex attribute
 glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
-
-glBindVertexArray(0)
 
 # Loop #
 while !GLFW.WindowShouldClose(window)
@@ -102,9 +92,7 @@ while !GLFW.WindowShouldClose(window)
   glClear(GL_COLOR_BUFFER_BIT)
   # draw
   glUseProgram(shaderProgram)
-  glBindVertexArray(pointer(VAO))
   glDrawArrays(GL_TRIANGLES, 0, 3)
-  glBindVertexArray(0)
   # swap the buffers
   GLFW.SwapBuffers(window)
 end
@@ -112,6 +100,8 @@ end
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
+glDeleteBuffers(1, buffer)
+glDeleteVertexArrays(1, VAO)
 GLFW.Terminate()
 
 
