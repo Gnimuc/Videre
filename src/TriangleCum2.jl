@@ -89,8 +89,8 @@ glLinkProgram(shaderProgram)
 
 # VAO #
 VAO = GLuint[0]
-glGenVertexArrays(1,VAO)
-glBindVertexArray(pointer(VAO))
+glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
+glBindVertexArray(VAO[1])
 
 # Loop #
 while !GLFW.WindowShouldClose(window)

@@ -1,11 +1,11 @@
 ## Test ##
 
-# testing
+# works on Windows & Mac
 include("../src/TriangleCum2.jl")
 
-# works on Windows, failed on Mac
+# works on Windows & Mac
 include("../src/TriangleCum.jl")
 
-# works on Windows, need to test on Mac
+# works on Windows & Mac
 include("../src/TriangleSim.jl")
 
