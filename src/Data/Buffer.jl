@@ -7,7 +7,6 @@ data = GLfloat[-0.5, -0.5, 0.5, 1.0,
                 0.5, -0.5, 0.5, 1.0,
                 0.0, 0.5, 0.5, 1.0]
 
-sizeof(data)
 ## Initialize Buffer ##
 buffer = GLuint[0]
 glGenBuffers(1, pointer(buffer) )
