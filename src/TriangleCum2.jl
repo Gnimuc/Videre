@@ -109,4 +109,5 @@ end
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
+glDeleteVertexArrays(1, VAO)
 GLFW.Terminate()

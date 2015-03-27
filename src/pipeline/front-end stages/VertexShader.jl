@@ -42,7 +42,7 @@ vertexΔ3 =    """#version 330 core
                  out VS_OUT
                  {
                      vec4 color;    // Send color to the next stage
-                 } this_out;
+                 } Δ3out;
 
                  void main(void)
                  {
@@ -52,7 +52,7 @@ vertexΔ3 =    """#version 330 core
                       // Add "offset" to our hard-coded vertex position
                       gl_Position = vertices[gl_VertexID] + offset;
                       // Output a fixed value for vs_color
-                      this_out.color = color;
+                      Δ3out.color = color;
                  }"""
 
 vertex★ =     """#version 330 core
@@ -63,4 +63,3 @@ vertex★ =     """#version 330 core
                  {
                       gl_Position = position;
                  }"""
-

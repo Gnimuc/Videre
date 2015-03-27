@@ -46,10 +46,14 @@ fragmentΔ3 =   """#version 330 core
                   }"""
 
 fragment★ =    """#version 330 core
+
                   out vec4 color;
+
+                  uniform vec4 ourColor;
+
                   void main(void)
                   {
-                      color = vec4(1.0, 0.0, 0.0, 1.0);
+                      color = ourColor;
                   }"""
 
 

@@ -2,6 +2,7 @@
 # Δ : simplest
 # Δ2: set color in vertexShader
 # Δ3: use Interface Block
+#
 
 # Deps #
 using GLFW, ModernGL
@@ -43,7 +44,7 @@ glViewport(0, 0, WIDTH, HEIGHT)
 GLFW.SetKeyCallback(window, key_callback)
 
 # Vertex Shader #
-vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexΔ))
+vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexΔ))    # you can change shader source here
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
 glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
 glCompileShader(vertexShader)
@@ -56,7 +57,7 @@ if success[1] != 1
 end
 
 # Fragment Shader #
-fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(fragmentΔ))
+fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(fragmentΔ))    # you can change shader source here
 fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
 glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
 glCompileShader(fragmentShader)
@@ -94,11 +95,7 @@ end
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
+glDeleteVertexArrays(1, VAO)
 GLFW.Terminate()
-
-
-
-
-
 
 

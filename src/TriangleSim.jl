@@ -91,7 +91,11 @@ while !GLFW.WindowShouldClose(window)
   glClearColor(0.7, 0.4, 0.2, 1.0)
   glClear(GL_COLOR_BUFFER_BIT)
   # draw
+  # use uniforms to change color
+  greenValue = convert(GLfloat, (sin(time()) / 2) + 0.5)
+  vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor")
   glUseProgram(shaderProgram)
+  glUniform4f(vertexColorLocation, 0.0, greenValue, 0.0, 1.0)
   glDrawArrays(GL_TRIANGLES, 0, 3)
   # swap the buffers
   GLFW.SwapBuffers(window)

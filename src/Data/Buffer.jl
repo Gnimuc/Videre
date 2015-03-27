@@ -29,13 +29,3 @@ glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data)
 
 
 
-#GLfloat vertices[] = {
-#    // Positions    // Colors
-#     0.5f, -0.5f,   1.0f, 0.0f, 0.0f,   // Bottom Right
-#    -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,   // Bottom Left
-#     0.0f,  0.5f,   0.0f, 0.0f, 1.0f    // Top
-#};
-
-
-
-
