@@ -63,3 +63,20 @@ vertex★ =     """#version 330 core
                  {
                       gl_Position = position;
                  }"""
+
+vertex★★ =    """#version 330 core
+
+                 layout (location = 0) in vec4 position;
+
+                 layout(std140) uniform TransformBlock
+                 {
+                     float scale;               // Global scale to apply to everything
+                     vec3 translation;          // Translation in X, Y, and Z
+                     float rotation[3];         // Rotation around X, Y, and Z axes
+                     mat4 projection_matrix;    // A generalized projection matrix to apply after scale and rotate
+                 } transform;
+
+                 void main(void)
+                 {
+                      gl_Position = position;
+                 }"""
