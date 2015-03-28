@@ -33,7 +33,7 @@ fragmentΔ3 =   """#version 330 core
                   in VS_OUT
                   {
                      vec4 color; // Send color to the next stage
-                  } fs_in;
+                  } f_in;
 
                   // Output to the framebuffer
                   out vec4 color;
@@ -42,7 +42,7 @@ fragmentΔ3 =   """#version 330 core
                   {
                        // Simply assign the color we were given by the vertex shader
                        // to our output
-                       color = fs_in.color;
+                       color = f_in.color;
                   }"""
 
 fragment★ =    """#version 330 core
@@ -56,6 +56,18 @@ fragment★ =    """#version 330 core
                       color = ourColor;
                   }"""
 
+fragmentΔ4 =   """#version 330 core
 
+                  out vec4 color;
+
+                  in VS_OUT
+                  {
+                      vec4 color;
+                  } f_in;
+
+                  void main(void)
+                  {
+                      color = f_in.color;
+                  }"""
 
 

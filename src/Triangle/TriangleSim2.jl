@@ -1,14 +1,14 @@
 ## Triangle Simplify ★★ #
 
-# Future task: need another wrap
+# Future task: need wrap
 
 
 # Deps #
 using GLFW, ModernGL
 
 # Load Source #
-include("./pipeline/front-end stages/VertexShader.jl")
-include("./pipeline/back-end stages/FragmentShader.jl")
+include("../pipeline/front-end stages/VertexShader.jl")
+include("../pipeline/back-end stages/FragmentShader.jl")
 
 # Callbacks #
 # key callbacks : press Esc to escape
@@ -73,7 +73,7 @@ glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
 # Data Buffer #
-include("./Data/Buffer.jl")
+include("../data/Buffer.jl")
 
 # VAO #
 VAO = GLuint[0]

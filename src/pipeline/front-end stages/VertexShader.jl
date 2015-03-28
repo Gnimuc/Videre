@@ -42,7 +42,7 @@ vertexΔ3 =    """#version 330 core
                  out VS_OUT
                  {
                      vec4 color;    // Send color to the next stage
-                 } Δ3out;
+                 } v_out;
 
                  void main(void)
                  {
@@ -52,7 +52,7 @@ vertexΔ3 =    """#version 330 core
                       // Add "offset" to our hard-coded vertex position
                       gl_Position = vertices[gl_VertexID] + offset;
                       // Output a fixed value for vs_color
-                      Δ3out.color = color;
+                      v_out.color = color;
                  }"""
 
 vertex★ =     """#version 330 core
@@ -64,19 +64,20 @@ vertex★ =     """#version 330 core
                       gl_Position = position;
                  }"""
 
-vertex★★ =    """#version 330 core
+vertexΔ4 =    """#version 330 core
 
-                 layout (location = 0) in vec4 position;
+                 in vec4 position;
 
-                 layout(std140) uniform TransformBlock
+                 out VS_OUT
                  {
-                     float scale;               // Global scale to apply to everything
-                     vec3 translation;          // Translation in X, Y, and Z
-                     float rotation[3];         // Rotation around X, Y, and Z axes
-                     mat4 projection_matrix;    // A generalized projection matrix to apply after scale and rotate
-                 } transform;
+                     vec4 color;
+                 } v_out;
+
+                 uniform mat4 mv_matrix;
+                 uniform mat4 proj_matrix;
 
                  void main(void)
                  {
-                      gl_Position = position;
+                      gl_Position = proj_matrix * mv_matrix * position;
+                      v_out.color = position * 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
                  }"""

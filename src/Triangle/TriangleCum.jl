@@ -1,14 +1,15 @@
-## Triangle Simplify ★ #
-
-
-
+## Triangle Cumbersome Δ ##
+# Δ : simplest
+# Δ2: set color in vertexShader
+# Δ3: use Interface Block
+#
 
 # Deps #
 using GLFW, ModernGL
 
 # Load Source #
-include("./pipeline/front-end stages/VertexShader.jl")
-include("./pipeline/back-end stages/FragmentShader.jl")
+include("../pipeline/front-end stages/VertexShader.jl")
+include("../pipeline/back-end stages/FragmentShader.jl")
 
 # Callbacks #
 # key callbacks : press Esc to escape
@@ -43,7 +44,7 @@ glViewport(0, 0, WIDTH, HEIGHT)
 GLFW.SetKeyCallback(window, key_callback)
 
 # Vertex Shader #
-vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertex★))
+vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(vertexΔ))    # you can change shader source here
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
 glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
 glCompileShader(vertexShader)
@@ -56,7 +57,7 @@ if success[1] != 1
 end
 
 # Fragment Shader #
-fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(fragment★))
+fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(fragmentΔ))    # you can change shader source here
 fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
 glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
 glCompileShader(fragmentShader)
@@ -72,16 +73,10 @@ glAttachShader(shaderProgram, vertexShader)
 glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
-# Data Buffer #
-include("./Data/Buffer.jl")
-
 # VAO #
 VAO = GLuint[0]
 glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
 glBindVertexArray(VAO[1])
-# set vertex attribute
-glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
-glEnableVertexAttribArray(0)
 
 # Loop #
 while !GLFW.WindowShouldClose(window)
@@ -91,11 +86,7 @@ while !GLFW.WindowShouldClose(window)
   glClearColor(0.7, 0.4, 0.2, 1.0)
   glClear(GL_COLOR_BUFFER_BIT)
   # draw
-  # use uniforms to change color
-  greenValue = convert(GLfloat, (sin(time()) / 2) + 0.5)
-  vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor")
   glUseProgram(shaderProgram)
-  glUniform4f(vertexColorLocation, 0.0, greenValue, 0.0, 1.0)
   glDrawArrays(GL_TRIANGLES, 0, 3)
   # swap the buffers
   GLFW.SwapBuffers(window)
@@ -104,13 +95,7 @@ end
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
-glDeleteBuffers(1, buffer)
 glDeleteVertexArrays(1, VAO)
 GLFW.Terminate()
-
-
-
-
-
 
 
