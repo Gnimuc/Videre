@@ -15,7 +15,6 @@ vertexΔ =    """#version 330 core
                      gl_Position = vertices[gl_VertexID];
                  }"""
 
-
 vertexΔ2 =    """#version 330 core
                  // "offset" and "color" are two input vertex attributes
                  layout (location = 0) in vec4 offset;
