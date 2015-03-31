@@ -24,12 +24,12 @@ const HEIGHT = convert(GLuint, 600)
 
 # Window Initialization #
 GLFW.Init()
-#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
-#GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
-#GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
-#GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
+GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
+GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
-#GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 # debug
 #GLFW.DefaultWindowHints()
 
@@ -102,11 +102,11 @@ while !GLFW.WindowShouldClose(window)
   # transformation
   # Transform #
   include("../transform/Matrix.jl")
- # mv_matrix = translation * rotation
- # proj_matrix = perspective
+  mv_matrix = translation * rotation
+  proj_matrix = perspective
 
-  mv_matrix = translation
-  proj_matrix = rotation
+  #mv_matrix = translation
+  #proj_matrix = rotation
   glUseProgram(shaderProgram)
   glUniformMatrix4fv(mv_location, 1, GL_FALSE, mv_matrix)
   glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj_matrix)
