@@ -7,18 +7,18 @@ identity = GLfloat[ 1.0, 0.0, 0.0, 0.0,
                     0.0, 0.0, 0.0, 1.0 ]
 
 # Translation Matrix #
-tx = sin(time())/2  # translation in the x axes
-ty = sin(time())/2  # translation in the y axes
-tz = -0.25-abs(sin(time())/2)  # translation in the z axes
+tx = 0 #sin(time())/2  # translation in the x axes
+ty = 0 #sin(time())/2  # translation in the y axes
+tz = 0 #-0.25-abs(sin(time())/2)  # translation in the z axes
 translation = GLfloat[ 1.0 0.0 0.0 tx;
                        0.0 1.0 0.0 ty;
                        0.0 0.0 1.0 tz;
                        0.0 0.0 0.0 1.0 ]
 
 # Rotation Matrix #
-θ = 0 #pi/6*abs(sin(time()))  # rotation around the x axis by an angle of θ
-ϕ = 0 #pi/2*abs(sin(time()))  # rotation around the y axis by an angle of ϕ
-ψ =  pi*abs(sin(time()))  # rotation around the z axis by an angle of ψ
+θ = pi*sin(time()*0.2)  # rotation around the x axis by an angle of θ
+ϕ = 2pi*sin(time()*0.3)  # rotation around the y axis by an angle of ϕ
+ψ = pi/18 #pi*abs(sin(time()))  # rotation around the z axis by an angle of ψ
 rotationX = GLfloat[ 1.0     0.0    0.0 0.0;
                      0.0  cos(θ) sin(θ) 0.0;
                      0.0 -sin(θ) cos(θ) 0.0;
@@ -42,7 +42,7 @@ rotation = rotationZ * rotationY * rotationX
 
 # Perspective Matrix #
 near = 0.1
-far = 2.0
+far = 1000.0
 left = -0.5*4/3
 right = 0.5*4/3
 top = 0.5
