@@ -14,10 +14,19 @@ triangle♡f = """#version 330 core
                 }"""
 
 triangle♠f = """#version 330 core
+                // 'in's
+                // interface block
+                in TriangleColor
+                {
+                   vec4 color;
+                }trianglecolor;
+
+                // 'out's
                 out vec4 color;
+
                 void main(void)
                 {
-                    color = vec4(0.0, 0.0, 0.0, 1.0);
+                    color = trianglecolor.color;
                 }"""
 
 

@@ -4,6 +4,11 @@ Code Style: cumbersome
 Functionality: to draw our lovely black triangle
 Usage: see triangleCum.jl
 
+More Details:
+← use "hard-coded" vertex data in GLSL source code ✓
+→ use attributes and interface blocks in GLSL source code
+→ return compile status ∮
+
 =#
 
 # Note that you must create a OpenGL context before running these code.
@@ -11,43 +16,65 @@ Usage: see triangleCum.jl
 # set up viewport
 glViewport(0, 0, WIDTH, HEIGHT)
 
-# Vertex Shader #
+# pipeline #
+# vertex shading stage
 include("./pipeline/front-end stages/vertex shading stage/VertexShader.jl")
-vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♠v))    # you can change shader source here
+vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♠v))
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
 glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
 glCompileShader(vertexShader)
-# checkout compile status
+# checkout compile status ∮
 success = GLuint[0]
 glGetShaderiv(vertexShader, GL_COMPILE_STATUS, pointer(success))
 if success[1] != 1
   println("Vertex shader compile failed.")
 end
 
-# Fragment Shader #
+# fragment shading stage
 include("./pipeline/back-end stages/fragment shading stage/FragmentShader.jl")
-fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♠f))    # you can change shader source here
+fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♠f))
 fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
 glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
 glCompileShader(fragmentShader)
-# checkout compile status
+# checkout compile status ∮
 glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, pointer(success) )
 if success[1] != 1
   println("Fragment shader compile failed.")
 end
 
-# Link Shaders #
+# link shaders #
 shaderProgram = glCreateProgram()
 glAttachShader(shaderProgram, vertexShader)
 glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
+# VBO #
+offset = GLfloat[0.0, 0.0, 0.0, 1.0]
+
+color = GLfloat[1.0, 0.0, 0.0, 1.0]
+# generate two buffers
+buffer = GLuint[0,0]
+glGenBuffers(2, pointer(buffer) )
+# pass offset to buffer 1
+glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
+glBufferData(GL_ARRAY_BUFFER, sizeof(offset), offset, GL_STATIC_DRAW)
+# pass color to buffer 2
+glBindBuffer(GL_ARRAY_BUFFER, buffer[2] )
+glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW)
+
 # VAO #
 VAO = GLuint[0]
 glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
 glBindVertexArray(VAO[1])
+# connect buffer to vertex attributes
+glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
+glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
+glEnableVertexAttribArray(0)
+glBindBuffer(GL_ARRAY_BUFFER, buffer[2] )
+glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
+glEnableVertexAttribArray(1)
 
-# Loop #
+# loop #
 while !GLFW.WindowShouldClose(window)
   # check and call events
   GLFW.PollEvents()
@@ -60,10 +87,10 @@ while !GLFW.WindowShouldClose(window)
   # swap the buffers
   GLFW.SwapBuffers(window)
 end
-# Clean up and Terminate #
+# clean up #
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
 glDeleteVertexArrays(1, VAO)
-
+glDeleteBuffers(2, buffer)
 

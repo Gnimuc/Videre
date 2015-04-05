@@ -4,6 +4,9 @@ Code Style: cumbersome
 Functionality: to draw our lovely red triangle
 Usage: see triangleCum.jl
 
+More Details:
+→ use "hard-coded" vertex data in GLSL source code
+
 =#
 
 # Note that you must create a OpenGL context before running these code.
@@ -26,7 +29,7 @@ fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
 glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
 glCompileShader(fragmentShader)
 
-# Link Shaders #
+# link shaders #
 shaderProgram = glCreateProgram()
 glAttachShader(shaderProgram, vertexShader)
 glAttachShader(shaderProgram, fragmentShader)
@@ -37,7 +40,7 @@ VAO = GLuint[0]
 glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
 glBindVertexArray(VAO[1])
 
-# Loop #
+# loop #
 while !GLFW.WindowShouldClose(window)
   # check and call events
   GLFW.PollEvents()
@@ -50,7 +53,8 @@ while !GLFW.WindowShouldClose(window)
   # swap the buffers
   GLFW.SwapBuffers(window)
 end
-# Clean up and Terminate #
+
+# clean up #
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
