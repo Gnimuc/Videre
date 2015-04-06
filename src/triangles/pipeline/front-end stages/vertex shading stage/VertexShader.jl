@@ -22,6 +22,7 @@ triangle♠v = """#version 330 core
                 // attributes
                 layout (location = 0) in vec4 offset;
                 layout (location = 1) in vec4 color;
+                //vec4 offset = vec4( 0.5, 0.0, 0.0, 0.0);
 
                 // 'out's
                 // interface blocks
