@@ -1,7 +1,7 @@
 ## Triangle ♠ ##
 #=
 Code Style: cumbersome
-Functionality: to draw our lovely black triangle
+Functionality: to draw our colorful triangle
 Usage: see triangleCum.jl
 
 More Details:
@@ -54,8 +54,8 @@ offset = GLfloat[0.5, 0.0, 0.0, 0.0,
                  0.5, 0.0, 0.0, 0.0]
 
 color = GLfloat[1.0, 0.0, 0.0, 1.0,
-                1.0, 0.0, 0.0, 1.0,
-                1.0, 0.0, 0.0, 1.0]
+                0.0, 1.0, 0.0, 1.0,
+                0.0, 0.0, 1.0, 1.0]
 # generate two buffers
 buffer = GLuint[0,0]
 glGenBuffers(2, pointer(buffer) )

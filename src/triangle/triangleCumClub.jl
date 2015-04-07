@@ -8,6 +8,7 @@ More Details:
 ← use "hard-coded" vertex data in GLSL source code ×
 ← use attributes in GLSL source code ✓
 ← return compile status ✓
+→ use uniforms
 
 =#
 
