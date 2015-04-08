@@ -22,8 +22,8 @@ end
 
 # Window Initialization #
 GLFW.Init()
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 3)
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 3)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 4)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 1)
 GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
 GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
@@ -42,11 +42,11 @@ GLFW.MakeContextCurrent(window)
 # ♡ (\heartsuit)
 #include("triangleCumHeart.jl")
 # ♠ (\spadesuit)
-include("triangleCumSpade.jl")
+#include("triangleCumSpade.jl")
 # ♢ (\clubsuit)
-#include("triangleCumClub.jl")
-# ♣ (\dimondsuit)
-#include("triangleCumDimond.jl")
+#include("triangleCumDiamond.jl")
+# ♣ (\diamondsuit)
+include("triangleCumClub.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()

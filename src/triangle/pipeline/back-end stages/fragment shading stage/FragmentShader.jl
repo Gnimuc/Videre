@@ -7,16 +7,16 @@
 << processed fragment data
 =#
 
-# Note that you may need to modify the version number(e.g. 330 here) to fit your specific case.
+# Note that you may need to modify the version number(e.g. 410 here) to fit your specific case.
 
-triangle♡f = """#version 330 core
+triangle♡f = """#version 410 core
                 out vec4 color;
                 void main(void)
                 {
                     color = vec4(1.0, 0.0, 0.0, 1.0);
                 }"""
 
-triangle♠f = """#version 330 core
+triangle♠f = """#version 410 core
                 // 'in's
                 // interface block
                 in TriangleColor
@@ -32,5 +32,16 @@ triangle♠f = """#version 330 core
                     color = trianglecolor.color;
                 }"""
 
+triangle♢f = """#version 410 core
+                // uniforms
+                // Default Block Uniform
+                uniform vec4 ucolor;
 
+                // 'out's
+                out vec4 color;
+
+                void main(void)
+                {
+                    color = ucolor;
+                }"""
 
