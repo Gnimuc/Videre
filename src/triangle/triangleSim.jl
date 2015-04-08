@@ -8,6 +8,29 @@ Pkg.add("ModernGL")
 # Deps #
 using GLFW, ModernGL
 
+# functions #
+function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
+    shaderSourceptr = convert(Ptr{GLchar}, pointer(shaderSource))
+    shader = glCreateShader(shaderType)
+    glShaderSource(shader, 1, convert(Ptr{Uint8}, pointer([shaderSourceptr])), C_NULL)
+    glCompileShader(shader)
+    success = GLuint[0]
+    glGetShaderiv(shader, GL_COMPILE_STATUS, pointer(success))
+    if success[1] != 1
+        println("shader compile failed.")
+    end
+
+    return shader
+end
+
+function programer(vertexShader::GLuint, fragmentShader::GLuint)
+    program = glCreateProgram()
+    glAttachShader(program, vertexShader)
+    glAttachShader(program, fragmentShader)
+    glLinkProgram(program)
+    return program
+end
+
 # Constants #
 const WIDTH = convert(GLuint, 800)
 const HEIGHT = convert(GLuint, 600)
@@ -29,7 +52,7 @@ GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
 GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 # if that doesn't work, try to uncomment the code below
-GLFW.DefaultWindowHints()
+#GLFW.DefaultWindowHints()
 
 # Create Window #
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullWindow)
@@ -40,13 +63,13 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)
-include("triangleSimHeart.jl")
+#include("triangleSimHeart.jl")
 # ♠ (\spadesuit)
-#include("triangleCumSpade.jl")
+include("triangleSimSpade.jl")
 # ♢ (\clubsuit)
-#include("triangleCumDiamond.jl")
+#include("triangleSimDiamond.jl")
 # ♣ (\diamondsuit)
-#include("triangleCumClub.jl")
+#include("triangleSimClub.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()
