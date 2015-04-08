@@ -5,37 +5,43 @@ Functionality: to draw our lovely red triangle
 Usage: see triangleSim.jl
 
 More Details:
-→ wrap shader
+→ shadercompiler
+→ programer
 
 =#
 
 # Note that you must create a OpenGL context before running these code.
-methods(open)
 
-f = open("./Documents/Videre/pipeline/front-end stages/vertex shading stage/VertexShader.jl")
+# functions #
+function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
+    shaderSourceptr = convert(Ptr{GLchar}, pointer(shaderSource))
+    shader = glCreateShader(shaderType)
+    glShaderSource(shader, 1, convert(Ptr{Uint8}, pointer([shaderSourceptr])), C_NULL)
+    glCompileShader(shader)
+    return shader
+end
+
+function programer(vertexShader::GLuint, fragmentShader::GLuint)
+    program = glCreateProgram()
+    glAttachShader(program, vertexShader)
+    glAttachShader(program, fragmentShader)
+    glLinkProgram(program)
+    return program
+end
+
 # set up viewport
 glViewport(0, 0, WIDTH, HEIGHT)
 
-# pipeline #
-# vertex shading stage
-include("./pipeline/front-end stages/vertex shading stage/VertexShader.jl")
-vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♡v))
-vertexShader = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
-glCompileShader(vertexShader)
+# shader compiling #
+# change working dir |you may need to edit this path, I currently don't know how to use a relative path in julia| #
+cd("C:\\Users\\Administrator\\Desktop\\Videre\\src\\triangle")
+source = readall("./pipeline/front-end stages/vertex shading stage/glsl/heart.vert")
+vertexShader = shadercompiler(source, GL_VERTEX_SHADER)
+source = readall("./pipeline/back-end stages/fragment shading stage/glsl/heart.frag")
+fragmentShader = shadercompiler(source, GL_FRAGMENT_SHADER)
 
-# fragment shading stage
-include("./pipeline/back-end stages/fragment shading stage/FragmentShader.jl")
-fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♡f))
-fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
-glCompileShader(fragmentShader)
-
-# link shaders #
-shaderProgram = glCreateProgram()
-glAttachShader(shaderProgram, vertexShader)
-glAttachShader(shaderProgram, fragmentShader)
-glLinkProgram(shaderProgram)
+# shader linking #
+shaderProgram = programer(vertexShader, fragmentShader)
 
 # VAO #
 VAO = GLuint[0]

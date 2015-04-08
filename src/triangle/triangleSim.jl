@@ -29,7 +29,7 @@ GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
 GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 # if that doesn't work, try to uncomment the code below
-#GLFW.DefaultWindowHints()
+GLFW.DefaultWindowHints()
 
 # Create Window #
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullWindow)
@@ -40,13 +40,13 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)
-#include("triangleCumHeart.jl")
+include("triangleSimHeart.jl")
 # ♠ (\spadesuit)
 #include("triangleCumSpade.jl")
 # ♢ (\clubsuit)
 #include("triangleCumDiamond.jl")
 # ♣ (\diamondsuit)
-include("triangleCumClub.jl")
+#include("triangleCumClub.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()
