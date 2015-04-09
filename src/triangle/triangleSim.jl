@@ -13,9 +13,10 @@ using GLFW, ModernGL
 if OS_NAME == :Windows
     cd(string(homedir(),"\\Desktop"))
 end
-if OS_NAME == :MAC
+if OS_NAME == :Darwin
     cd(string(homedir(),"/Documents/"))
 end
+
 # functions #
 function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
     shaderSourceptr = convert(Ptr{GLchar}, pointer(shaderSource))
@@ -25,8 +26,14 @@ function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
     glCompileShader(shader)
     result = GLuint[0]
     glGetShaderiv(shader, GL_COMPILE_STATUS, pointer(result))
+    typestring = Dict([(GL_COMPUTE_SHADER, "compute"),
+                       (GL_VERTEX_SHADER,"vertex"),
+                       (GL_TESS_CONTROL_SHADER, "tessellation control"),
+                       (GL_TESS_EVALUATION_SHADER, "tessellation evaluation"),
+                       (GL_GEOMETRY_SHADER, "geometry"),
+                       (GL_FRAGMENT_SHADER, "fragment")])
     if result[1] == GL_FALSE
-        println("shader compile failed.")
+        println("$(typestring[shaderType]) shader compile failed.")
         logLen = GLint[0]
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, pointer(logLen))
         if logLen[1] > 0
@@ -40,7 +47,7 @@ function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
 
         end
     end
-    return shader
+    return shader::GLuint
 end
 
 function programer(vertexShader::GLuint, fragmentShader::GLuint)
@@ -54,6 +61,8 @@ end
 # Constants #
 const WIDTH = convert(GLuint, 800)
 const HEIGHT = convert(GLuint, 600)
+const VERSION_MAJOR = 4
+const VERSION_MINOR = 1
 
 # GLFW's Callbacks #
 # key callbacks : press Esc to escape
@@ -65,14 +74,15 @@ end
 
 # Window Initialization #
 GLFW.Init()
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, 4)
-GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, 1)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
+GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
 GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
 GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
-# if using Macintosh
-GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
-# if that doesn't work, try to uncomment the code below
-GLFW.DefaultWindowHints()
+if OS_NAME == :Darwin
+    GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+end
+# if that doesn't work, try to uncomment the code below and checkout your OpenGL context version
+#GLFW.DefaultWindowHints()
 
 # Create Window #
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullWindow)
