@@ -12,14 +12,27 @@ using GLFW, ModernGL
 function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
     shaderSourceptr = convert(Ptr{GLchar}, pointer(shaderSource))
     shader = glCreateShader(shaderType)
+    @assert shader != 0 "Error creating vertex shader."
     glShaderSource(shader, 1, convert(Ptr{Uint8}, pointer([shaderSourceptr])), C_NULL)
     glCompileShader(shader)
-    success = GLuint[0]
-    glGetShaderiv(shader, GL_COMPILE_STATUS, pointer(success))
-    if success[1] != 1
+    result = GLuint[0]
+    glGetShaderiv(shader, GL_COMPILE_STATUS, pointer(result))
+    if result[1] == GL_FALSE
         println("shader compile failed.")
-    end
+        logLen = GLint[0]
 
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, pointer(logLen))
+        if logLen[1] > 0
+           log = Array(GLchar, logLen[1])
+           logptr = convert(Ptr{GLchar}, pointer(log))
+           written = GLsizei[0]
+           writtenptr = convert(Ptr{GLsizei}, pointer(written))
+           glGetShaderInfoLog(shader, logLen[1], writtenptr, logptr )
+           info = convert(ASCIIString, log)
+           println("$info")
+
+        end
+    end
     return shader
 end
 
