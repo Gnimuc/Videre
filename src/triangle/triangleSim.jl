@@ -1,4 +1,4 @@
-## Triangle-Cumbersome ##
+## Triangle-Simplified ##
 #=
 This script only depends on GLFW.jl and ModernGL.jl. #
 You can install these two packages by running:
@@ -8,6 +8,14 @@ Pkg.add("ModernGL")
 # Deps #
 using GLFW, ModernGL
 
+# add Videre working directory to julia's PATH #
+# you may need to edit this path, I currently don't know  #
+if OS_NAME == :Windows
+    cd(string(homedir(),"\\Desktop"))
+end
+if OS_NAME == :MAC
+    cd(string(homedir(),"/Documents/"))
+end
 # functions #
 function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
     shaderSourceptr = convert(Ptr{GLchar}, pointer(shaderSource))
@@ -20,16 +28,15 @@ function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
     if result[1] == GL_FALSE
         println("shader compile failed.")
         logLen = GLint[0]
-
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, pointer(logLen))
         if logLen[1] > 0
-           log = Array(GLchar, logLen[1])
-           logptr = convert(Ptr{GLchar}, pointer(log))
-           written = GLsizei[0]
-           writtenptr = convert(Ptr{GLsizei}, pointer(written))
-           glGetShaderInfoLog(shader, logLen[1], writtenptr, logptr )
-           info = convert(ASCIIString, log)
-           println("$info")
+            log = Array(GLchar, logLen[1])
+            logptr = convert(Ptr{GLchar}, pointer(log))
+            written = GLsizei[0]
+            writtenptr = convert(Ptr{GLsizei}, pointer(written))
+            glGetShaderInfoLog(shader, logLen[1], writtenptr, logptr )
+            info = convert(ASCIIString, log)
+            println("$info")
 
         end
     end
@@ -65,7 +72,7 @@ GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # if using Macintosh
 GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 # if that doesn't work, try to uncomment the code below
-#GLFW.DefaultWindowHints()
+GLFW.DefaultWindowHints()
 
 # Create Window #
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullWindow)

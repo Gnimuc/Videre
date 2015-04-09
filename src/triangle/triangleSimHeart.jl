@@ -16,13 +16,9 @@ More Details:
 glViewport(0, 0, WIDTH, HEIGHT)
 
 # shader compiling #
-# change working dir |you may need to edit this path, I currently don't know how to use a relative path in julia| #
-cd(homedir())
-cd("Documents/Videre/src/triangle")
-#cd("C:\\Users\\Administrator\\Desktop\\Videre\\src\\triangle")
-source = readall("./pipeline/front-end stages/vertex shading stage/glsl/heart.vert")
+source = readall("./Videre/src/triangle/pipeline/front-end stages/vertex shading stage/glsl/heart.vert")
 vertexShader = shadercompiler(source, GL_VERTEX_SHADER)
-source = readall("./pipeline/back-end stages/fragment shading stage/glsl/heart.frag")
+source = readall("./Videre/src/triangle/pipeline/back-end stages/fragment shading stage/glsl/heart.frag")
 fragmentShader = shadercompiler(source, GL_FRAGMENT_SHADER)
 
 # shader linking #

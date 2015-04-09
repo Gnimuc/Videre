@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 // 'in's
 // attributes
 layout (location = 0) in vec4 offset;
