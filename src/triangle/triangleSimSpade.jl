@@ -16,13 +16,13 @@ More Details:
 glViewport(0, 0, WIDTH, HEIGHT)
 
 # shader compiling #
-source = readall("./Videre/src/triangle/pipeline/front-end stages/vertex shading stage/glsl/spade.vert")
+source = readall("./src/triangle/pipeline/front-end stages/vertex shading stage/glsl/spade.vert")
 vertexShader = shadercompiler(source, GL_VERTEX_SHADER)
-source = readall("./Videre/src/triangle/pipeline/back-end stages/fragment shading stage/glsl/spade.frag")
+source = readall("./src/triangle/pipeline/back-end stages/fragment shading stage/glsl/spade.frag")
 fragmentShader = shadercompiler(source, GL_FRAGMENT_SHADER)
 
 # shader linking #
-shaderProgram = programer(vertexShader, fragmentShader)
+shaderProgram = programer([vertexShader, fragmentShader])
 
 # VBO #
 offset = GLfloat[0.5, 0.0, 0.0, 0.0,

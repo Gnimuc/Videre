@@ -16,13 +16,13 @@ More Details:
 glViewport(0, 0, WIDTH, HEIGHT)
 
 # shader compiling #
-source = readall("./Videre/src/triangle/pipeline/front-end stages/vertex shading stage/glsl/heart.vert")
+source = readall("./src/triangle/pipeline/front-end stages/vertex shading stage/glsl/heart.vert")
 vertexShader = shadercompiler(source, GL_VERTEX_SHADER)
-source = readall("./Videre/src/triangle/pipeline/back-end stages/fragment shading stage/glsl/heart.frag")
+source = readall("./src/triangle/pipeline/back-end stages/fragment shading stage/glsl/heart.frag")
 fragmentShader = shadercompiler(source, GL_FRAGMENT_SHADER)
 
 # shader linking #
-shaderProgram = programer(vertexShader, fragmentShader)
+shaderProgram = programer([vertexShader, fragmentShader])
 
 # VAO #
 VAO = GLuint[0]
