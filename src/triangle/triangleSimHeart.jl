@@ -5,8 +5,8 @@ Functionality: to draw our lovely red triangle
 Usage: see triangleSim.jl
 
 More Details:
-→ shadercompiler
-→ programer
+→ using shadercompiler() in triangleSim.jl
+→ using programer() in triangleSim.jl
 
 =#
 

@@ -19,19 +19,21 @@ end
 
 # functions #
 function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
-    shaderSourceptr = convert(Ptr{GLchar}, pointer(shaderSource))
+    typestring = Dict([(GL_COMPUTE_SHADER, "compute"),
+                     (GL_VERTEX_SHADER,"vertex"),
+                     (GL_TESS_CONTROL_SHADER, "tessellation control"),
+                     (GL_TESS_EVALUATION_SHADER, "tessellation evaluation"),
+                     (GL_GEOMETRY_SHADER, "geometry"),
+                     (GL_FRAGMENT_SHADER, "fragment")])
+    # create shader & load source
     shader = glCreateShader(shaderType)
-    @assert shader != 0 "Error creating vertex shader."
+    @assert shader != 0 "Error creating $(typestring[shaderType]) shader."
+    shaderSourceptr = convert(Ptr{GLchar}, pointer(shaderSource))
     glShaderSource(shader, 1, convert(Ptr{Uint8}, pointer([shaderSourceptr])), C_NULL)
+    # compile shader
     glCompileShader(shader)
     result = GLuint[0]
     glGetShaderiv(shader, GL_COMPILE_STATUS, pointer(result))
-    typestring = Dict([(GL_COMPUTE_SHADER, "compute"),
-                       (GL_VERTEX_SHADER,"vertex"),
-                       (GL_TESS_CONTROL_SHADER, "tessellation control"),
-                       (GL_TESS_EVALUATION_SHADER, "tessellation evaluation"),
-                       (GL_GEOMETRY_SHADER, "geometry"),
-                       (GL_FRAGMENT_SHADER, "fragment")])
     if result[1] == GL_FALSE
         println("$(typestring[shaderType]) shader compile failed.")
         logLen = GLint[0]
@@ -44,18 +46,19 @@ function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
             glGetShaderInfoLog(shader, logLen[1], writtenptr, logptr )
             info = convert(ASCIIString, log)
             println("$info")
-
         end
     end
     return shader::GLuint
 end
 
 function programer(vertexShader::GLuint, fragmentShader::GLuint)
-    program = glCreateProgram()
+    programHandle = glCreateProgram()
+    @assert programHandle != 0 "Error creating program object."
+
     glAttachShader(program, vertexShader)
     glAttachShader(program, fragmentShader)
     glLinkProgram(program)
-    return program
+    return programHandle::GLuint
 end
 
 # Constants #
@@ -103,10 +106,3 @@ include("triangleSimSpade.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()
-
-
-
-
-
-
-
