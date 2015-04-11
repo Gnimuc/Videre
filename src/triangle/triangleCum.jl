@@ -44,9 +44,9 @@ GLFW.MakeContextCurrent(window)
 # ♠ (\spadesuit)
 #include("triangleCumSpade.jl")
 # ♢ (\clubsuit)
-#include("triangleCumDiamond.jl")
+include("triangleCumDiamond.jl")
 # ♣ (\diamondsuit)
-include("triangleCumClub.jl")
+#include("triangleCumClub.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()

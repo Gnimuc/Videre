@@ -22,7 +22,7 @@ end
 # modify GLSL version
 function glslversion!(source::ASCIIString, major, minor)
     index = search(source, "#version ")
-    replace(source, source[index.stop+1:index.stop+2], "$major$minor")
+    source = replace(source, source[index.stop+1:index.stop+2], "$major$minor")
     return source
 end
 # create shader --> load shader source --> compile shader
@@ -90,6 +90,19 @@ function programer(shaderArray::Array{GLuint,1})
     end
     return programHandle::GLuint
 end
+# pass data to buffer
+function data2buffer(data, bufferTarget::GLenum, bufferUsage::GLenum )
+    # generate buffer
+    buffer = GLuint[0]
+    glGenBuffers(1, pointer(buffer) )
+    # bind target
+    glBindBuffer(bufferTarget, buffer[1] )
+    # pass data to buffer
+    glBufferData(bufferTarget, sizeof(data), data, bufferUsage)
+    # release target
+    glBindBuffer(bufferTarget, 0)
+    return buffer
+end
 
 # Constants #
 const WIDTH = convert(GLuint, 800)
@@ -126,9 +139,9 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)
-include("triangleSimHeart.jl")
+#include("triangleSimHeart.jl")
 # ♠ (\spadesuit)
-#include("triangleSimSpade.jl")
+include("triangleSimSpade.jl")
 # ♢ (\clubsuit)
 #include("triangleSimDiamond.jl")
 # ♣ (\diamondsuit)
@@ -136,3 +149,4 @@ include("triangleSimHeart.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()
+

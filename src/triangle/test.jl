@@ -1,4 +1,5 @@
-#include("triangleCum.jl")
+include("triangleCum.jl")
+
 include("triangleSim.jl")
 
 
