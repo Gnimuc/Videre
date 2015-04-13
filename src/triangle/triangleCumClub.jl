@@ -51,9 +51,9 @@ glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
 # VBO #
-offset = GLfloat[0.5, 0.0, 0.0, 0.0,
-                 0.5, 0.0, 0.0, 0.0,
-                 0.5, 0.0, 0.0, 0.0]
+offset = GLfloat[0.5, 0.0, 0.0
+                 0.5, 0.0, 0.0
+                 0.5, 0.0, 0.0]
 
 # generate two buffers
 buffer = GLuint[0]

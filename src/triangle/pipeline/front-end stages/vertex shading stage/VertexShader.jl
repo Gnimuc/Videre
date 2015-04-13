@@ -20,7 +20,7 @@ triangle♡v = """#version 410 core
 triangle♠v = """#version 410 core
                 // 'in's
                 // attributes
-                layout (location = 0) in vec4 offset;
+                layout (location = 0) in vec3 offset;
                 layout (location = 1) in vec4 color;
 
                 // 'out's
@@ -35,19 +35,19 @@ triangle♠v = """#version 410 core
                      const vec4 vertices[3] = vec4[3](vec4( 0.5, -0.5, 0.0, 1.0),
                                                       vec4( 0.0, 0.5, 0.0, 1.0),
                                                       vec4( -0.5, -0.5, 0.0, 1.0));
-                     gl_Position = vertices[gl_VertexID] + offset;
+                     gl_Position = vertices[gl_VertexID] + vec4(offset, 0.0);
                      trianglecolor.color = color;
                  }"""
 
 triangle♢v = """#version 410 core
                 // 'in's
                 // attributes
-                layout (location = 0) in vec4 offset;
+                layout (location = 0) in vec3 offset;
 
                 void main(void)
                 {
                      const vec4 vertices[3] = vec4[3](vec4( 0.5, -0.5, 0.0, 1.0),
                                                       vec4( 0.0, 0.5, 0.0, 1.0),
                                                       vec4( -0.5, -0.5, 0.0, 1.0));
-                     gl_Position = vertices[gl_VertexID] + offset;
+                     gl_Position = vertices[gl_VertexID] + vec4(offset, 0.0);
                  }"""
