@@ -104,28 +104,13 @@ function data2buffer(data, bufferTarget::GLenum, bufferUsage::GLenum )
     return buffer
 end
 # connect buffer data to vertex attributes
-function buffer2attrib(buffer::Array{GLuint,1}, attribindex::Array{GLuint,1}, component)
-    # generate vertex array object
-    vao = GLuint[0]
-    glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(vao)) )
-    # bind VAO
-    glBindVertexArray(vao[1])
-    # connecting
-    glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
-    glVertexAttribPointer(attribindex, component, GL_FLOAT, GL_FALSE, 0, C_NULL)
-    glEnableVertexAttribArray(attribindex)
-    # release target
-    glBindBuffer(GL_ARRAY_BUFFER, 0)
-    # release VAO
-    glBindVertexArray(0)
-    return vao
-end
+
 
 # Constants #
 const WIDTH = convert(GLuint, 800)
 const HEIGHT = convert(GLuint, 600)
-const VERSION_MAJOR = 3
-const VERSION_MINOR = 3
+const VERSION_MAJOR = 4
+const VERSION_MINOR = 1
 
 # GLFW's Callbacks #
 # key callbacks : press Esc to escape
@@ -145,14 +130,14 @@ if OS_NAME == :Darwin
     GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 end
 # if that doesn't work, try to uncomment the code below and checkout your OpenGL context version
-GLFW.DefaultWindowHints()
+#GLFW.DefaultWindowHints()
 
 # Create Window #
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullWindow)
 # set callbacks
 GLFW.SetKeyCallback(window, key_callback)
 # create OpenGL context
-GLFW.MakeContextCurrent(window)
+#GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)

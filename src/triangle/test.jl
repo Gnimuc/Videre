@@ -4,4 +4,3 @@ include("triangleSim.jl")
 
 
 
-
