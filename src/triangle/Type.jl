@@ -3,12 +3,11 @@ module Type
 #
 
 # Our top type is AbstractOpenGLData, all concrete data type(e.g. VertexData) should be a subtype of it.
-# AbstractOpenGLDataFormat is our data format, all concrete data format should be a subtype of it.
 abstract AbstractOpenGLData{T} <: AbstractVector{T}
-abstract AbstractOpenGLDataFormat{T}
+abstract AbstractOpenGLDataFormat
 # VertexDataFormat #
-type VertexDataFormat{T} <: AbstractOpenGLDataFormat{T}
-    datatype::T
+type VertexDataFormat <: AbstractOpenGLDataFormat
+    datatype::Uint32
     component::Uint
     stride::Uint
     offset::Ptr{None}
@@ -26,7 +25,7 @@ offset --> a byte offset from the beginning of the buffer to the first attribute
 =#
 type VertexData{T} <: AbstractOpenGLData{T}
     value::Vector{T}
-    format::VertexDataFormat{T}
+    format::VertexDataFormat
 
 end
 

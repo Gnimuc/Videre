@@ -7,7 +7,7 @@ Usage: see triangleSim.jl
 More Details:
 ← using shadercompiler() in triangleSim.jl ✓
 ← using programer() in triangleSim.jl ✓
-→ define our own data type in TriangleType.jl
+→ define our own data type in Type.jl
 → using data2buffer() in triangleSim.jl
 → using data2buffer() in triangleSim.jl
 =#
@@ -30,28 +30,16 @@ shaderProgram = programer([vertexShader, fragmentShader])
 #
 offset = VertexData{GLfloat}([0.5, 0.0, 0.0,
                               0.5, 0.0, 0.0,
-                              0.5, 0.0, 0.0], 3, 0, C_NULL)
+                              0.5, 0.0, 0.0], VertexDataFormat(GL_FLOAT, 3, 0, C_NULL))
 
 color = VertexData{GLfloat}([1.0, 0.0, 0.0, 1.0,
                              0.0, 1.0, 0.0, 1.0,
-                             0.0, 0.0, 1.0, 1.0], 4, 0, C_NULL)
-offsetbuffer = data2buffer(offset, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
-colorbuffer = data2buffer(color, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
+                             0.0, 0.0, 1.0, 1.0], VertexDataFormat(GL_FLOAT, 4, 0, C_NULL))
+offsetbuffer = data2buffer(offset.value, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
+colorbuffer = data2buffer(color.value, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 
 # VAO #
-#offsetVAO = buffer2attrib(offsetbuffer, 0, 3)
-#colorVAO = buffer2attrib(colorbuffer, 1, 4)
-
-VAO = GLuint[0]
-glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
-glBindVertexArray(VAO[1])
-# connect buffer to vertex attributes
-glBindBuffer(GL_ARRAY_BUFFER, offsetbuffer[1] )
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
-glEnableVertexAttribArray(0)
-glBindBuffer(GL_ARRAY_BUFFER, colorbuffer[1] )
-glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
-glEnableVertexAttribArray(1)
+triangleVAO = buffer2attrib([offsetbuffer, colorbuffer], GLuint[0, 1], [offset.format, color.format])
 
 
 # loop #

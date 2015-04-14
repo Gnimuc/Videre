@@ -20,6 +20,9 @@ end
 
 # Types #
 include("Type.jl")
+using Type.AbstractOpenGLDataFormat
+using Type.AbstractOpenGLData
+using Type.VertexDataFormat
 using Type.VertexData
 
 # Functions #
@@ -29,6 +32,7 @@ function glslversion!(source::ASCIIString, major, minor)
     source = replace(source, source[index.stop+1:index.stop+2], "$major$minor")
     return source
 end
+
 # create shader --> load shader source --> compile shader
 function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
     typestring = Dict([(GL_COMPUTE_SHADER, "compute"),
@@ -64,6 +68,7 @@ function shadercompiler(shaderSource::ASCIIString, shaderType::GLenum)
     end
     return shader::GLuint
 end
+
 # create program handler --> attach shader --> link shader
 function programer(shaderArray::Array{GLuint,1})
     # create program handler
@@ -94,23 +99,37 @@ function programer(shaderArray::Array{GLuint,1})
     end
     return programHandle::GLuint
 end
+
 # pass data to buffer
-function data2buffer(data::VertexData, bufferTarget::GLenum, bufferUsage::GLenum )
+function data2buffer(data::Vector, bufferTarget::GLenum, bufferUsage::GLenum )
     # generate buffer
     buffer = GLuint[0]
     glGenBuffers(1, pointer(buffer) )
     # bind target
     glBindBuffer(bufferTarget, buffer[1] )
     # pass data to buffer
-    glBufferData(bufferTarget, sizeof(data.value), data.value, bufferUsage)
+    glBufferData(bufferTarget, sizeof(data), data, bufferUsage)
     # release target
     glBindBuffer(bufferTarget, 0)
     return buffer
 end
 
 # connect buffer data to vertex attributes
-function buffer2attrib(buffer::Array{GLfloat})
+function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1}, format::Array{VertexDataFormat, 1})
+    # generate vertex array object
+    vao = GLuint[0]
+    glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(vao)) )
+    glBindVertexArray(vao[1])
+    # connecting
+    @assert length(buffer) == length(attriblocation) "the number of buffers and attributes do not match."
+    for i = 1:length(buffer)
+        glBindBuffer(GL_ARRAY_BUFFER, buffer[i] )
+        glEnableVertexAttribArray(attriblocation[i])
+        glVertexAttribPointer(attriblocation[i], format[i].component, format[i].datatype, GL_FALSE,
+                              format[i].stride, format[i].offset)
+    end
 
+    return vao
 end
 
 # Constants #
