@@ -5,9 +5,11 @@ Functionality: to draw our colorful triangle
 Usage: see triangleSim.jl
 
 More Details:
-← shadercompiler ✓
-← programer ✓
-
+← using shadercompiler() in triangleSim.jl ✓
+← using programer() in triangleSim.jl ✓
+→ define our own data type in TriangleType.jl
+→ using data2buffer() in triangleSim.jl
+→ using data2buffer() in triangleSim.jl
 =#
 
 # Note that you must create a OpenGL context before running these code.
@@ -25,20 +27,21 @@ fragmentShader = shadercompiler(source, GL_FRAGMENT_SHADER)
 shaderProgram = programer([vertexShader, fragmentShader])
 
 # VBO #
-offset = GLfloat[0.5, 0.0, 0.0,
-                 0.5, 0.0, 0.0,
-                 0.5, 0.0, 0.0]
+#
+offset = VertexData{GLfloat}([0.5, 0.0, 0.0,
+                              0.5, 0.0, 0.0,
+                              0.5, 0.0, 0.0], 3, 0, C_NULL)
 
-color = GLfloat[1.0, 0.0, 0.0, 1.0,
-                0.0, 1.0, 0.0, 1.0,
-                0.0, 0.0, 1.0, 1.0]
+color = VertexData{GLfloat}([1.0, 0.0, 0.0, 1.0,
+                             0.0, 1.0, 0.0, 1.0,
+                             0.0, 0.0, 1.0, 1.0], 4, 0, C_NULL)
 offsetbuffer = data2buffer(offset, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 colorbuffer = data2buffer(color, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 
 # VAO #
-offsetVAO = buffer2attrib(offsetbuffer, 0, 3)
-colorVAO = buffer2attrib(colorbuffer, 1, 4)
-#=
+#offsetVAO = buffer2attrib(offsetbuffer, 0, 3)
+#colorVAO = buffer2attrib(colorbuffer, 1, 4)
+
 VAO = GLuint[0]
 glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
 glBindVertexArray(VAO[1])
@@ -49,7 +52,7 @@ glEnableVertexAttribArray(0)
 glBindBuffer(GL_ARRAY_BUFFER, colorbuffer[1] )
 glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(1)
-=#
+
 
 # loop #
 while !GLFW.WindowShouldClose(window)
@@ -69,7 +72,7 @@ end
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
-glDeleteVertexArrays(1, offsetVAO)
-glDeleteVertexArrays(1, colorVAO)
+#glDeleteVertexArrays(1, offsetVAO)
+#glDeleteVertexArrays(1, colorVAO)
 glDeleteBuffers(1, offsetbuffer)
 glDeleteBuffers(1, colorbuffer)

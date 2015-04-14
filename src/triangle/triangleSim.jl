@@ -18,6 +18,10 @@ if OS_NAME == :Darwin
     cd(string(homedir(),"/Documents/Videre"))
 end
 
+# Types #
+include("Type.jl")
+using Type.VertexData
+
 # Functions #
 # modify GLSL version
 function glslversion!(source::ASCIIString, major, minor)
@@ -91,20 +95,23 @@ function programer(shaderArray::Array{GLuint,1})
     return programHandle::GLuint
 end
 # pass data to buffer
-function data2buffer(data, bufferTarget::GLenum, bufferUsage::GLenum )
+function data2buffer(data::VertexData, bufferTarget::GLenum, bufferUsage::GLenum )
     # generate buffer
     buffer = GLuint[0]
     glGenBuffers(1, pointer(buffer) )
     # bind target
     glBindBuffer(bufferTarget, buffer[1] )
     # pass data to buffer
-    glBufferData(bufferTarget, sizeof(data), data, bufferUsage)
+    glBufferData(bufferTarget, sizeof(data.value), data.value, bufferUsage)
     # release target
     glBindBuffer(bufferTarget, 0)
     return buffer
 end
-# connect buffer data to vertex attributes
 
+# connect buffer data to vertex attributes
+function buffer2attrib(buffer::Array{GLfloat})
+
+end
 
 # Constants #
 const WIDTH = convert(GLuint, 800)
