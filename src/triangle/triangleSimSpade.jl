@@ -28,13 +28,13 @@ shaderProgram = programer([vertexShader, fragmentShader])
 
 # VBO #
 #
-offset = VertexData{GLfloat}([0.5, 0.0, 0.0,
-                              0.5, 0.0, 0.0,
-                              0.5, 0.0, 0.0], GL_FLOAT, 3, 0, C_NULL)
+offset = VertexData(GLfloat[0.5, 0.0, 0.0,
+                            0.5, 0.0, 0.0,
+                            0.5, 0.0, 0.0], GL_FLOAT, 3, 0, C_NULL)
 
-color = VertexData{GLfloat}([1.0, 0.0, 0.0, 1.0,
-                             0.0, 1.0, 0.0, 1.0,
-                             0.0, 0.0, 1.0, 1.0], GL_FLOAT, 4, 0, C_NULL)
+color = VertexData(GLfloat[1.0, 0.0, 0.0, 1.0,
+                           0.0, 1.0, 0.0, 1.0,
+                           0.0, 0.0, 1.0, 1.0], GL_FLOAT, 4, 0, C_NULL)
 offsetbuffer = data2buffer(offset, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 colorbuffer = data2buffer(color, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 

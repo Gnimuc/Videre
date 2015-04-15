@@ -18,6 +18,12 @@ if OS_NAME == :Darwin
     cd(string(homedir(),"/Documents/Videre"))
 end
 
+# Constants #
+const WIDTH = convert(GLuint, 800)
+const HEIGHT = convert(GLuint, 600)
+const VERSION_MAJOR = 3
+const VERSION_MINOR = 3
+
 # Types #
 include("Type.jl")
 using Type.AbstractOpenGLData
@@ -99,21 +105,21 @@ function programer(shaderArray::Array{GLuint,1})
 end
 
 # pass data to buffer
-function data2buffer(data::AbstractOpenGLData, bufferTarget::GLenum, bufferUsage::GLenum )
+function data2buffer(gldata::AbstractOpenGLData, bufferTarget::GLenum, bufferUsage::GLenum )
     # generate buffer
     buffer = GLuint[0]
     glGenBuffers(1, pointer(buffer) )
     # bind target
     glBindBuffer(bufferTarget, buffer[1] )
     # pass data to buffer
-    glBufferData(bufferTarget, sizeof(data.value), data.value, bufferUsage)
+    glBufferData(bufferTarget, sizeof(gldata.data), gldata.data, bufferUsage)
     # release target
     glBindBuffer(bufferTarget, 0)
     return buffer
 end
 
 # connect buffer data to vertex attributes
-function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1}, data::AbstractOpenGLData)
+function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1}, gldata::AbstractOpenGLData)
     # generate vertex array object
     vao = GLuint[0]
     glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(vao)) )
@@ -123,18 +129,12 @@ function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1
     for i = 1:length(buffer)
         glBindBuffer(GL_ARRAY_BUFFER, buffer[i] )
         glEnableVertexAttribArray(attriblocation[i])
-        glVertexAttribPointer(attriblocation[i], data[i].component, data[i].datatype, GL_FALSE,
-                              data[i].stride, data[i].offset)
+        glVertexAttribPointer(attriblocation[i], gldata[i].component, gldata[i].datatype, GL_FALSE,
+                              gldata[i].stride, gldata[i].offset)
     end
 
     return vao
 end
-
-# Constants #
-const WIDTH = convert(GLuint, 800)
-const HEIGHT = convert(GLuint, 600)
-const VERSION_MAJOR = 4
-const VERSION_MINOR = 1
 
 # GLFW's Callbacks #
 # key callbacks : press Esc to escape
@@ -154,14 +154,15 @@ if OS_NAME == :Darwin
     GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 end
 # if that doesn't work, try to uncomment the code below and checkout your OpenGL context version
-#GLFW.DefaultWindowHints()
-
+if OS_NAME == :Windows
+    GLFW.DefaultWindowHints()
+end
 # Create Window #
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullWindow)
 # set callbacks
 GLFW.SetKeyCallback(window, key_callback)
 # create OpenGL context
-#GLFW.MakeContextCurrent(window)
+GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)

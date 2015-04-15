@@ -1,9 +1,9 @@
 module Type
 # We could define our own types here.
 #
-using ModernGL.GLenum
+using ModernGL
 # Our top type is AbstractOpenGLData, all concrete data type(e.g. VertexData) should be a subtype of it.
-abstract AbstractOpenGLData{T} <: AbstractArray{T,1}
+abstract AbstractOpenGLData{T,N} <: AbstractArray{T,N}
 
 # VertexData #
 #=
@@ -16,14 +16,15 @@ component --> the number of components per vertex attribute
 stride --> the byte offset between consecutive attributes
 offset --> a byte offset from the beginning of the buffer to the first attribute in the buffer
 =#
-type VertexData{T} <: AbstractOpenGLData{T}
-    value::Array{T,1}
+type VertexData{T, A<:AbstractVector} <: AbstractOpenGLData{T,1}
+    data::A
     datatype::GLenum
     component::Uint
     stride::Uint
     offset::Ptr{None}
 
 end
+VertexData(data, datatype, component, stride, offset) = VertexData{eltype(data), typeof(data)}(data, datatype, component, stride, offset)
 
 # Uniform Data #
 
