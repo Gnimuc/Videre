@@ -30,17 +30,16 @@ shaderProgram = programer([vertexShader, fragmentShader])
 #
 offset = VertexData{GLfloat}([0.5, 0.0, 0.0,
                               0.5, 0.0, 0.0,
-                              0.5, 0.0, 0.0], VertexDataFormat(GL_FLOAT, 3, 0, C_NULL))
+                              0.5, 0.0, 0.0], GL_FLOAT, 3, 0, C_NULL)
 
 color = VertexData{GLfloat}([1.0, 0.0, 0.0, 1.0,
                              0.0, 1.0, 0.0, 1.0,
-                             0.0, 0.0, 1.0, 1.0], VertexDataFormat(GL_FLOAT, 4, 0, C_NULL))
-offsetbuffer = data2buffer(offset.value, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
-colorbuffer = data2buffer(color.value, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
+                             0.0, 0.0, 1.0, 1.0], GL_FLOAT, 4, 0, C_NULL)
+offsetbuffer = data2buffer(offset, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
+colorbuffer = data2buffer(color, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 
 # VAO #
-triangleVAO = buffer2attrib([offsetbuffer, colorbuffer], GLuint[0, 1], [offset.format, color.format])
-
+triangleVAO = buffer2attrib([offsetbuffer, colorbuffer], GLuint[0, 1], [offset, color])
 
 # loop #
 while !GLFW.WindowShouldClose(window)
