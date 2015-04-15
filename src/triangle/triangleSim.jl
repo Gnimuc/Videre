@@ -25,9 +25,9 @@ const VERSION_MAJOR = 3
 const VERSION_MINOR = 3
 
 # Types #
-include("Type.jl")
-using Type.AbstractOpenGLData
-using Type.VertexData
+include("Types.jl")
+using Types.AbstractOpenGLData
+using Types.VertexData
 
 # Functions #
 # modify GLSL version
