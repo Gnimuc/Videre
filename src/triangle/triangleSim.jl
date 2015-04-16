@@ -119,7 +119,7 @@ function data2buffer(gldata::AbstractOpenGLData, bufferTarget::GLenum, bufferUsa
 end
 
 # connect buffer data to vertex attributes
-function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1}, gldata::AbstractOpenGLData)
+function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1}, gldata::Array{VertexData, 1})
     # generate vertex array object
     vao = GLuint[0]
     glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(vao)) )

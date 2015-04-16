@@ -8,7 +8,7 @@ typealias AbstractOpenGLVectorData{T} AbstractOpenGLData{T,1}
 # VertexData #
 #=
 Note that the data here is constraint to a vector, which is consistent with our corresponding scripts.
-And component, stride and offset are three parameters of glVertexAttribPointer() which specify data format.
+And datatype, component, stride and offset are four parameters of glVertexAttribPointer() which specify data format.
 
 More details:
 datatype --> the data type of each component

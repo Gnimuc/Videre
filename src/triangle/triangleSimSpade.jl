@@ -39,7 +39,7 @@ offsetbuffer = data2buffer(offset, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 colorbuffer = data2buffer(color, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 
 # VAO #
-triangleVAO = buffer2attrib([offsetbuffer, colorbuffer], GLuint[0, 1], [offset, color])
+triangleVAO = buffer2attrib([offsetbuffer, colorbuffer], GLuint[0, 1], VertexData[offset, color])
 
 # loop #
 while !GLFW.WindowShouldClose(window)
