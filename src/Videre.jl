@@ -2,7 +2,7 @@
 #
 
 # Basic Examples #
-include("TriangleCum.jl")
+include("./triangle/test.jl")
 
 
 

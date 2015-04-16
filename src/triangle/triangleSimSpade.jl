@@ -7,9 +7,10 @@ Usage: see triangleSim.jl
 More Details:
 ← using shadercompiler() in triangleSim.jl ✓
 ← using programer() in triangleSim.jl ✓
-→ define our own data type in Type.jl
-→ using data2buffer() in triangleSim.jl
-→ using data2buffer() in triangleSim.jl
+→ define our own data type in Types.jl
+→ using data2buffer() in triangleSim.jl ∮
+→ using buffer2attrib() in triangleSim.jl ∮
+
 =#
 
 # Note that you must create a OpenGL context before running these code.
@@ -26,19 +27,20 @@ fragmentShader = shadercompiler(source, GL_FRAGMENT_SHADER)
 # shader linking #
 shaderProgram = programer([vertexShader, fragmentShader])
 
-# VBO #
-#
+# VBO # ∮
 offset = VertexData(GLfloat[0.5, 0.0, 0.0,
                             0.5, 0.0, 0.0,
                             0.5, 0.0, 0.0], GL_FLOAT, 3, 0, C_NULL)
 
 color = VertexData(GLfloat[1.0, 0.0, 0.0, 1.0,
                            0.0, 1.0, 0.0, 1.0,
-                           0.0, 0.0, 1.0, 1.0], GL_FLOAT, 4, 0, C_NULL)
+                           0.0, 0.0, 1.0, 1.0], GL_FLOAT, 4)    # note: last two argument are optional
 offsetbuffer = data2buffer(offset, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 colorbuffer = data2buffer(color, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 
-# VAO #
+# VAO # ∮
+# offset ⇒ offsetbuffer ⇒ attribute index 0
+# color ⇒ colorbuffer ⇒ attribute index 1
 triangleVAO = buffer2attrib([offsetbuffer, colorbuffer], GLuint[0, 1], VertexData[offset, color])
 
 # loop #
@@ -59,7 +61,6 @@ end
 glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
-#glDeleteVertexArrays(1, offsetVAO)
-#glDeleteVertexArrays(1, colorVAO)
+glDeleteVertexArrays(1, triangleVAO)
 glDeleteBuffers(1, offsetbuffer)
 glDeleteBuffers(1, colorbuffer)
