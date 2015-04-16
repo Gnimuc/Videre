@@ -6,12 +6,14 @@ I'm working on it now...
 
 
 
- 
- 
- 
- 
+
+
+
+
 ## References
- 
+
+[OpenGL 4 Shading Language Cookbook (2nd Ed)](http://www.amazon.com/OpenGL-Shading-Language-Cookbook-Edition/dp/1782167021)
+
 [OpenGL Superbible, 6th edition: Comprehensive Tutorial and Reference](http://www.openglsuperbible.com)
 
 [www.learnopengl.com](http://www.learnopengl.com/#!Introduction)

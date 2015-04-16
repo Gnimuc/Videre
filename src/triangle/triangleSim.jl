@@ -10,7 +10,7 @@ using GLFW, ModernGL
 
 # Change path #
 # change julia's current working directory to Videre working directory #
-# you may need to edit this path, I currently don't know how to fix it elegantly. #
+# you may need to edit this path, I currently don't know how to do it elegantly. #
 if OS_NAME == :Windows
     cd(string(homedir(),"\\Desktop\\Videre"))
 end
@@ -27,6 +27,7 @@ const VERSION_MINOR = 3
 # Types #
 include("Types.jl")
 using Types.AbstractOpenGLData
+using Types.AbstractOpenGLVectorData
 using Types.VertexData
 
 # Functions #
@@ -132,7 +133,6 @@ function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1
         glVertexAttribPointer(attriblocation[i], gldata[i].component, gldata[i].datatype, GL_FALSE,
                               gldata[i].stride, gldata[i].offset)
     end
-
     return vao
 end
 
@@ -150,13 +150,16 @@ GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
 GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
 GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
 GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
+# there two if-statement below just fit my specific case.
 if OS_NAME == :Darwin
     GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
 end
-# if that doesn't work, try to uncomment the code below and checkout your OpenGL context version
 if OS_NAME == :Windows
     GLFW.DefaultWindowHints()
 end
+# if that doesn't work, try to uncomment the code below and checkout your OpenGL context version
+#GLFW.DefaultWindowHints()
+
 # Create Window #
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Videre", GLFW.NullMonitor, GLFW.NullWindow)
 # set callbacks
@@ -166,9 +169,9 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)
-include("triangleSimHeart.jl")
+#include("triangleSimHeart.jl")
 # ♠ (\spadesuit)
-#include("triangleSimSpade.jl")
+include("triangleSimSpade.jl")
 # ♢ (\clubsuit)
 #include("triangleSimDiamond.jl")
 # ♣ (\diamondsuit)

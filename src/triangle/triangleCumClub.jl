@@ -14,6 +14,7 @@ More Details:
 =#
 
 # Note that you must create a OpenGL context before running these code.
+# and make sure that your context version is matching those in VertexShader.jl and FragmentShader.jl.
 
 # set up viewport
 glViewport(0, 0, WIDTH, HEIGHT)

@@ -12,6 +12,7 @@ More Details:
 =#
 
 # Note that you must create a OpenGL context before running these code.
+# and make sure that your context version is matching those in VertexShader.jl and FragmentShader.jl.
 
 # set up viewport
 glViewport(0, 0, WIDTH, HEIGHT)
@@ -48,7 +49,7 @@ glAttachShader(shaderProgram, vertexShader)
 glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
-# VBO #
+# Data #
 offset = GLfloat[0.5, 0.0, 0.0,
                  0.5, 0.0, 0.0,
                  0.5, 0.0, 0.0]
@@ -56,6 +57,8 @@ offset = GLfloat[0.5, 0.0, 0.0,
 color = GLfloat[1.0, 0.0, 0.0, 1.0,
                 0.0, 1.0, 0.0, 1.0,
                 0.0, 0.0, 1.0, 1.0]
+
+# VBO #
 # generate two buffers
 buffer = GLuint[0,0]
 glGenBuffers(2, pointer(buffer) )

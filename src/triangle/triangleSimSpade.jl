@@ -27,7 +27,7 @@ fragmentShader = shadercompiler(source, GL_FRAGMENT_SHADER)
 # shader linking #
 shaderProgram = programer([vertexShader, fragmentShader])
 
-# VBO # ∮
+# Data #
 offset = VertexData(GLfloat[0.5, 0.0, 0.0,
                             0.5, 0.0, 0.0,
                             0.5, 0.0, 0.0], GL_FLOAT, 3, 0, C_NULL)
@@ -35,6 +35,7 @@ offset = VertexData(GLfloat[0.5, 0.0, 0.0,
 color = VertexData(GLfloat[1.0, 0.0, 0.0, 1.0,
                            0.0, 1.0, 0.0, 1.0,
                            0.0, 0.0, 1.0, 1.0], GL_FLOAT, 4)    # note: last two argument are optional
+# VBO # ∮
 offsetbuffer = data2buffer(offset, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 colorbuffer = data2buffer(color, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 

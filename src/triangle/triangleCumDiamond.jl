@@ -1,7 +1,7 @@
 ## Triangle ♢ ##
 #=
 Code Style: cumbersome
-Functionality: to draw our lovely red triangle
+Functionality: to draw our dynamic red triangle
 Usage: see triangleCum.jl
 
 More Details:
@@ -13,7 +13,8 @@ More Details:
 
 =#
 
-# Note that you must create a OpenGL context before running these code.
+# Note that you must create a OpenGL context before running these code
+# and make sure that your context version is matching those in VertexShader.jl and FragmentShader.jl.
 
 # set up viewport
 glViewport(0, 0, WIDTH, HEIGHT)
