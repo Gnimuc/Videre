@@ -37,17 +37,17 @@ triangle♠v = """#version 410 core
                                                       vec4( -0.5, -0.5, 0.0, 1.0));
                      gl_Position = vertices[gl_VertexID] + vec4(offset, 0.0);
                      trianglecolor.color = color;
-                 }"""
+                }"""
 
 triangle♢v = """#version 410 core
                 // 'in's
                 // attributes
-                layout (location = 0) in vec3 offset;
+                layout (location = 0) in vec3 position;
+
+                // uniforms
+                uniform mat4 rotationMatrix;
 
                 void main(void)
                 {
-                     const vec4 vertices[3] = vec4[3](vec4( 0.5, -0.5, 0.0, 1.0),
-                                                      vec4( 0.0, 0.5, 0.0, 1.0),
-                                                      vec4( -0.5, -0.5, 0.0, 1.0));
-                     gl_Position = vertices[gl_VertexID] + vec4(offset, 0.0);
-                 }"""
+                     gl_Position = rotationMatrix * vec4(position, 1.0);
+                }"""

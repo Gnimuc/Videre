@@ -52,16 +52,16 @@ glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
 # VBO #
-offset = GLfloat[0.5, 0.0, 0.0,
-                 0.5, 0.0, 0.0,
-                 0.5, 0.0, 0.0]
+position = GLfloat[0.5, -0.5, 0.0,
+                   0.0, 0.5, 0.0,
+                  -0.5, -0.5, 0.0]
 
 # generate two buffers
 buffer = GLuint[0]
 glGenBuffers(1, pointer(buffer) )
 # pass offset to buffer 1
 glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
-glBufferData(GL_ARRAY_BUFFER, sizeof(offset), offset, GL_STATIC_DRAW)
+glBufferData(GL_ARRAY_BUFFER, sizeof(position), position, GL_STATIC_DRAW)
 
 # VAO #
 VAO = GLuint[0]
@@ -81,9 +81,16 @@ while !GLFW.WindowShouldClose(window)
   glClear(GL_COLOR_BUFFER_BIT)
   # use uniforms to change color ∮
   red = convert(GLfloat, (sin(time())/2) + 0.5)
+  ϕ = pi*sin(time()/2)
+  rotationY = GLfloat[ cos(ϕ) 0.0 -sin(ϕ) 0.0;
+                          0.0 1.0     0.0 0.0;
+                       sin(ϕ) 0.0  cos(ϕ) 0.0;
+                          0.0 0.0     0.0 1.0 ]
+  rotationMatrixLocation = glGetUniformLocation(shaderProgram, "rotationMatrix")
   ucolorLocation = glGetUniformLocation(shaderProgram, "ucolor")
-  glUseProgram(shaderProgram)
+  glUniformMatrix4fv(rotationMatrixLocation, 1, GL_FALSE, convert(Ptr{GLfloat}, pointer(rotationY)) )
   glUniform4f(ucolorLocation, red, 0.0, 0.0, 1.0)
+  glUseProgram(shaderProgram)
   # draw
   glDrawArrays(GL_TRIANGLES, 0, 3)
   # swap the buffers
