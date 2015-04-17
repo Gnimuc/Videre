@@ -88,7 +88,7 @@ while !GLFW.WindowShouldClose(window)
                           0.0 0.0     0.0 1.0 ]
   rotationMatrixLocation = glGetUniformLocation(shaderProgram, "rotationMatrix")
   ucolorLocation = glGetUniformLocation(shaderProgram, "ucolor")
-  glUniformMatrix4fv(rotationMatrixLocation, 1, GL_FALSE, convert(Ptr{GLfloat}, pointer(rotationY)) )
+  glUniformMatrix4fv(rotationMatrixLocation, 1, GL_FALSE, pointer(rotationY))
   glUniform4f(ucolorLocation, red, 0.0, 0.0, 1.0)
   # draw
   glUseProgram(shaderProgram)

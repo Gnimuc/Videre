@@ -13,6 +13,8 @@ import Base.similar
 # We make AbstractOpenGLData a subtype of AbstractArray in order to implement some convenient array operations.
 abstract AbstractOpenGLData{T,N} <: AbstractArray{T,N}
 typealias AbstractOpenGLVectorData{T} AbstractOpenGLData{T,1}
+typealias AbstractOpenGLMatrixData{T} AbstractOpenGLData{T,2}
+typealias AbstractOpenGLVecOrMatData{T} Union(AbstractOpenGLVectorData{T}, AbstractOpenGLMatrixData{T})
 
 # VertexData #
 #=
@@ -45,7 +47,12 @@ similar{T}(vd::VertexData, ::Type{T}, dims::Dims) = VertexData(similar(vd.data, 
 
 
 # Uniform Data #
-
+type  UniformData{T, A<: AbstractVecOrMat} <: AbstractOpenGLVecOrMatData
+    data::A
+    uniformformat::ASCIIString
+    uniformtype::
+    name::ASCIIString
+end
 
 
 end

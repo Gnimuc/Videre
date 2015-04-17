@@ -136,10 +136,20 @@ function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1
     return vao
 end
 
-# uniform operation
-function uniformer()
+# pass data to uniform
+function data2uniform(gldata::UniformData, programHandle::GLuint)
+    location = glGetUniformLocation(programHandle, gldata.name)
+    # Metaprogramming
+    functionName = string("glUniform",gldata.uniformtype)
+    Expr(:call, symbol(functionName), location, 1, GL_FALSE, 4)
 
+    uniformer(location, 1, GL_FALSE, gldata.data)
 end
+# uniformers
+function uniformer(location::GLint, count::GLsizei, transpose::GLboolean, value::AbstractVecOrMat)
+    glUniformMatrix4fv(location, count, transpose, pointer(value))
+end
+
 
 # GLFW's Callbacks #
 # key callbacks : press Esc to escape
