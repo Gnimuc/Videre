@@ -136,6 +136,11 @@ function buffer2attrib(buffer::Array{GLuint, 1}, attriblocation::Array{GLuint, 1
     return vao
 end
 
+# uniform operation
+function uniformer()
+
+end
+
 # GLFW's Callbacks #
 # key callbacks : press Esc to escape
 function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint)
@@ -171,9 +176,9 @@ GLFW.MakeContextCurrent(window)
 # ♡ (\heartsuit)
 #include("triangleSimHeart.jl")
 # ♠ (\spadesuit)
-include("triangleSimSpade.jl")
+#include("triangleSimSpade.jl")
 # ♢ (\clubsuit)
-#include("triangleSimDiamond.jl")
+include("triangleSimDiamond.jl")
 # ♣ (\diamondsuit)
 #include("triangleSimClub.jl")
 

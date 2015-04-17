@@ -1,7 +1,7 @@
 ## Triangle ♢ ##
 #=
 Code Style: cumbersome
-Functionality: to draw our dynamic red triangle
+Functionality: to draw our flapping triangle
 Usage: see triangleCum.jl
 
 More Details:
@@ -51,11 +51,11 @@ glAttachShader(shaderProgram, vertexShader)
 glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
-# VBO #
+# Data #
 position = GLfloat[0.5, -0.5, 0.0,
                    0.0, 0.5, 0.0,
                   -0.5, -0.5, 0.0]
-
+# VBO #
 # generate two buffers
 buffer = GLuint[0]
 glGenBuffers(1, pointer(buffer) )
@@ -90,8 +90,8 @@ while !GLFW.WindowShouldClose(window)
   ucolorLocation = glGetUniformLocation(shaderProgram, "ucolor")
   glUniformMatrix4fv(rotationMatrixLocation, 1, GL_FALSE, convert(Ptr{GLfloat}, pointer(rotationY)) )
   glUniform4f(ucolorLocation, red, 0.0, 0.0, 1.0)
-  glUseProgram(shaderProgram)
   # draw
+  glUseProgram(shaderProgram)
   glDrawArrays(GL_TRIANGLES, 0, 3)
   # swap the buffers
   GLFW.SwapBuffers(window)
