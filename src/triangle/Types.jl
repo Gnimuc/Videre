@@ -47,12 +47,53 @@ similar{T}(vd::VertexData, ::Type{T}, dims::Dims) = VertexData(similar(vd.data, 
 
 
 # Uniform Data #
-type  UniformData{T, A<: AbstractVecOrMat} <: AbstractOpenGLVecOrMatData
+# not fully tested yet
+type UniformData{T, A<:AbstractVecOrMat} <: AbstractOpenGLData{T}
     data::A
-    uniformformat::ASCIIString
-    uniformtype::
     name::ASCIIString
+    tag::ASCIIString
+    suffixsize::ASCIIString
+    suffixtype::ASCIIString
+    count::GLsizei
+#=
+    function UniformData(data, name, tag, count)
+        # specify suffix size
+        datasize = size(data)
+        typeof(data) <: Matrix ? suffixsize = string(datasize[1],"x",datasize[2]) : suffixsize = string(datasize[1])
+        # specify suffix type
+        typestring = Dict([(GLfloat, "f"), (GLint, "i"), (GLuint, "ui")])
+        suffixtype = typestring[eltype(data)]
+
+        obj = new(data, name, tag, suffixsize, suffixtype, count)
+        obj
+    end
+=#
 end
+function UniformData(data, name, tag, count)
+    # specify suffix size
+    datasize = size(data)
+    if typeof(data) <: Vector
+        suffixsize = string(datasize[1])
+    elseif datasize[1] == datasize[2]
+        suffixsize = string(datasize[1])
+    else
+        suffixsize = string(datasize[1],"x",datasize[2])
+    end
+    # specify suffix type
+    typestring = Dict([(GLfloat, "f"), (GLint, "i"), (GLuint, "ui")])
+    suffixtype = typestring[eltype(data)]
+
+    UniformData{eltype(data), typeof(data)}(data, name, tag, suffixsize, suffixtype, count)
+end
+
+# extend size() getindex() setindex!() and similar() in Base
+size(ud::UniformData) = size(ud.data)
+getindex(ud::UniformData, i::Real) = getindex(ud.data, i)
+setindex!(ud::UniformData, X, i::Real) = setindex!(ud.data, X, i)
+similar(ud::UniformData) = UniformData(similar(ud.data), ud.name, ud.tag, ud.count)
+similar(ud::UniformData, dims::Dims) = UniformData(similar(ud.data, dims), ud.name, ud.tag, ud.count)
+similar{T}(ud::UniformData, ::Type{T}, dims::Dims) = UniformData(similar(ud.data, T, dims), ud.name, ud.tag, ud.count)
+
 
 
 end

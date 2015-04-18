@@ -48,16 +48,14 @@ while !GLFW.WindowShouldClose(window)
   glClearColor(255/256, 250/256, 205/256, 1.0)
   glClear(GL_COLOR_BUFFER_BIT)
   # use uniforms to change color
-  red = convert(GLfloat, (sin(time())/2) + 0.5)
+  red = UniformData(GLfloat[sin(time())/2 + 0.5, 0.0, 0.0, 1.0], "ucolor", "Scalar", convert(GLsizei,0) )
   ϕ = pi*sin(time()/2)
-  rotationY = GLfloat[ cos(ϕ) 0.0 -sin(ϕ) 0.0;
-                          0.0 1.0     0.0 0.0;
-                       sin(ϕ) 0.0  cos(ϕ) 0.0;
-                          0.0 0.0     0.0 1.0 ]
-  rotationMatrixLocation = glGetUniformLocation(shaderProgram, "rotationMatrix")
-  ucolorLocation = glGetUniformLocation(shaderProgram, "ucolor")
-  glUniformMatrix4fv(rotationMatrixLocation, 1, GL_FALSE, convert(Ptr{GLfloat}, pointer(rotationY)) )
-  glUniform4f(ucolorLocation, red, 0.0, 0.0, 1.0)
+  rotationY = UniformData(GLfloat[ cos(ϕ) 0.0 -sin(ϕ) 0.0;
+                                      0.0 1.0     0.0 0.0;
+                                   sin(ϕ) 0.0  cos(ϕ) 0.0;
+                                      0.0 0.0     0.0 1.0 ], "rotationMatrix", "Matrix", convert(GLsizei,1))
+  data2uniform(red, shaderProgram)
+  data2uniform(rotationY, shaderProgram)
   # draw
   glUseProgram(shaderProgram)
   glDrawArrays(GL_TRIANGLES, 0, 3)

@@ -28,7 +28,10 @@ const VERSION_MINOR = 3
 include("Types.jl")
 using Types.AbstractOpenGLData
 using Types.AbstractOpenGLVectorData
+using Types.AbstractOpenGLMatrixData
+using Types.AbstractOpenGLVecOrMatData
 using Types.VertexData
+using Types.UniformData
 
 # Functions #
 # modify GLSL version
@@ -139,15 +142,21 @@ end
 # pass data to uniform
 function data2uniform(gldata::UniformData, programHandle::GLuint)
     location = glGetUniformLocation(programHandle, gldata.name)
-    # Metaprogramming
-    functionName = string("glUniform",gldata.uniformtype)
-    Expr(:call, symbol(functionName), location, 1, GL_FALSE, 4)
-
-    uniformer(location, 1, GL_FALSE, gldata.data)
-end
-# uniformers
-function uniformer(location::GLint, count::GLsizei, transpose::GLboolean, value::AbstractVecOrMat)
-    glUniformMatrix4fv(location, count, transpose, pointer(value))
+    # select uniform API
+    if gldata.tag == "Scalar"
+        functionName = string("glUniform", gldata.suffixsize, gldata.suffixtype)
+        expression = Expr(:call, symbol(functionName), location)
+        for i = 1:size(gldata)[1]
+            push!(expression.args, gldata[i])
+        end
+    elseif gldata.tag == "Vector"
+        functionName = string("glUniform", gldata.suffixsize, gldata.suffixtype, "v")
+        expression = Expr(:call, symbol(functionName), location, gldata.count, gldata.data)
+    else gldata.tag == "Matrix"
+        functionName = string("glUniform", "Matrix", gldata.suffixsize, gldata.suffixtype, "v")
+        expression = Expr(:call, symbol(functionName), location, gldata.count, GL_FALSE, gldata.data)
+    end
+    eval(expression)
 end
 
 
