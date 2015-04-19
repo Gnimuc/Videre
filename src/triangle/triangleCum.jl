@@ -44,11 +44,11 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)
-#include("triangleCumHeart.jl")
+include("triangleCumHeart.jl")
 # ♠ (\spadesuit)
 #include("triangleCumSpade.jl")
 # ♢ (\clubsuit)
-include("triangleCumDiamond.jl")
+#include("triangleCumDiamond.jl")
 # ♣ (\diamondsuit)
 #include("triangleCumClub.jl")
 

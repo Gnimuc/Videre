@@ -26,7 +26,7 @@ vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♢v))
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
 glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
 glCompileShader(vertexShader)
-# checkout compile status ∮
+# checkout compile status
 success = GLuint[0]
 glGetShaderiv(vertexShader, GL_COMPILE_STATUS, pointer(success))
 if success[1] != 1
@@ -39,7 +39,7 @@ fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♢f))
 fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
 glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
 glCompileShader(fragmentShader)
-# checkout compile status ∮
+# checkout compile status
 glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, pointer(success) )
 if success[1] != 1
   println("Fragment shader compile failed.")

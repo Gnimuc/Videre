@@ -21,8 +21,8 @@ end
 # Constants #
 const WIDTH = convert(GLuint, 800)
 const HEIGHT = convert(GLuint, 600)
-const VERSION_MAJOR = 3
-const VERSION_MINOR = 3
+const VERSION_MAJOR = 4
+const VERSION_MINOR = 1
 
 # Types #
 include("Types.jl")
@@ -193,11 +193,11 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)
-#include("triangleSimHeart.jl")
+include("triangleSimHeart.jl")
 # ♠ (\spadesuit)
 #include("triangleSimSpade.jl")
 # ♢ (\clubsuit)
-include("triangleSimDiamond.jl")
+#include("triangleSimDiamond.jl")
 # ♣ (\diamondsuit)
 #include("triangleSimClub.jl")
 
