@@ -11,12 +11,9 @@ using GLFW, ModernGL
 # Change path #
 # change julia's current working directory to Videre working directory #
 # you may need to edit this path, I currently don't know how to do it elegantly. #
-if OS_NAME == :Windows
-    cd(string(homedir(),"\\Desktop\\Videre"))
-end
-if OS_NAME == :Darwin
-    cd(string(homedir(),"/Documents/Videre"))
-end
+
+@windows_only cd(string(homedir(),"\\Desktop\\Videre"))
+@osx_only cd(string(homedir(),"/Documents/Videre"))
 
 # Constants #
 const WIDTH = convert(GLuint, 800)
@@ -100,7 +97,7 @@ function programer(shaderArray::Array{GLuint,1})
             logptr = convert(Ptr{GLchar}, pointer(log))
             written = GLsizei[0]
             writtenptr = convert(Ptr{GLsizei}, pointer(written))
-            glGetProgramInfoLog(shader, logLen[1], writtenptr, logptr )
+            glGetProgramInfoLog(programHandle, logLen[1], writtenptr, logptr )
             info = convert(ASCIIString, log)
             println("$info")
         end
@@ -175,12 +172,9 @@ GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
 GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
 GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
 # there two if-statement below just fit my specific case.
-if OS_NAME == :Darwin
-    GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
-end
-if OS_NAME == :Windows
-    GLFW.DefaultWindowHints()
-end
+@osx_only GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+@windows_only GLFW.DefaultWindowHints()
+
 # if that doesn't work, try to uncomment the code below and checkout your OpenGL context version
 #GLFW.DefaultWindowHints()
 
