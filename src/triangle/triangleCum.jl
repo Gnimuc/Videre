@@ -54,6 +54,3 @@ include("triangleCumHeart.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()
-
-
-
