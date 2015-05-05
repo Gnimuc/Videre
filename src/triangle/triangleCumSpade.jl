@@ -20,9 +20,9 @@ glViewport(0, 0, WIDTH, HEIGHT)
 # pipeline #
 # vertex shading stage
 include("./pipeline/front-end stages/vertex shading stage/VertexShader.jl")
-vertexShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♠v))
+vertexShaderSourceptr = pointer(triangle♠v)
 vertexShader = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShader, 1, convert(Ptr{Uint8}, pointer([vertexShaderSourceptr])), C_NULL)
+glShaderSource(vertexShader, 1, Ref([vertexShaderSourceptr]), C_NULL)
 glCompileShader(vertexShader)
 # checkout compile status ∮
 success = GLuint[0]
@@ -33,9 +33,9 @@ end
 
 # fragment shading stage
 include("./pipeline/back-end stages/fragment shading stage/FragmentShader.jl")
-fragmentShaderSourceptr = convert(Ptr{GLchar}, pointer(triangle♠f))
+fragmentShaderSourceptr = pointer(triangle♠f)
 fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShader, 1, convert(Ptr{Uint8}, pointer([fragmentShaderSourceptr])), C_NULL)
+glShaderSource(fragmentShader, 1, Ref([fragmentShaderSourceptr]), C_NULL)
 glCompileShader(fragmentShader)
 # checkout compile status ∮
 glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, pointer(success) )
@@ -60,8 +60,8 @@ color = GLfloat[1.0, 0.0, 0.0, 1.0,
 
 # VBO #
 # generate two buffers
-buffer = GLuint[0,0]
-glGenBuffers(2, pointer(buffer) )
+buffer = zeros(GLuint, 2)
+glGenBuffers(2, Ref(buffer) )
 # pass offset to buffer 1
 glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
 glBufferData(GL_ARRAY_BUFFER, sizeof(offset), offset, GL_STATIC_DRAW)
@@ -71,7 +71,7 @@ glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW)
 
 # VAO #
 VAO = GLuint[0]
-glGenVertexArrays(1, convert(Ptr{GLuint}, pointer(VAO)) )
+glGenVertexArrays(1, Ref(VAO))
 glBindVertexArray(VAO[1])
 # connect buffer to vertex attributes
 glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
@@ -100,4 +100,3 @@ glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
 glDeleteVertexArrays(1, VAO)
 glDeleteBuffers(2, buffer)
-
