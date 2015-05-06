@@ -2,8 +2,5 @@
 #
 
 # Basic Examples #
-include("./triangle/test.jl")
-
-
-
+include("./triangle/run.jl")
 

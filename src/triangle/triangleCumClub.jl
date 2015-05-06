@@ -52,7 +52,7 @@ position = GLfloat[0.5, -0.5, 0.0,
                    0.0, 0.5, 0.0,
                   -0.5, -0.5, 0.0]
 # VBO #
-# generate two buffers
+# generate buffer
 buffer = GLuint[0]
 glGenBuffers(1, pointer(buffer) )
 # pass offset to buffer 1

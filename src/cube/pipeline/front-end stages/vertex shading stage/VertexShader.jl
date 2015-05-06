@@ -6,38 +6,26 @@
 << processed vertex data
 =#
 
-# Note that you may need to modify the version number(e.g. 330 here) to fit your specific case.
+# Note that you may need to modify the version number(e.g. 410 here) to fit your specific case.
 
-triangle♡v = """#version 330 core
-                void main(void)
-                {
-                    const vec4 vertices[3] = vec4[3](vec4( 0.5, -0.5, 0.0, 1.0),
-                                                     vec4( 0.0, 0.5, 0.0, 1.0),
-                                                     vec4( -0.5, -0.5, 0.0, 1.0));
-                    gl_Position = vertices[gl_VertexID];
-                }"""
+cube♡v = """#version 410 core
+            // 'in's
+            // attributes
+            layout (location = 0) in vec4 position;
 
-triangle♠v = """#version 330 core
-                // 'in's
-                // attributes
-                layout (location = 0) in vec4 offset;
-                layout (location = 1) in vec4 color;
-                //vec4 offset = vec4( 0.5, 0.0, 0.0, 0.0);
+            // 'out's
+            // interface blocks
+            out CubeColor
+            {
+                vec4 color;
+            } cubecolor;
 
-                // 'out's
-                // interface blocks
-                out TriangleColor
-                {
-                    vec4 color;
-                } trianglecolor;
+            uniform mat4 mv_matrix;
+            uniform mat4 proj_matrix;
 
-                void main(void)
-                {
-                     const vec4 vertices[3] = vec4[3](vec4( 0.5, -0.5, 0.0, 1.0),
-                                                      vec4( 0.0, 0.5, 0.0, 1.0),
-                                                      vec4( -0.5, -0.5, 0.0, 1.0));
-                     gl_Position = vertices[gl_VertexID] + offset;
-                     trianglecolor.color = color;
-                 }"""
-
+            void main(void)
+            {
+                gl_Position = proj_matrix * mv_matrix * position;
+                cubecolor.color = position * 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
+            }"""
 

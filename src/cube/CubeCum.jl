@@ -1,4 +1,4 @@
-## Triangle-Cumbersome ##
+## Cube-Cumbersome ##
 #=
 This script only depends on GLFW.jl and ModernGL.jl. #
 You can install these two packages by running:
@@ -44,13 +44,13 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣  #
 # ♡ (\heartsuit)
-#include("triangleCumHeart.jl")
+include("CubeCumHeart.jl")
 # ♠ (\spadesuit)
-include("triangleCumSpade.jl")
+#include("CubeCumSpade.jl")
 # ♢ (\clubsuit)
-#include("triangleCumDiamond.jl")
+#include("CubeCumDiamond.jl")
 # ♣ (\diamondsuit)
-#include("triangleCumClub.jl")
+#include("CubeCumClub.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()
