@@ -19,10 +19,10 @@ translation = GLfloat[ 1.0 0.0 0.0 tx;
 θ = pi*sin(time()*0.2)  # rotation around the x axis by an angle of θ
 ϕ = 2pi*sin(time()*0.3)  # rotation around the y axis by an angle of ϕ
 ψ = pi/18 #pi*abs(sin(time()))  # rotation around the z axis by an angle of ψ
-rotationX = GLfloat[ 1.0     0.0    0.0 0.0;
-                     0.0  cos(θ) sin(θ) 0.0;
-                     0.0 -sin(θ) cos(θ) 0.0;
-                     0.0     0.0    0.0 1.0 ]
+rotationX = GLfloat[ 1.0     0.0     0.0 0.0;
+                     0.0  cos(θ) -sin(θ) 0.0;
+                     0.0  sin(θ)  cos(θ) 0.0;
+                     0.0     0.0     0.0 1.0 ]
 
 rotationY = GLfloat[ cos(ϕ) 0.0 -sin(ϕ) 0.0;
                         0.0 1.0     0.0 0.0;
