@@ -1,16 +1,18 @@
 ## Triangle-Simplified ##
 #=
-This script only depends on GLFW.jl and ModernGL.jl.
+This script only depends on two julia packages: GLFW.jl and ModernGL.jl.
 You can install these two packages by running:
+Pkg.update()
 Pkg.add("GLFW")
 Pkg.add("ModernGL")
+and use Pkg.status() to checkout the current package status.
 =#
 # Deps #
 using GLFW, ModernGL
 
 # Change path #
 # change julia's current working directory to Videre working directory #
-# you may need to edit this path, I currently don't know how to do it elegantly. #
+# you may need to edit this path by yourself, I currently don't know how to do it elegantly. #
 
 @windows_only cd(string(homedir(),"\\Desktop\\Videre"))
 @osx_only cd(string(homedir(),"/Documents/Videre"))
@@ -29,9 +31,9 @@ using Types.AbstractOpenGLMatrixData
 using Types.AbstractOpenGLVecOrMatData
 using Types.VertexData
 using Types.UniformData
+
 # Functions #
 include("Utils.jl")
-
 
 # GLFW's Callbacks #
 # key callbacks : press Esc to escape
@@ -47,10 +49,8 @@ GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
 GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
 GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
 GLFW.WindowHint(GLFW.RESIZABLE, GL_FALSE)
-# there two if-statement below just fit my specific case.
+# if you're running on Macintosh
 @osx_only GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
-@windows_only GLFW.DefaultWindowHints()
-
 # if that doesn't work, try to uncomment the code below and checkout your OpenGL context version
 #GLFW.DefaultWindowHints()
 
@@ -61,7 +61,7 @@ GLFW.SetKeyCallback(window, key_callback)
 # create OpenGL context
 GLFW.MakeContextCurrent(window)
 
-# Choose one of the ♡  ♠  ♢  ♣  #
+# Choose one of the ♡  ♠  ♢  ♣ and uncomment the corresponding line #
 # ♡ (\heartsuit)
 include("triangleSimHeart.jl")
 # ♠ (\spadesuit)

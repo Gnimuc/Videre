@@ -45,55 +45,29 @@ glAttachShader(shaderProgram, vertexShader)
 glAttachShader(shaderProgram, fragmentShader)
 glLinkProgram(shaderProgram)
 
-# Data Buffer #
+# Data #
 # cube
-position = GLfloat[ -0.25, 0.25, -0.25,
-                  -0.25, -0.25, -0.25,
-                   0.25, -0.25, -0.25,
+position = GLfloat[ -0.25, -0.25, -0.25,
+                    -0.25,  0.25, -0.25,
+                     0.25, -0.25, -0.25,
+                     0.25,  0.25, -0.25,
+                     0.25, -0.25,  0.25,
+                     0.25,  0.25,  0.25,
+                    -0.25, -0.25,  0.25,
+                    -0.25,  0.25,  0.25 ]
 
-                   0.25, -0.25, -0.25,
-                   0.25, 0.25, -0.25,
-                  -0.25, 0.25, -0.25,
-
-                   0.25, -0.25, -0.25,
-                   0.25, -0.25, 0.25,
-                   0.25, 0.25, -0.25,
-
-                   0.25, -0.25, 0.25,
-                   0.25, 0.25, 0.25,
-                   0.25, 0.25, -0.25,
-
-                   0.25, -0.25, 0.25,
-                  -0.25, -0.25, 0.25,
-                   0.25, 0.25, 0.25,
-
-                  -0.25, -0.25, 0.25,
-                  -0.25, 0.25, 0.25,
-                   0.25, 0.25, 0.25,
-
-                  -0.25, -0.25, 0.25,
-                  -0.25, -0.25, -0.25,
-                  -0.25, 0.25, 0.25,
-
-                  -0.25, -0.25, -0.25,
-                  -0.25, 0.25, -0.25,
-                  -0.25, 0.25, 0.25,
-
-                  -0.25, -0.25, 0.25,
-                   0.25, -0.25, 0.25,
-                   0.25, -0.25, -0.25,
-
-                   0.25, -0.25, -0.25,
-                  -0.25, -0.25, -0.25,
-                  -0.25, -0.25, 0.25,
-
-                  -0.25, 0.25, -0.25,
-                   0.25, 0.25, -0.25,
-                   0.25, 0.25, 0.25,
-
-                   0.25, 0.25, 0.25,
-                  -0.25, 0.25, 0.25,
-                  -0.25, 0.25, -0.25 ]
+cubeindices = GLushort[ 0, 1, 2,
+                        2, 1, 3,
+                        2, 3, 4,
+                        4, 3, 5,
+                        4, 5, 6,
+                        6, 5, 7,
+                        6, 7, 0,
+                        0, 7, 1,
+                        6, 0, 2,
+                        2, 4, 6,
+                        7, 5, 3,
+                        7, 3, 1 ]
 
 # VBO #
 # generate buffer
@@ -103,6 +77,11 @@ glGenBuffers(1, pointer(buffer) )
 glBindBuffer(GL_ARRAY_BUFFER, buffer[1] )
 glBufferData(GL_ARRAY_BUFFER, sizeof(position), position, GL_STATIC_DRAW)
 
+indexbuffer = GLuint[0]
+glGenBuffers(1, pointer(indexbuffer) )
+# pass offset to buffer 1
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer[1] )
+glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeindices), cubeindices, GL_STATIC_DRAW)
 # Uniforms #
 mv_location = glGetUniformLocation(shaderProgram, "mv_matrix")
 proj_location = glGetUniformLocation(shaderProgram, "proj_matrix")
@@ -129,13 +108,14 @@ while !GLFW.WindowShouldClose(window)
   include("./transform/Matrix.jl")
   mv_matrix = translation * rotation
   proj_matrix = perspective
-
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer[1] )
   #mv_matrix = translation
   #proj_matrix = rotation
   glUseProgram(shaderProgram)
   glUniformMatrix4fv(mv_location, 1, GL_FALSE, mv_matrix)
   glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj_matrix)
-  glDrawArrays(GL_TRIANGLES, 0, 36)
+  #glDrawArrays(GL_TRIANGLES, 0, 36)
+  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
   # swap the buffers
   GLFW.SwapBuffers(window)
 end
