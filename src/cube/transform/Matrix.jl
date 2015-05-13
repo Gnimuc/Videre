@@ -42,24 +42,25 @@ rotation = rotationZ * rotationY * rotationX
 
 # Perspective Matrix #
 #=
-near = 0.1
-far = 1000.0
-left = -1.0
-right = 1.0
-top = 1.0
-bottom = -1.0
+near = 1.0
+far = 100.0
+left = -0.25
+right = 0.25
+top = 0.25
+bottom = -0.25
 
 perspective = GLfloat[ 2near/(right-left)     0.0          (right+left)/(right-left)         0.0;
                             0.0        2near/(top-bottom)  (top+bottom)/(top-bottom)         0.0;
                             0.0               0.0            (near+far)/(near-far)   2near*far/(near-far);
-                            0.0               0.0                    -1.0                    0.0 ] =#
+                            0.0               0.0                    -1.0                    0.0 ]
+=#
 
-
-near = 0.1
-far = 1000.0
+near = 1.0
+far = 100.0
 aspect = 800/600
-A = 1.0 / tan(45*pi/180)
-q =  aspect / tan(45*pi/180)
+fov = deg2rad(45)
+q = 1.0 / tan(fov/2)
+A =  1.0 / (aspect*tan(fov/2))
 B = (near + far) / (near - far)
 C = (2.0 * near * far) / (near - far)
 
