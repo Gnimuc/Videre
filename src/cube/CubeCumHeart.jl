@@ -4,6 +4,10 @@ Code Style: cumbersome
 Functionality: to draw our rotating cube
 Usage: see CubeCum.jl
 
+More Details:
+→ use perspective projection ∮
+→ use glDrawElements() ∮
+
 =#
 
 
@@ -12,6 +16,8 @@ Usage: see CubeCum.jl
 
 # set up viewport
 glViewport(0, 0, WIDTH, HEIGHT)
+# set up culling
+glEnable(GL_CULL_FACE)
 
 # pipeline #
 # vertex shading stage
@@ -82,9 +88,6 @@ glGenBuffers(1, pointer(indexbuffer) )
 # pass offset to buffer 1
 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer[1] )
 glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeindices), cubeindices, GL_STATIC_DRAW)
-# Uniforms #
-mv_location = glGetUniformLocation(shaderProgram, "mv_matrix")
-proj_location = glGetUniformLocation(shaderProgram, "proj_matrix")
 
 # VAO #
 VAO = GLuint[0]
@@ -102,20 +105,18 @@ while !GLFW.WindowShouldClose(window)
   # rendering commands here
   glClearColor(0.0, 0.0, 0.0, 1.0)
   glClear(GL_COLOR_BUFFER_BIT)
-  # draw
-  # transformation
-  # Transform #
+  # transformations
   include("./transform/Matrix.jl")
-  mv_matrix = translation * rotation
-  proj_matrix = perspective
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer[1] )
-  #mv_matrix = translation
-  #proj_matrix = rotation
+  modelViewMatrix = translation * rotation
+  projectionMatrix = perspective    # ∮
+  modelViewLocation = glGetUniformLocation(shaderProgram, "modelViewMatrix")
+  projectionLocation = glGetUniformLocation(shaderProgram, "projectionMatrix")
+  glUniformMatrix4fv(modelViewLocation, 1, GL_FALSE, modelViewMatrix)
+  glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projectionMatrix)
+  # draw elements
   glUseProgram(shaderProgram)
-  glUniformMatrix4fv(mv_location, 1, GL_FALSE, mv_matrix)
-  glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj_matrix)
-  #glDrawArrays(GL_TRIANGLES, 0, 36)
-  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer[1])
+  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0)    # ∮
   # swap the buffers
   GLFW.SwapBuffers(window)
 end
@@ -124,4 +125,5 @@ glDeleteShader(vertexShader)
 glDeleteShader(fragmentShader)
 glDeleteProgram(shaderProgram)
 glDeleteBuffers(1, buffer)
+glDeleteBuffers(1, indexbuffer)
 glDeleteVertexArrays(1, VAO)

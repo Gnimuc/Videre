@@ -20,12 +20,12 @@ cube♡v = """#version 410 core
                 vec4 color;
             } cubecolor;
 
-            uniform mat4 mv_matrix;
-            uniform mat4 proj_matrix;
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
 
             void main(void)
             {
-                gl_Position = proj_matrix * mv_matrix * position;
+                gl_Position = projectionMatrix * modelViewMatrix * position;
                 cubecolor.color = position * 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
             }"""
 

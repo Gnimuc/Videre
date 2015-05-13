@@ -82,9 +82,9 @@ while !GLFW.WindowShouldClose(window)
   # use uniforms to change color ∮
   red = convert(GLfloat, (sin(time())/2) + 0.5)
   ϕ = pi*sin(time()/2)
-  rotationY = GLfloat[ cos(ϕ) 0.0 -sin(ϕ) 0.0;
+  rotationY = GLfloat[ cos(ϕ) 0.0  sin(ϕ) 0.0;
                           0.0 1.0     0.0 0.0;
-                       sin(ϕ) 0.0  cos(ϕ) 0.0;
+                      -sin(ϕ) 0.0  cos(ϕ) 0.0;
                           0.0 0.0     0.0 1.0 ]
   rotationMatrixLocation = glGetUniformLocation(shaderProgram, "rotationMatrix")
   ucolorLocation = glGetUniformLocation(shaderProgram, "ucolor")
