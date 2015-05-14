@@ -14,14 +14,14 @@ using GLFW, ModernGL
 # change julia's current working directory to Videre working directory #
 # you may need to edit this path by yourself, I currently don't know how to do it elegantly. #
 
-@windows_only cd(string(homedir(),"\\Desktop\\Videre"))
+@windows_only cd(string(homedir(),"\\Documents\\Videre"))
 @osx_only cd(string(homedir(),"/Documents/Videre"))
 
 # Constants #
 const WIDTH = convert(GLuint, 800)
 const HEIGHT = convert(GLuint, 600)
 const VERSION_MAJOR = 4
-const VERSION_MINOR = 1
+const VERSION_MINOR = 4
 
 # Types #
 include("Types.jl")
@@ -63,13 +63,13 @@ GLFW.MakeContextCurrent(window)
 
 # Choose one of the ♡  ♠  ♢  ♣ and uncomment the corresponding line #
 # ♡ (\heartsuit)
-include("triangleSimHeart.jl")
+#include("triangleSimHeart.jl")
 # ♠ (\spadesuit)
 #include("triangleSimSpade.jl")
 # ♢ (\clubsuit)
 #include("triangleSimDiamond.jl")
 # ♣ (\diamondsuit)
-#include("triangleSimClub.jl")
+include("triangleSimClub.jl")
 
 # GLFW Terminating #
 GLFW.Terminate()

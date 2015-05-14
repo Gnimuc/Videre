@@ -2,6 +2,7 @@
 #=
 Code Style: cumbersome
 Functionality: to draw our colorful triangle
+GL Version: 330+
 Usage: see triangleCum.jl
 
 More Details:

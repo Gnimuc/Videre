@@ -2,6 +2,7 @@
 #=
 Code Style: cumbersome
 Functionality: to draw our rotating cube
+GL Version: 330
 Usage: see CubeCum.jl
 
 More Details:
@@ -16,7 +17,7 @@ More Details:
 
 # set up viewport
 glViewport(0, 0, WIDTH, HEIGHT)
-# set up culling
+# enable culling
 glEnable(GL_CULL_FACE)
 
 # pipeline #

@@ -31,7 +31,7 @@ rotation = rotationZ * rotationY * rotationX
 
 # Perspective Matrix #
 #=
-near = 1.0
+near = 0.5
 far = 100.0
 left = -0.25
 right = 0.25
@@ -44,7 +44,7 @@ perspective = GLfloat[ 2near/(right-left)     0.0          (right+left)/(right-l
                             0.0               0.0                    -1.0                    0.0 ]
 =#
 
-near = 1.0
+near = 0.1
 far = 100.0
 aspect = 800/600
 fov = deg2rad(45)

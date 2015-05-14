@@ -2,6 +2,7 @@
 #=
 Code Style: cumbersome
 Functionality: to draw our fuzzy triangle
+GL Version: 430+
 Usage: could NOT be used yet, because my graphics does not support binding layout identifier.
 
 More Details:
