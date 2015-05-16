@@ -59,8 +59,8 @@ triangle♣f = """#version 330 core
 
                 void main(void)
                 {
-                    dx = gl_FragCoord.x;
-                    dy = gl_FragCoord.y;
-                    dist = sqrt( dx*dx, dy*dy);
-                    color = mix( InnerColor, OuterColor, smoothstep( RadiusInner, RadiusOuter, dist) );
+                    float dx = gl_FragCoord.x/800 - 0.5;
+                    float dy = gl_FragCoord.y/600 - 0.5;
+                    float dist = sqrt(dx*dx + dy*dy);
+                    color = mix( InnerColor, OuterColor, smoothstep( RadiusInner, RadiusOuter, dist));
                 }"""

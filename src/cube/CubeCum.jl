@@ -44,10 +44,10 @@ GLFW.SetKeyCallback(window, key_callback)
 # create OpenGL context
 GLFW.MakeContextCurrent(window)
 # show OpenGL version information
-println(bytestring(glGetString(GL_RENDERER)))
-println(bytestring(glGetString(GL_VENDOR)))
-println(bytestring(glGetString(GL_VERSION)))
-println(bytestring(glGetString(GL_SHADING_LANGUAGE_VERSION)))
+println("Renderer: ", bytestring(glGetString(GL_RENDERER)))
+println("Vendor: ", bytestring(glGetString(GL_VENDOR)))
+println("GL Version: ", bytestring(glGetString(GL_VERSION)))
+println("GLSL Version: ", bytestring(glGetString(GL_SHADING_LANGUAGE_VERSION)))
 
 # Choose one of the ♡  ♠  ♢  ♣ and uncomment the corresponding line #
 # ♡ (\heartsuit)
