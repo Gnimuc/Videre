@@ -2,7 +2,7 @@
 #=
 Code Style: simplified
 Functionality: to draw our fuzzy triangle
-Usage: could NOT be used yet, because my graphics does not support binding layout identifier.
+Usage: see triangleSim.jl
 
 More Details:
 
@@ -35,6 +35,9 @@ positionbuffer = data2buffer(position, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
 # offset ⇒ offsetbuffer ⇒ attribute index 0
 # color ⇒ colorbuffer ⇒ attribute index 1
 triangleVAO = buffer2attrib([positionbuffer], GLuint[0], VertexData[position])
+
+# Uniform Blocks #
+# need to wrap
 
 # loop #
 while !GLFW.WindowShouldClose(window)
