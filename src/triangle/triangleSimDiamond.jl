@@ -48,7 +48,7 @@ while !GLFW.WindowShouldClose(window)
   glClearColor(255/256, 250/256, 205/256, 1.0)
   glClear(GL_COLOR_BUFFER_BIT)
   # use uniforms to change color
-  red = UniformData(GLfloat[sin(time())/2 + 0.5, 0.0, 0.0, 1.0], "ucolor", "Scalar", convert(GLsizei,0) )
+  red = UniformData(GLfloat[sin(time())/2 + 0.5, 0.0, 0.0, 1.0], "ucolor", "Scalar", convert(GLsizei,1) )
   ϕ = pi*sin(time()/2)
   rotationY = UniformData(GLfloat[ cos(ϕ) 0.0 -sin(ϕ) 0.0;
                                       0.0 1.0     0.0 0.0;
