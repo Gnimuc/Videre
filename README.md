@@ -1,9 +1,8 @@
 # Videre
-**Videre** is a data visualization tool written in [julia](http://julialang.org) and currently under development. There already exists a more mature package called [GLVisualize](https://github.com/JuliaGL/GLVisualize.jl) which has the capability of doing most of the plotting jobs. So I'm not attempted to make **Videre** another plotting tool, instead, I try to make it a good example for those who want to use/learn OpenGL with julia.
+~~**Videre** is a data visualization tool written in [julia](http://julialang.org) and currently under development. There already exists a more mature package called [GLVisualize](https://github.com/JuliaGL/GLVisualize.jl) which has the capability of doing most of the plotting jobs. So I'm not attempted to make **Videre** another plotting tool, instead, I try to make it a good example for those who want to use/learn OpenGL with julia.~~
 
-## Cumbersome-Simplified Style
-I'm working on it now...
-
+# development on hold
+I decide to rewrite this...
 
 
 
