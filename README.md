@@ -1,6 +1,14 @@
 # Videre
 OpenGL examples written in julia.
 
+# Usage
+Please set up OpenGL version before running these examples.
+
+| Platform | Default GL Version |
+| :--------|:------------------:|
+| OSX                     | 4.1 |
+| Linux                   | 4.4 |
+| Windows                 | 4.4 |
 
 ## References
 [Anton's OpenGL 4 Tutorials](http://antongerdelan.net/opengl/)
