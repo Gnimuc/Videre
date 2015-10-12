@@ -51,9 +51,8 @@ end
 function logerror(filename::ASCIIString, message::ASCIIString)
     logfile = open(filename, "a")
     println(logfile, message)
-    # println(STDERR, message)
+    println(STDERR, message)
     close(logfile)
-    error(message)
     return true
 end
 # load OpenGL parameters info
@@ -175,7 +174,6 @@ renderer = bytestring(glGetString(GL_RENDERER))
 version = bytestring(glGetString(GL_VERSION))
 println("Renderder: ", renderer)
 println("OpenGL version supported: ", version)
-
 # save logs
 logadd("gl.log", string("renderer: ", renderer, "\nversion: ", version))
 glparams()

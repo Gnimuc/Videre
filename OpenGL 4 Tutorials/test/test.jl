@@ -101,7 +101,7 @@ glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
 
 # create VAO
 vaoID = GLuint[0]
-glGenVertexArrays(1, Ref(vaoID))
+glGenVertexArrays(1, vaoID)
 glBindVertexArray(vaoID[])
 glBindBuffer(GL_ARRAY_BUFFER, vboID[])
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
