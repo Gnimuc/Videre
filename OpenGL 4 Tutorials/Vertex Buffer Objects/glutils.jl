@@ -120,7 +120,7 @@ function startgl()
     GLFW.SetErrorCallback(error_callback)
 
     # create window
-    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Shader", GLFW.NullMonitor, GLFW.NullWindow)
+    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "VBO", GLFW.NullMonitor, GLFW.NullWindow)
     if window == C_NULL
         println("error: GLFW window creating failed.")
         GLFW.Terminate()
@@ -149,6 +149,121 @@ end
 
 
 
+## shaders
+# checkout shader infos
+function shaderlog(shaderID::GLuint)
+    maxLength = GLsizei[0]
+    glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, Ref(maxLength))
+    actualLength = GLsizei[0]
+    log = Array{GLchar}(maxLength[])
+    glGetShaderInfoLog(shaderID, maxLength[], Ref(actualLength), Ref(log))
+    # print log
+    println("shader info log for GL index ", shaderID, ":")
+    println(ASCIIString(log))
+    # save log
+    logadd("gl.log", string("shader info log for GL index ", shaderID, ":"))
+    logadd("gl.log", ASCIIString(log))
+end
+
+# checkout program infos
+function programlog(programID::GLuint)
+    maxLength = GLsizei[0]
+    glGetProgramiv(programID, GL_INFO_LOG_LENGTH, Ref(maxLength))
+    actualLength = GLsizei[0]
+    log = Array{GLchar}(maxLength[])
+    glGetProgramInfoLog(programID, maxLength[], Ref(actualLength), Ref(log))
+    # print log
+    println("program info log for GL index ", programID, ":")
+    println(ASCIIString(log))
+    # save log
+    logadd("gl.log", string("program info log for GL index ", programID, ":"))
+    logadd("gl.log", ASCIIString(log))
+end
+
+# verbose log infos
+function programlogverbose(shaderProgramID::GLuint)
+    result = GLint[-1]
+
+    logerror("gl.log", string("--------------------\nshader program ", shaderProgramID, " verbose info:\n"))
+    glGetProgramiv(shaderProgramID, GL_LINK_STATUS, Ref(result))
+    logerror("gl.log", string("GL_LINK_STATUS = ", result[]))
+
+    glGetProgramiv(shaderProgramID, GL_ATTACHED_SHADERS, Ref(result))
+    logerror("gl.log", string("GL_ATTACHED_SHADERS = ", result[]))
+
+    glGetProgramiv(shaderProgramID, GL_ACTIVE_ATTRIBUTES, Ref(result))
+    logerror("gl.log", string("GL_ACTIVE_ATTRIBUTES = ", result[]))
+
+    for i in eachindex(result)
+        maxLength = GLsizei[0]
+        glGetProgramiv(shaderProgramID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, Ref(maxLength))
+        actualLength = GLsizei[0]
+        attributeSize = GLint[0]
+        attributeType = GLenum[0]
+        name = Array{GLchar}(maxLength[])
+        glGetActiveAttrib(shaderProgramID, i-1, maxLength[], Ref(actualLength), Ref(attributeSize), Ref(attributeType), Ref(name))
+        if attributeSize[] > 1
+            for j = 1: attributeSize[]
+                longName = @sprintf "%s[%i]" name j
+                location = glGetAttribLocation(shaderProgramID, Ref(longName))
+                log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", ASCIIString(longName), " location:", location)
+                println(log)
+                logadd("gl.log", log)
+            end
+        else
+            location = glGetAttribLocation(shaderProgramID, Ref(name))
+            log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", ASCIIString(name), " location:", location)
+            println(log)
+            logadd("gl.log", log)
+        end
+    end
+
+    glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORMS, Ref(result))
+    logerror("gl.log", string("GL_ACTIVE_UNIFORMS = ", result[]))
+    for i in eachindex(result)
+        maxLength = GLsizei[0]
+        glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORM_MAX_LENGTH, Ref(maxLength))
+        actualLength = GLsizei[0]
+        attributeSize = GLint[0]
+        attributeType = GLenum[0]
+        name = Array{GLchar}(maxLength[])
+        glGetActiveUniform(shaderProgramID, i-1, maxLength[], Ref(actualLength), Ref(attributeSize), Ref(attributeType), Ref(name))
+        if attributeSize[] > 1
+            for j = 1: attributeSize[]
+                longName = @sprintf "%s[%i]" name j
+                location = glGetUniformLocation(shaderProgramID, Ref(longName))
+                log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", ASCIIString(longName), " location:", location)
+                println(log)
+                logadd("gl.log", log)
+            end
+        else
+            location = glGetUniformLocation(shaderProgramID, Ref(name))
+            log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", ASCIIString(name), " location:", location)
+            println(log)
+            logadd("gl.log", log)
+        end
+    end
+    programlog(shaderProgramID)
+end
+
+# validate shader program
+function validprogram(shaderProgramID::GLuint)
+    validResult = GLint[-1]
+    glValidateProgram(shaderProgramID)
+    glGetProgramiv(shaderProgramID, GL_VALIDATE_STATUS, Ref(validResult))
+    log = string("program ", shaderProgramID, " GL_VALIDATE_STATUS = ", validResult[])
+    logadd("gl.log", log)
+    println(log)
+    if validResult[] != GL_TRUE
+        programlog(shaderProgramID)
+        return false
+    end
+    return true
+end
+
+
+
+
 ## other functionalities
 # show FPS on title
 previousTime = time()
@@ -161,7 +276,7 @@ function updatefps(window::GLFW.Window)
     if elapsedTime > 0.25
         previousTime = currentTime
         fps = frameCount / elapsedTime
-        s = @sprintf "Shader @ fps: %.2f" fps
+        s = @sprintf "VBO @ fps: %.2f" fps
         GLFW.SetWindowTitle(window, s)
         frameCount = 0
     end

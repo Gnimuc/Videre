@@ -9,7 +9,7 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 
 - [x] **OpenGL 4 Shaders**
 
-- [ ] **Vertex Buffer Objects**
+- [x] **Vertex Buffer Objects**
 
 - [ ] **Vectors and Matrices**
 

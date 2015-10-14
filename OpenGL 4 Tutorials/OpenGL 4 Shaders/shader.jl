@@ -110,7 +110,7 @@ function printall(shaderProgramID::GLuint)
             logadd("gl.log", log)
         end
     end
-            programlog(shaderProgramID)
+    programlog(shaderProgramID)
 end
 
 # validate shader program
