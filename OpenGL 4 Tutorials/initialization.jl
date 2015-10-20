@@ -36,7 +36,7 @@ renderer = bytestring(glGetString(GL_RENDERER))
 version = bytestring(glGetString(GL_VERSION))
 println("Renderder: ", renderer)
 println("OpenGL version supported: ", version)
-@assert parse(Float32, version[1:3]) >= 3.2 "OpenGL version must ≥ 3.2, Please upgrade your graphic driver."
+@assert parse(Float64, version[1:3]) >= 3.2 "OpenGL version must ≥ 3.2, Please upgrade your graphic driver."
 
 
 GLFW.Terminate()

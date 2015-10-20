@@ -277,7 +277,7 @@ function updatefps(window::GLFW.Window)
     if elapsedTime > 0.25
         previousTime = currentTime
         fps = frameCount / elapsedTime
-        s = @sprintf "Vectors & Matrices @ fps: %.2f" fps
+        s = @sprintf "Virtual Camera @ fps: %.2f" fps
         GLFW.SetWindowTitle(window, s)
         frameCount = 0
     end
