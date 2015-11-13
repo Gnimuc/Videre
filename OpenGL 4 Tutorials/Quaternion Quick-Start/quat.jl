@@ -10,8 +10,8 @@ include("./glutils.jl")
 
 
 # window init global variables
-glfwWidth = 640
-glfwHeight = 480
+glfwWidth = 800
+glfwHeight = 800
 window = C_NULL
 
 
@@ -40,12 +40,6 @@ f = open(string(dirname(@__FILE__), "/sphere.bin"), "r")
 points = readbytes(f, positionBufferView.byteLength)
 indices = readbytes(f, indicesBufferView.byteLength)
 close(f)
-
-
-
-
-# quaternions
-qx = qrotation([1,0,0], pi/4)
 
 
 
@@ -86,20 +80,11 @@ projectionMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
 
 
 
-# enable depth test
-glEnable(GL_DEPTH_TEST)
-glDepthFunc(GL_LESS)
-# enable cull face
-glEnable(GL_CULL_FACE)
-glCullFace(GL_BACK)
-glFrontFace(GL_CW)
-glClearColor(0.2, 0.2, 0.2, 1.0)
-glViewport(0, 0, glfwWidth, glfwHeight)
-
-
-
-
 # camera
+viewMatrix = zeros(GLfloat, 4, 4)
+projectionMatrix = zeros(4, 4)
+cameraPosition = GLfloat[0.0, 0.0, 5.0]
+# perspective
 near = 0.1            # clipping near plane
 far = 100.0             # clipping far plane
 fov = deg2rad(67)
@@ -110,30 +95,58 @@ Sx = 2.0*near / (range *aspectRatio + range * aspectRatio)
 Sy = near / range
 Sz = -(far + near) / (far - near)
 Pz = -(2.0*far*near) / (far - near)
-projMatrix = GLfloat[ Sx   0.0  0.0  0.0;
-                      0.0   Sy  0.0  0.0;
-                      0.0  0.0   Sz   Pz;
-                      0.0  0.0 -1.0  0.0 ]
+projectionMatrix = GLfloat[ Sx   0.0  0.0  0.0;
+                            0.0   Sy  0.0  0.0;
+                            0.0  0.0   Sz   Pz;
+                            0.0  0.0 -1.0  0.0]
 # view matrix
-cameraSpeed = 1.0
-cameraSpeedY = 10.0
-cameraPosition = GLfloat[0.0, 0.0, 2.0]
-cameraRotationY = 0.0
+cameraSpeed = 5.0
+cameraHeadingSpeed = 100.0
+cameraHeading = 0.0
+
 transMatrix = GLfloat[ 1.0 0.0 0.0 -cameraPosition[1];
                        0.0 1.0 0.0 -cameraPosition[2];
                        0.0 0.0 1.0 -cameraPosition[3];
-                       0.0 0.0 0.0                1.0 ]
-rotationY = GLfloat[  cos(deg2rad(-cameraRotationY))  0.0  sin(deg2rad(-cameraRotationY)) 0.0;
-                                                 0.0  1.0                             0.0 0.0;
-                     -sin(deg2rad(-cameraRotationY))  0.0  cos(deg2rad(-cameraRotationY)) 0.0;
-                                                 0.0  0.0                             0.0 1.0 ]
-viewMatrix =  rotationY * transMatrix
+                       0.0 0.0 0.0                1.0]
 
-viewMatrixLocation = glGetUniformLocation(shaderProgramID, "view")
-projMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
+quat = qrotation([0.0, 1.0, 0.0], deg2rad(-cameraHeading))
+quatMatrix = rotationmatrix(quat)
+rotationMatrix = eye(GLfloat, 4, 4)
+rotationMatrix[1:3, 1:3] = deepcopy(quatMatrix)
+viewMatrix = rotationMatrix * transMatrix
+
 glUseProgram(shaderProgramID)
 glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
-glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, projMatrix)
+glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix)
+
+# spheres in world
+sphereWorildPositions = GLfloat[-2.0 0.0  0.0;
+                                 2.0 0.0  0.0;
+                                -2.0 0.0 -2.0;
+                                 1.5 1.0 -1.0]
+modelMatrices = Array{Matrix, 1}(4)
+for i = 1:4
+    modelMatrices[i] = GLfloat[ 1.0 0.0 0.0 sphereWorildPositions[i,1];
+                                0.0 1.0 0.0 sphereWorildPositions[i,2];
+                                0.0 0.0 1.0 sphereWorildPositions[i,3];
+                                0.0 0.0 0.0                        1.0]
+end
+
+fwd = GLfloat[0.0, 0.0, -1.0, 0.0]
+rgt = GLfloat[1.0, 0.0, 0.0, 0.0]
+up = GLfloat[0.0, 1.0, 0.0, 0.0]
+
+
+
+# enable depth test
+glEnable(GL_DEPTH_TEST)
+glDepthFunc(GL_LESS)
+# enable cull face
+glEnable(GL_CULL_FACE)
+glCullFace(GL_BACK)
+glFrontFace(GL_CCW)
+glClearColor(0.2, 0.2, 0.2, 1.0)
+glViewport(0, 0, glfwWidth, glfwHeight)
 
 
 
@@ -151,62 +164,131 @@ while !GLFW.WindowShouldClose(window)
     # drawing
     glUseProgram(shaderProgramID)
     glBindBuffer(GLenum(get(indicesBufferView.target)), indicesEBO[])
-    glDrawElements(GL_TRIANGLES, indicesAccessor.count, GLenum(indicesAccessor.componentType), Ptr{Void}(indicesAccessor.byteOffset))
+    for i = 1:4
+        glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrices[i])
+        glDrawElements(GL_TRIANGLES, indicesAccessor.count, GLenum(indicesAccessor.componentType), Ptr{Void}(indicesAccessor.byteOffset))
+    end
     # check and call events
     GLFW.PollEvents()
     # camera key callbacks
     cameraMovedFlag = false
+    move = GLfloat[0.0, 0.0, 0.0]
+    cameraYaw = GLfloat(0.0)
+    cameraPitch = GLfloat(0.0)
+    cameraRoll = GLfloat(0.0)
     if GLFW.GetKey(window, GLFW.KEY_A)
-        cameraPosition[1] -= cameraSpeed * elapsedCameraTime
+        move[1] -= cameraSpeed * elapsedCameraTime
         cameraMovedFlag = true
     end
     if GLFW.GetKey(window, GLFW.KEY_D)
-        cameraPosition[1] += cameraSpeed * elapsedCameraTime
+        move[1] += cameraSpeed * elapsedCameraTime
         cameraMovedFlag = true
     end
-    if GLFW.GetKey(window, GLFW.KEY_PAGE_UP)
-        cameraPosition[2] += cameraSpeed * elapsedCameraTime
+    if GLFW.GetKey(window, GLFW.KEY_Q)
+        move[2] += cameraSpeed * elapsedCameraTime
         cameraMovedFlag = true
     end
-    if GLFW.GetKey(window, GLFW.KEY_PAGE_DOWN)
-        cameraPosition[2] -= cameraSpeed * elapsedCameraTime
+    if GLFW.GetKey(window, GLFW.KEY_E)
+        move[2] -= cameraSpeed * elapsedCameraTime
         cameraMovedFlag = true
     end
     if GLFW.GetKey(window, GLFW.KEY_W)
-        cameraPosition[3] -= cameraSpeed * elapsedCameraTime
+        move[3] -= cameraSpeed * elapsedCameraTime
         cameraMovedFlag = true
     end
     if GLFW.GetKey(window, GLFW.KEY_S)
-        cameraPosition[3] += cameraSpeed * elapsedCameraTime
+        move[3] += cameraSpeed * elapsedCameraTime
         cameraMovedFlag = true
     end
     if GLFW.GetKey(window, GLFW.KEY_LEFT)
-
-
-
-
-        cameraRotationY += cameraSpeedY * elapsedCameraTime
+        cameraYaw += cameraHeadingSpeed * elapsedCameraTime
         cameraMovedFlag = true
+        # use quaternion
+        quatYaw = qrotation([up[1], up[2], up[3]], deg2rad(cameraYaw))
+        quat = quatYaw * quat
+        quatMatrix = rotationmatrix(quat)
+        rotationMatrix = eye(GLfloat, 4, 4)
+        rotationMatrix[1:3, 1:3] = deepcopy(quatMatrix)
+        fwd = rotationMatrix * GLfloat[0.0, 0.0, -1.0, 0.0]
+        rgt = rotationMatrix * GLfloat[1.0, 0.0, 0.0, 0.0]
+        up = rotationMatrix * GLfloat[0.0, 1.0, 0.0, 0.0]
     end
     if GLFW.GetKey(window, GLFW.KEY_RIGHT)
-
-
-
-
-
-        cameraRotationY -= cameraSpeedY * elapsedCameraTime
+        cameraYaw -= cameraHeadingSpeed * elapsedCameraTime
         cameraMovedFlag = true
+        # use quaternion
+        quatYaw = qrotation([up[1], up[2], up[3]], deg2rad(cameraYaw))
+        quat = quatYaw * quat
+        quatMatrix = rotationmatrix(quat)
+        rotationMatrix = eye(GLfloat, 4, 4)
+        rotationMatrix[1:3, 1:3] = deepcopy(quatMatrix)
+        fwd = rotationMatrix * GLfloat[0.0, 0.0, -1.0, 0.0]
+        rgt = rotationMatrix * GLfloat[1.0, 0.0, 0.0, 0.0]
+        up = rotationMatrix * GLfloat[0.0, 1.0, 0.0, 0.0]
     end
+    if GLFW.GetKey(window, GLFW.KEY_UP)
+        cameraPitch += cameraHeadingSpeed * elapsedCameraTime
+        cameraMovedFlag = true
+        # use quaternion
+        quatPitch = qrotation([rgt[1], rgt[2], rgt[3]], deg2rad(cameraPitch))
+        quat = quatPitch * quat
+        quatMatrix = rotationmatrix(quat)
+        rotationMatrix = eye(GLfloat, 4, 4)
+        rotationMatrix[1:3, 1:3] = deepcopy(quatMatrix)
+        fwd = rotationMatrix * GLfloat[0.0, 0.0, -1.0, 0.0]
+        rgt = rotationMatrix * GLfloat[1.0, 0.0, 0.0, 0.0]
+        up = rotationMatrix * GLfloat[0.0, 1.0, 0.0, 0.0]
+    end
+    if GLFW.GetKey(window, GLFW.KEY_DOWN)
+        cameraPitch -= cameraHeadingSpeed * elapsedCameraTime
+        cameraMovedFlag = true
+        # use quaternion
+        quatPitch = qrotation([rgt[1], rgt[2], rgt[3]], deg2rad(cameraPitch))
+        quat = quatPitch * quat
+        quatMatrix = rotationmatrix(quat)
+        rotationMatrix = eye(GLfloat, 4, 4)
+        rotationMatrix[1:3, 1:3] = deepcopy(quatMatrix)
+        fwd = rotationMatrix * GLfloat[0.0, 0.0, -1.0, 0.0]
+        rgt = rotationMatrix * GLfloat[1.0, 0.0, 0.0, 0.0]
+        up = rotationMatrix * GLfloat[0.0, 1.0, 0.0, 0.0]
+    end
+    if GLFW.GetKey(window, GLFW.KEY_Z)
+        cameraRoll -= cameraHeadingSpeed * elapsedCameraTime
+        cameraMovedFlag = true
+        # use quaternion
+        quatRoll = qrotation([fwd[1], fwd[2], fwd[3]], deg2rad(cameraRoll))
+        quat = quatRoll * quat
+        quatMatrix = rotationmatrix(quat)
+        rotationMatrix = eye(GLfloat, 4, 4)
+        rotationMatrix[1:3, 1:3] = deepcopy(quatMatrix)
+        fwd = rotationMatrix * GLfloat[0.0, 0.0, -1.0, 0.0]
+        rgt = rotationMatrix * GLfloat[1.0, 0.0, 0.0, 0.0]
+        up = rotationMatrix * GLfloat[0.0, 1.0, 0.0, 0.0]
+    end
+    if GLFW.GetKey(window, GLFW.KEY_C)
+        cameraRoll += cameraHeadingSpeed * elapsedCameraTime
+        cameraMovedFlag = true
+        # use quaternion
+        quatRoll = qrotation([fwd[1], fwd[2], fwd[3]], deg2rad(cameraRoll))
+        quat = quatRoll * quat
+        quatMatrix = rotationmatrix(quat)
+        rotationMatrix = eye(GLfloat, 4, 4)
+        rotationMatrix[1:3, 1:3] = deepcopy(quatMatrix)
+        fwd = rotationMatrix * GLfloat[0.0, 0.0, -1.0, 0.0]
+        rgt = rotationMatrix * GLfloat[1.0, 0.0, 0.0, 0.0]
+        up = rotationMatrix * GLfloat[0.0, 1.0, 0.0, 0.0]
+    end
+
     if cameraMovedFlag
-        transMatrix = GLfloat[ 1.0 0.0 0.0 -cameraPosition[1];
-                               0.0 1.0 0.0 -cameraPosition[2];
-                               0.0 0.0 1.0 -cameraPosition[3];
-                               0.0 0.0 0.0                1.0 ]
-        rotationY = GLfloat[  cos(deg2rad(-cameraRotationY))  0.0  sin(deg2rad(-cameraRotationY)) 0.0;
-                                                         0.0  1.0                             0.0 0.0;
-                             -sin(deg2rad(-cameraRotationY))  0.0  cos(deg2rad(-cameraRotationY)) 0.0;
-                                                         0.0  0.0                             0.0 1.0 ]
-        viewMatrix = rotationY * transMatrix
+        cameraPosition = cameraPosition + fwd[1:3] * -move[3]
+        cameraPosition = cameraPosition + up[1:3] * move[2]
+        cameraPosition = cameraPosition + rgt[1:3] * move[1]
+        transMatrix = GLfloat[ 1.0 0.0 0.0 cameraPosition[1];
+                               0.0 1.0 0.0 cameraPosition[2];
+                               0.0 0.0 1.0 cameraPosition[3];
+                               0.0 0.0 0.0               1.0]
+
+        viewMatrix = inv(rotationMatrix) * inv(transMatrix)
         glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
     end
     # swap the buffers
