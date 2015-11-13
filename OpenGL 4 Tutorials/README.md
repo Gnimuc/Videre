@@ -14,8 +14,8 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 - [x] **Vectors and Matrices**
 
 - [x] **Virtual Camera**
-
-- [ ] **Quaternion Quick-Start**
+	
+- [x] **Quaternion Quick-Start**
 
 - [ ] **Ray-Based Picking**
 

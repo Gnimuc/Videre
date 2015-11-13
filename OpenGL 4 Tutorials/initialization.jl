@@ -2,7 +2,7 @@
 using GLFW, ModernGL
 
 # set up OpenGL context version
-@osx_only const VERSION_MAJOR = 4    # it seems OSX will stuck on OpenGL 4.1.
+@osx_only const VERSION_MAJOR = 4    # it seems OSX will get stuck on OpenGL 4.1.
 @osx_only const VERSION_MINOR = 1
 
 # initialize GLFW library, error check is already wrapped.

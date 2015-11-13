@@ -1,5 +1,5 @@
 # load dependency packages
-using GLFW, ModernGL
+using GLFW, ModernGL, Quaternions, GLTF
 include("./glutils.jl")
 
 
@@ -21,67 +21,31 @@ window = C_NULL
 @assert loginit("gl.log")
 @assert startgl()
 
-# enable depth test
-glEnable(GL_DEPTH_TEST)
-glDepthFunc(GL_LESS)
+
+
+
+# load glTF file
+rootDict = JSON.parsefile(string(dirname(@__FILE__), "/sphere.gltf"))
+
+positionAccessor = GLTF.loadaccessor("accessor_position", rootDict)
+positionBufferView = positionAccessor.bufferView
+positionBuffer = positionBufferView.buffer
+
+indicesAccessor = GLTF.loadaccessor("accessor_index_0", rootDict)
+indicesBufferView = indicesAccessor.bufferView
+indicesBuffer = indicesBufferView.buffer
+
+# load buffer-blob
+f = open(string(dirname(@__FILE__), "/sphere.bin"), "r")
+points = readbytes(f, positionBufferView.byteLength)
+indices = readbytes(f, indicesBufferView.byteLength)
+close(f)
 
 
 
 
-# load shaders from file
-const vertexShader = readall(string(dirname(@__FILE__), "/camera.vert"))
-const fragmentShader = readall(string(dirname(@__FILE__), "/camera.frag"))
-
-
-# compile shaders and check for shader compile errors
-vertexShaderID = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShaderID, 1, [pointer(vertexShader)], C_NULL)
-glCompileShader(vertexShaderID)
-# get shader compile status
-compileResult = GLint[-1]
-glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, Ref(compileResult))
-if compileResult[] != GL_TRUE
-    logerror("gl.log", string("\nERROR: GL vertex shader(index", vertexShaderID, ")did not compile."))
-    shaderlog(vertexShaderID)
-end
-
-
-fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShaderID, 1, [pointer(fragmentShader)], C_NULL)
-glCompileShader(fragmentShaderID)
-# checkout shader compile status
-compileResult = GLint[-1]
-glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, Ref(compileResult))
-if compileResult[] != GL_TRUE
-    logerror("gl.log", string("\nERROR: GL fragment shader(index ", fragmentShaderID, " )did not compile."))
-    shaderlog(fragmentShaderID)
-end
-
-
-# create and link shader program
-shaderProgramID = glCreateProgram()
-glAttachShader(shaderProgramID, vertexShaderID)
-glAttachShader(shaderProgramID, fragmentShaderID)
-glLinkProgram(shaderProgramID)
-# checkout programe linking status
-linkingResult = GLint[-1]
-glGetProgramiv(shaderProgramID, GL_LINK_STATUS, Ref(linkingResult))
-if linkingResult[] != GL_TRUE
-    logerror("gl.log", string("\nERROR: could not link shader programme GL index: ", shaderProgramID))
-    programlog(shaderProgramID)
-end
-
-
-
-
-# vertex data
-points = GLfloat[ 0.0,  0.5, 0.0,
-                  0.5, -0.5, 0.0,
-                 -0.5, -0.5, 0.0]
-
-colors = GLfloat[ 1.0, 0.0, 0.0,
-                  0.0, 1.0, 0.0,
-                  0.0, 0.0, 1.0]
+# quaternions
+qx = qrotation([1,0,0], pi/4)
 
 
 
@@ -89,13 +53,13 @@ colors = GLfloat[ 1.0, 0.0, 0.0,
 # create buffers located in the memory of graphic card
 pointsVBO = GLuint[0]
 glGenBuffers(1, Ref(pointsVBO))
-glBindBuffer(GL_ARRAY_BUFFER, pointsVBO[])
-glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
+glBindBuffer(GLenum(get(positionBufferView.target)), pointsVBO[])
+glBufferData(GLenum(get(positionBufferView.target)), positionBufferView.byteLength, points, GL_STATIC_DRAW)
 
-colorsVBO = GLuint[0]
-glGenBuffers(1, Ref(colorsVBO))
-glBindBuffer(GL_ARRAY_BUFFER, colorsVBO[])
-glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW)
+indicesEBO = GLuint[0]
+glGenBuffers(1, Ref(indicesEBO))
+glBindBuffer(GLenum(get(indicesBufferView.target)), indicesEBO[])
+glBufferData(GLenum(get(indicesBufferView.target)), indicesBufferView.byteLength, indices, GL_STATIC_DRAW)
 
 
 
@@ -104,20 +68,33 @@ glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW)
 vaoID = GLuint[0]
 glGenVertexArrays(1, Ref(vaoID))
 glBindVertexArray(vaoID[])
-glBindBuffer(GL_ARRAY_BUFFER, pointsVBO[])
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
-glBindBuffer(GL_ARRAY_BUFFER, colorsVBO[])
-glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
+glBindBuffer(GLenum(get(positionBufferView.target)), pointsVBO[])
+stride = positionAccessor.byteStride
+offset = positionAccessor.byteOffset + positionBufferView.byteOffset
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLsizei(stride), Ptr{Void}(offset))
 glEnableVertexAttribArray(0)
-glEnableVertexAttribArray(1)
 
 
 
 
+# create program
+shaderProgramID = createprogram("quat.vert", "quat.frag")
+modelMatrixLocation = glGetUniformLocation(shaderProgramID, "model")
+viewMatrixLocation = glGetUniformLocation(shaderProgramID, "view")
+projectionMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
+
+
+
+
+# enable depth test
+glEnable(GL_DEPTH_TEST)
+glDepthFunc(GL_LESS)
 # enable cull face
 glEnable(GL_CULL_FACE)
 glCullFace(GL_BACK)
 glFrontFace(GL_CW)
+glClearColor(0.2, 0.2, 0.2, 1.0)
+glViewport(0, 0, glfwWidth, glfwHeight)
 
 
 
@@ -171,11 +148,10 @@ while !GLFW.WindowShouldClose(window)
     previousCameraTime = currentCameraTime
     # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glViewport(0, 0, glfwWidth, glfwHeight)
     # drawing
     glUseProgram(shaderProgramID)
-    glBindVertexArray(vaoID[])
-    glDrawArrays(GL_TRIANGLES, 0, 3)
+    glBindBuffer(GLenum(get(indicesBufferView.target)), indicesEBO[])
+    glDrawElements(GL_TRIANGLES, indicesAccessor.count, GLenum(indicesAccessor.componentType), Ptr{Void}(indicesAccessor.byteOffset))
     # check and call events
     GLFW.PollEvents()
     # camera key callbacks
@@ -205,10 +181,19 @@ while !GLFW.WindowShouldClose(window)
         cameraMovedFlag = true
     end
     if GLFW.GetKey(window, GLFW.KEY_LEFT)
+
+
+
+
         cameraRotationY += cameraSpeedY * elapsedCameraTime
         cameraMovedFlag = true
     end
     if GLFW.GetKey(window, GLFW.KEY_RIGHT)
+
+
+
+
+
         cameraRotationY -= cameraSpeedY * elapsedCameraTime
         cameraMovedFlag = true
     end
