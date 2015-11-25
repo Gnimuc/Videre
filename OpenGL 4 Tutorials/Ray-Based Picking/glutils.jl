@@ -120,7 +120,7 @@ function startgl()
     GLFW.SetErrorCallback(error_callback)
 
     # create window
-    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "VBO")
+    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Ray-Based Picking")
     if window == C_NULL
         println("error: GLFW window creating failed.")
         GLFW.Terminate()
@@ -262,7 +262,51 @@ function validprogram(shaderProgramID::GLuint)
     return true
 end
 
+# create shader
+function createshader(source::ASCIIString, shaderType::GLenum)
+    logadd("gl.log", string("creating shader from ", source, "..."))
+    const shader = readall(string(dirname(@__FILE__), "/", source))
+    shaderID = glCreateShader(shaderType)
+    glShaderSource(shaderID, 1, [pointer(shader)], C_NULL)
+    glCompileShader(shaderID)
+    # get shader compile status
+    compileResult = GLint[-1]
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, Ref(compileResult))
+    if compileResult[] != GL_TRUE
+        logerror("gl.log", string("\nERROR: GL vertex shader(index", shaderID, ")did not compile."))
+        shaderlog(shaderID)
+    end
+    logadd("gl.log", string("shader compiled. index ", shaderID))
+    return shaderID::GLuint
+end
 
+# create program
+function createprogram(vertID::GLuint, fragID::GLuint)
+    shaderProgramID = glCreateProgram()
+    logadd("gl.log", string("creating program ", shaderProgramID, " attaching shaders: ", vertID, " and ", fragID, "..."))
+    glAttachShader(shaderProgramID, vertID)
+    glAttachShader(shaderProgramID, fragID)
+    glLinkProgram(shaderProgramID)
+    # checkout programe linking status
+    linkingResult = GLint[-1]
+    glGetProgramiv(shaderProgramID, GL_LINK_STATUS, Ref(linkingResult))
+    if linkingResult[] != GL_TRUE
+        logerror("gl.log", string("\nERROR: could not link shader programme GL index: ", shaderProgramID))
+        programlog(shaderProgramID)
+    end
+    @assert validprogram(shaderProgramID)
+    glDeleteShader(vertID)
+    glDeleteShader(fragID)
+    return shaderProgramID::GLuint
+end
+
+# create program from files
+function createprogram(vertSource::ASCIIString, fragSource::ASCIIString)
+    vertexShader = createshader(vertSource, GL_VERTEX_SHADER)
+    fragmentShader = createshader(fragSource, GL_FRAGMENT_SHADER)
+    shaderProgramID = createprogram(vertexShader, fragmentShader)
+    return shaderProgramID
+end
 
 
 ## other functionalities
@@ -277,7 +321,7 @@ function updatefps(window::GLFW.Window)
     if elapsedTime > 0.25
         previousTime = currentTime
         fps = frameCount / elapsedTime
-        s = @sprintf "VBO @ fps: %.2f" fps
+        s = @sprintf "Ray-Based Picking @ fps: %.2f" fps
         GLFW.SetWindowTitle(window, s)
         frameCount = 0
     end

@@ -150,7 +150,7 @@ end
 # create window
 global glfwWidth = 640
 global glfwHeight = 480
-window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Extended Init.", GLFW.NullMonitor, GLFW.NullWindow)
+window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Extended Init.")
 if window == C_NULL
     println("error: GLFW window creating failed.")
     GLFW.Terminate()

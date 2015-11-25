@@ -120,7 +120,7 @@ function startgl()
     GLFW.SetErrorCallback(error_callback)
 
     # create window
-    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "VBO", GLFW.NullMonitor, GLFW.NullWindow)
+    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Vectors&Matrices")
     if window == C_NULL
         println("error: GLFW window creating failed.")
         GLFW.Terminate()

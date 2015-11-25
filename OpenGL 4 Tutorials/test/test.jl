@@ -31,7 +31,7 @@ function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Ci
 end
 
 # create window
-window = GLFW.CreateWindow(640, 480, "Hello Triangle", GLFW.NullMonitor, GLFW.NullWindow)
+window = GLFW.CreateWindow(640, 480, "test")
 if window == C_NULL
     println("error: GLFW window creating failed.")
     GLFW.Terminate()

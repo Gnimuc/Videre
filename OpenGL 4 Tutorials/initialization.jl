@@ -22,7 +22,7 @@ GLFW.Init()
 )
 
 # create window
-window = GLFW.CreateWindow(640, 480, "Initialization", GLFW.NullMonitor, GLFW.NullWindow)
+window = GLFW.CreateWindow(640, 480, "Initialization")
 if window == C_NULL
     println("error: GLFW window creating failed.")
     GLFW.Terminate()
