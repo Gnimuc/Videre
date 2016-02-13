@@ -2,22 +2,22 @@
 Note that, this is not a one-to-one correspondence translation from [this repo](https://github.com/capnramses/antons_opengl_tutorials_book).
 The only thing I can guarantee is the outputs of those codes are quite the same.
 
-## Index
-- [x] **Hello Triangle**
+## Index and Dependencies
+- [x] **Hello Triangle**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl))
 
-- [x] **Extended Initialization**
+- [x] **Extended Initialization**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl))
 
-- [x] **OpenGL 4 Shaders**
+- [x] **OpenGL 4 Shaders**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl))
 
-- [x] **Vertex Buffer Objects**
+- [x] **Vertex Buffer Objects**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl))
 
-- [x] **Vectors and Matrices**
+- [x] **Vectors and Matrices**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl))
 
-- [x] **Virtual Camera**
+- [x] **Virtual Camera**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl))
 
-- [x] **Quaternion Quick-Start**
+- [x] **Quaternion Quick-Start**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl), [Quaternions.jl](https://github.com/JuliaGeometry/Quaternions.jl), [GLTF.jl](https://github.com/Gnimuc/GLTF.jl))
 
-- [x] **Ray-Based Picking**
+- [x] **Ray-Based Picking**([GLFW.jl](https://github.com/JuliaGL/GLFW.jl), [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl), [Quaternions.jl](https://github.com/JuliaGeometry/Quaternions.jl), [GLTF.jl](https://github.com/Gnimuc/GLTF.jl))
 
 - [ ] **Phong Lighting**
 
