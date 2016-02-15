@@ -136,13 +136,13 @@ close(f)
 # create buffers located in the memory of graphic card
 pointsVBO = GLuint[0]
 glGenBuffers(1, Ref(pointsVBO))
-glBindBuffer(GLenum(get(positionBufferView.target)), pointsVBO[])
-glBufferData(GLenum(get(positionBufferView.target)), positionBufferView.byteLength, points, GL_STATIC_DRAW)
+glBindBuffer(get(positionBufferView.target), pointsVBO[])
+glBufferData(get(positionBufferView.target), positionBufferView.byteLength, points, GL_STATIC_DRAW)
 
 indicesEBO = GLuint[0]
 glGenBuffers(1, Ref(indicesEBO))
-glBindBuffer(GLenum(get(indicesBufferView.target)), indicesEBO[])
-glBufferData(GLenum(get(indicesBufferView.target)), indicesBufferView.byteLength, indices, GL_STATIC_DRAW)
+glBindBuffer(get(indicesBufferView.target), indicesEBO[])
+glBufferData(get(indicesBufferView.target), indicesBufferView.byteLength, indices, GL_STATIC_DRAW)
 
 
 
@@ -151,7 +151,7 @@ glBufferData(GLenum(get(indicesBufferView.target)), indicesBufferView.byteLength
 vaoID = GLuint[0]
 glGenVertexArrays(1, Ref(vaoID))
 glBindVertexArray(vaoID[])
-glBindBuffer(GLenum(get(positionBufferView.target)), pointsVBO[])
+glBindBuffer(get(positionBufferView.target), pointsVBO[])
 stride = positionAccessor.byteStride
 offset = positionAccessor.byteOffset + positionBufferView.byteOffset
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLsizei(stride), Ptr{Void}(offset))
@@ -253,7 +253,7 @@ while !GLFW.WindowShouldClose(window)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     # drawing
     glUseProgram(shaderProgramID)
-    glBindBuffer(GLenum(get(indicesBufferView.target)), indicesEBO[])
+    glBindBuffer(get(indicesBufferView.target), indicesEBO[])
     for i = 1:NUM_SPHERES
         if i == selectedSphere
             glUniform1f(blueLocation, 1.0)
@@ -261,7 +261,7 @@ while !GLFW.WindowShouldClose(window)
             glUniform1f(blueLocation, 0.0)
         end
         glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrices[i])
-        glDrawElements(GL_TRIANGLES, indicesAccessor.count, GLenum(indicesAccessor.componentType), Ptr{Void}(indicesAccessor.byteOffset))
+        glDrawElements(GL_TRIANGLES, indicesAccessor.count, indicesAccessor.componentType, Ptr{Void}(indicesAccessor.byteOffset))
     end
     # check and call events
     GLFW.PollEvents()
