@@ -1,42 +1,34 @@
-# load dependency packages
-using GLFW, ModernGL
+using GLFW
+using ModernGL
 
-# set up OpenGL context version
-@osx_only const VERSION_MAJOR = 4    # it seems OSX will get stuck on OpenGL 4.1.
-@osx_only const VERSION_MINOR = 1
-
-# initialize GLFW library, error check is already wrapped.
 GLFW.Init()
 
-# set up window creation hints
-@osx ? (
-    begin
-        GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
-        GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
-        GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
-        GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
-    end
-  : begin
-        GLFW.DefaultWindowHints()
-    end
-)
-
-# create window
-window = GLFW.CreateWindow(640, 480, "Initialization")
-if window == C_NULL
-    println("error: GLFW window creating failed.")
-    GLFW.Terminate()
+# set up OpenGL context version
+# it seems OpenGL 4.1 is the highest version supported by MacOS.
+@static if is_apple()
+    const VERSION_MAJOR = 4
+    const VERSION_MINOR = 1
 end
 
-# make current context
+@static if is_apple()
+    GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
+    GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
+    GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
+    GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+else
+    GLFW.DefaultWindowHints()
+end
+
+window = GLFW.CreateWindow(640, 480, "Initialization")
+window == C_NULL && error("could not open window with GLFW3.")
+
 GLFW.MakeContextCurrent(window)
 
-# get version info
-renderer = bytestring(glGetString(GL_RENDERER))
-version = bytestring(glGetString(GL_VERSION))
+# dump version info
+renderer = unsafe_string(glGetString(GL_RENDERER))
+version = unsafe_string(glGetString(GL_VERSION))
 println("Renderder: ", renderer)
 println("OpenGL version supported: ", version)
 @assert parse(Float64, version[1:3]) >= 3.2 "OpenGL version must ≥ 3.2, Please upgrade your graphic driver."
-
 
 GLFW.Terminate()

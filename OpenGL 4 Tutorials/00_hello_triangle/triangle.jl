@@ -1,57 +1,40 @@
-# load dependency packages
-using GLFW, ModernGL
+using GLFW
+using ModernGL
+using Memento
 
-
-# set up OpenGL context version
-@osx_only const VERSION_MAJOR = 4    # it seems OSX will get stuck on OpenGL 4.1.
-@osx_only const VERSION_MINOR = 1
-
-
-# initialize GLFW library, error check is already wrapped.
 GLFW.Init()
 
-# set up window creation hints
-@osx ? (
-    begin
-        GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
-        GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
-        GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
-        GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
-    end
-  : begin
-        GLFW.DefaultWindowHints()
-    end
-)
+# set up OpenGL context version
+# it seems OpenGL 4.1 is the highest version supported by MacOS.
+@static if is_apple()
+    const VERSION_MAJOR = 4
+    const VERSION_MINOR = 1
+end
 
-# set up GLFW key callbacks : press Esc to escape
-function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint)
-    if (key == GLFW.KEY_ESCAPE && action == GLFW.PRESS)
-        GLFW.SetWindowShouldClose(window, GL_TRUE)
-    end
+@static if is_apple()
+    GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
+    GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
+    GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
+    GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
+else
+    GLFW.DefaultWindowHints()
 end
 
 # create window
 window = GLFW.CreateWindow(640, 480, "Hello Triangle")
-if window == C_NULL
-    println("error: GLFW window creating failed.")
-    GLFW.Terminate()
-end
-# set callbacks
-GLFW.SetKeyCallback(window, key_callback)
-# make current context
+window == C_NULL && error("could not open window with GLFW3.")
 GLFW.MakeContextCurrent(window)
 
 # get version info
-renderer = bytestring(glGetString(GL_RENDERER))
-version = bytestring(glGetString(GL_VERSION))
-println("Renderder: ", renderer)
-println("OpenGL version supported: ", version)
+renderer = unsafe_string(glGetString(GL_RENDERER))
+version = unsafe_string(glGetString(GL_VERSION))
+info("Renderder: ", renderer)
+info("OpenGL version supported: ", version)
 @assert parse(Float64, version[1:3]) >= 3.2 "OpenGL version must ≥ 3.2, Please upgrade your graphic driver."
 
 # enable depth test
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
-
 
 # hard-coded shaders
 const vertexShader = """
@@ -83,34 +66,28 @@ glAttachShader(shaderProgram, vertexShaderID)
 glAttachShader(shaderProgram, fragmentShaderID)
 glLinkProgram(shaderProgram)
 
-
 # vertex data
 points = GLfloat[ 0.0,  0.5, 0.0,
                   0.5, -0.5, 0.0,
                  -0.5, -0.5, 0.0]
 
-
 # create buffers located in the memory of graphic card
-vboID = GLuint[0]
-glGenBuffers(1, Ref(vboID))
+vboID = Ref{GLuint}(0)
+glGenBuffers(1, vboID)
 glBindBuffer(GL_ARRAY_BUFFER, vboID[])
 glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
 
-
 # create VAO
-vaoID = GLuint[0]
-glGenVertexArrays(1, Ref(vaoID))
+vaoID = Ref{GLuint}(0)
+glGenVertexArrays(1, vaoID)
 glBindVertexArray(vaoID[])
 glBindBuffer(GL_ARRAY_BUFFER, vboID[])
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
 
-
-# loop
+# render
 while !GLFW.WindowShouldClose(window)
-    # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    # drawing
     glUseProgram(shaderProgram)
     glBindVertexArray(vaoID[])
     glDrawArrays(GL_TRIANGLES, 0, 3)
@@ -119,6 +96,5 @@ while !GLFW.WindowShouldClose(window)
     # swap the buffers
     GLFW.SwapBuffers(window)
 end
-
 
 GLFW.Terminate()

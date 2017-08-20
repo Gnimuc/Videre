@@ -1,16 +1,16 @@
 # Videre 
-[![Project Status: Suspended - Initial development has started, but there has not yet been a stable, usable release; work has been stopped for the time being but the author(s) intend on resuming work.](http://www.repostatus.org/badges/latest/suspended.svg)](http://www.repostatus.org/#suspended)
+[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
 
 OpenGL examples written in julia.
 
 # Usage
 Please set up OpenGL version before running these examples.
 
-| Platform | Default GL Version       |
-| :--------|:-----------------------: |
-| OSX      | 4.1                      |
-| Linux    | highest possible version |
-| Windows  | highest possible version |
+| Platform | Default GL Version|
+| :--------|:----------------: |
+| OSX      | 4.1               |
+| Linux    | highest possible  |
+| Windows  | highest possible  |
 
 ## References
 [Anton's OpenGL 4 Tutorials](http://antongerdelan.net/opengl/)
