@@ -1,35 +1,9 @@
-using GLFW, ModernGL
+using GLFW
+using ModernGL
+using Memento
 
-
-
-
-## OpenGL logs
-# initialize OpenGL log file
-function loginit(filename::ASCIIString)
-    logfile = open(filename, "w")
-    println(logfile, filename, " local time: ", now())
-    close(logfile)
-    return true
-end
-# add a message to the log file
-function logadd(filename::ASCIIString, message::ASCIIString)
-    logfile = open(filename, "a")
-    println(logfile, message)
-    close(logfile)
-    return true
-end
-# add error message to the log file and throw an error to STDERR
-function logerror(filename::ASCIIString, message::ASCIIString)
-    logfile = open(filename, "a")
-    println(logfile, message)
-    println(STDERR, message)
-    close(logfile)
-    return true
-end
 # load OpenGL parameters info
 function glparams()
-    v = GLint[0, 0]
-    s = GLboolean[0]
     params = GLenum[ GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,
                      GL_MAX_CUBE_MAP_TEXTURE_SIZE,
                      GL_MAX_DRAW_BUFFERS,
@@ -55,21 +29,22 @@ function glparams()
         	  "GL_MAX_VIEWPORT_DIMS",
         	  "GL_STEREO" ]
 
-    logadd("gl.log","\nGL Context Params:")
+    logger = get_logger(current_module())
+    info(logger, "GL Context Params:")
     for i = 1:10
-        local v = GLint[0]
-        glGetIntegerv(params[i], Ref(v))
-        logadd("gl.log", string(names[i], ": ", v[]))
+        v = Ref{GLint}(0)
+        glGetIntegerv(params[i], v)
+        info(logger, string(names[i], ": ", v[]))
     end
-    glGetIntegerv(params[11], Ref(v))  # ?
-    logadd("gl.log", string(names[11], ": ", v[1], " | ", v[2]))
-    glGetBooleanv(params[12], Ref(s))
-    logadd("gl.log", string(names[12], ": ", s[]))
-    logadd("gl.log", "-----------------------------\n")
+    v = GLint[0, 0]
+    s = Ref{GLboolean}(0)
+    glGetIntegerv(params[11], v)
+    info(logger, string(names[11], ": ", v[1], " | ", v[2]))
+    glGetBooleanv(params[12], s)
+    info(logger, string(names[12], ": ", s[]))
+    info(logger, "-----------------------------")
     return nothing
 end
-
-
 
 
 ## GLFW initialization
@@ -91,80 +66,69 @@ end
 
 # error callback
 function error_callback(error::Cint, description::Ptr{GLchar})
+    logger = get_logger(current_module())
     s = @sprintf "GLFW ERROR: code %i msg: %s" error description
-	logerror("gl.log", s)
+	error(logger, s)
     return nothing
 end
 
 
 # start OpenGL
 function startgl()
-    # initialize GLFW library, error check is already wrapped.
     GLFW.Init()
 
-    # set up window creation hints
-    @osx ? (
-    begin
+    @static if is_apple()
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
         GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
         GLFW.WindowHint(GLFW.OPENGL_FORWARD_COMPAT, GL_TRUE)
-    end
-    : begin
+    else
         GLFW.DefaultWindowHints()
     end
-    )
+
     # set up GLFW log and error callbacks
-    logadd("gl.log", "\nstarting GLFW ...")
-    logadd("gl.log", GLFW.GetVersionString())
+    Memento.config("notice"; fmt="[ {date} | {level} ]: {msg}")
+    logger = get_logger(current_module())
+    add_handler(logger, DefaultHandler("gl.log", DefaultFormatter("[{date} | {level}]: {msg}")))
+    set_level(logger, "info")
+    info(logger, "starting GLFW ...")
+    info(logger, GLFW.GetVersionString())
     GLFW.SetErrorCallback(error_callback)
 
     # create window
-    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Shader")
-    if window == C_NULL
-        println("error: GLFW window creating failed.")
-        GLFW.Terminate()
-    end
+    global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Extended Init.")
+    window == C_NULL && error("could not open window with GLFW3.")
 
     # set callbacks
     GLFW.SetKeyCallback(window, key_callback)
     GLFW.SetWindowSizeCallback(window, window_size_callback)
-
-    # make current context
     GLFW.MakeContextCurrent(window)
     GLFW.WindowHint(GLFW.SAMPLES, 4)
 
     # get version info
-    renderer = bytestring(glGetString(GL_RENDERER))
-    version = bytestring(glGetString(GL_VERSION))
-    println("Renderder: ", renderer)
-    println("OpenGL version supported: ", version)
+    renderer = unsafe_string(glGetString(GL_RENDERER))
+    version = unsafe_string(glGetString(GL_VERSION))
+    info("Renderder: ", renderer)
+    info("OpenGL version supported: ", version)
     @assert parse(Float64, version[1:3]) >= 3.2 "OpenGL version must ≥ 3.2, Please upgrade your graphic driver."
-    # save logs
-    logadd("gl.log", string("renderer: ", renderer, "\nversion: ", version))
     glparams()
 
     return true
 end
 
-
-
-
-## other functionalities
-# show FPS on title
-previousTime = time()
-frameCount = 0
-function updatefps(window::GLFW.Window)
-    global previousTime
-    global frameCount
-    currentTime = time()
-    elapsedTime = currentTime - previousTime
-    if elapsedTime > 0.25
-        previousTime = currentTime
-        fps = frameCount / elapsedTime
-        s = @sprintf "Shader @ fps: %.2f" fps
-        GLFW.SetWindowTitle(window, s)
-        frameCount = 0
+# _update_fps_counter
+let previousTime = time()
+    frameCount = 0
+    global function updatefps(window::GLFW.Window)
+        currentTime = time()
+        elapsedTime = currentTime - previousTime
+        if elapsedTime > 0.25
+            previousTime = currentTime
+            fps = frameCount / elapsedTime
+            s = @sprintf "opengl @ fps: %.2f" fps
+            GLFW.SetWindowTitle(window, s)
+            frameCount = 0
+        end
+        frameCount = frameCount + 1
     end
-    frameCount = frameCount + 1
 end
