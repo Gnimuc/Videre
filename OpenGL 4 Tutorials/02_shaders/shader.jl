@@ -1,5 +1,3 @@
-# load dependency packages
-using GLFW, ModernGL
 include("./glutils.jl")
 
 @static if is_apple()
@@ -11,107 +9,6 @@ end
 glfwWidth = 640
 glfwHeight = 480
 window = C_NULL
-
-# checkout shader infos
-function shaderlog(shaderID::GLuint)
-    maxLength = Ref{GLsizei}(0)
-    glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, maxLength)
-    actualLength = Ref{GLsizei}(0)
-    log = Vector{GLchar}(maxLength[])
-    glGetShaderInfoLog(shaderID, maxLength[], actualLength, log)
-    logger = get_logger(current_module())
-    warn(logger, string("shader info log for GL index ", shaderID, ":"))
-    warn(logger, String(log))
-end
-
-# checkout program infos
-function programlog(programID::GLuint)
-    maxLength = Ref{GLsizei}(0)
-    glGetProgramiv(programID, GL_INFO_LOG_LENGTH, maxLength)
-    actualLength = Ref{GLsizei}(0)
-    log = Vector{GLchar}(maxLength[])
-    glGetProgramInfoLog(programID, maxLength[], actualLength, log)
-    logger = get_logger(current_module())
-    warn(logger, string("program info log for GL index ", programID, ":"))
-    warn(logger, String(log))
-end
-
-# print verbose infos
-function printall(shaderProgramID::GLuint)
-    result = Ref{GLint}(-1)
-    logger = get_logger(current_module())
-    info(logger, string("Shader Program ", shaderProgramID, " verbose info:"))
-    glGetProgramiv(shaderProgramID, GL_LINK_STATUS, result)
-    info(logger, string("GL_LINK_STATUS = ", result[]))
-
-    glGetProgramiv(shaderProgramID, GL_ATTACHED_SHADERS, result)
-    info(logger, string("GL_ATTACHED_SHADERS = ", result[]))
-
-    glGetProgramiv(shaderProgramID, GL_ACTIVE_ATTRIBUTES, result)
-    info(logger, string("GL_ACTIVE_ATTRIBUTES = ", result[]))
-
-    for i in 1:result[]
-        maxLength = Ref{GLsizei}(0)
-        glGetProgramiv(shaderProgramID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, maxLength)
-        actualLength = Ref{GLsizei}(0)
-        attributeSize = Ref{GLint}(0)
-        attributeType = Ref{GLenum}(0)
-        name = Vector{GLchar}(maxLength[])
-        glGetActiveAttrib(shaderProgramID, i-1, maxLength[], actualLength, attributeSize, attributeType, name)
-        if attributeSize[] > 1
-            for j = 1:attributeSize[]
-                longName = @sprintf "%s[%i]" name j
-                location = glGetAttribLocation(shaderProgramID, longName)
-                log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", String(longName), " location:", location)
-                info(logger, log)
-            end
-        else
-            location = glGetAttribLocation(shaderProgramID, name)
-            log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", String(name), " location:", location)
-            info(logger, log)
-        end
-    end
-
-    glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORMS, result)
-    info(logger, string("GL_ACTIVE_UNIFORMS = ", result[]))
-    for i in 1:result[]
-        maxLength = Ref{GLsizei}(0)
-        glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORM_MAX_LENGTH, maxLength)
-        actualLength = Ref{GLsizei}(0)
-        attributeSize = Ref{GLint}(0)
-        attributeType = Ref{GLenum}(0)
-        name = Vector{GLchar}(maxLength[])
-        glGetActiveUniform(shaderProgramID, i-1, maxLength[], actualLength, attributeSize, attributeType, name)
-        if attributeSize[] > 1
-            for j = 1:attributeSize[]
-                longName = @sprintf "%s[%i]" name j
-                location = glGetUniformLocation(shaderProgramID, longName)
-                log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", String(longName), " location:", location)
-                info(logger, log)
-            end
-        else
-            location = glGetUniformLocation(shaderProgramID, name)
-            log = string("  ", i, ") type:", GLENUM(attributeType[]).name, " name:", String(name), " location:", location)
-            info(logger, log)
-        end
-    end
-    programlog(shaderProgramID)
-end
-
-# validate shader program
-function validprogram(shaderProgramID::GLuint)
-    validResult = Ref{GLint}(-1)
-    glValidateProgram(shaderProgramID)
-    glGetProgramiv(shaderProgramID, GL_VALIDATE_STATUS, validResult)
-    log = string("program ", shaderProgramID, " GL_VALIDATE_STATUS = ", validResult[])
-    logger = get_logger(current_module())
-    info(logger, log)
-    if validResult[] != GL_TRUE
-        programlog(shaderProgramID)
-        return false
-    end
-    return true
-end
 
 # start OpenGL
 @assert startgl()
@@ -149,7 +46,6 @@ if compileResult[] != GL_TRUE
     shaderlog(fragmentShaderID)
     error("GL fragment shader(index ", fragmentShaderID, " )did not compile.")
 end
-
 
 # create and link shader program
 shaderProgramID = glCreateProgram()
