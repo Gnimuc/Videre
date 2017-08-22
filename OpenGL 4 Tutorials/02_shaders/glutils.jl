@@ -51,7 +51,7 @@ end
 # set up GLFW key callbacks : press Esc to escape
 function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint)
     if (key == GLFW.KEY_ESCAPE && action == GLFW.PRESS)
-        GLFW.SetWindowShouldClose(window, GL_TRUE)
+        GLFW.SetWindowShouldClose(window, true)
     end
 end
 

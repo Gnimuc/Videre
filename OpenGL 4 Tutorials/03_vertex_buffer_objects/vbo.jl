@@ -1,4 +1,4 @@
-include("./glutils.jl")
+include(joinpath(dirname(@__FILE__), "glutils.jl"))
 
 @static if is_apple()
     const VERSION_MAJOR = 4
@@ -29,7 +29,7 @@ compileResult = Ref{GLint}(-1)
 glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, compileResult)
 if compileResult[] != GL_TRUE
     logger = get_logger(current_module())
-    error(logger, string("GL vertex shader(index", vertexShaderID, ")did not compile."))
+    warn(logger, string("GL vertex shader(index", vertexShaderID, ")did not compile."))
     shaderlog(vertexShaderID)
     error("GL vertex shader(index ", vertexShaderID, " )did not compile.")
 end
