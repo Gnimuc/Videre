@@ -10,8 +10,8 @@ function shaderlog(shaderID::GLuint)
     log = Vector{GLchar}(maxLength[])
     glGetShaderInfoLog(shaderID, maxLength[], actualLength, log)
     logger = get_logger(current_module())
-    warn(logger, string("shader info log for GL index ", shaderID, ":"))
-    warn(logger, String(log))
+    info(logger, string("shader info log for GL index ", shaderID, ":"))
+    info(logger, String(log))
 end
 
 # checkout program infos
@@ -22,8 +22,8 @@ function programlog(programID::GLuint)
     log = Vector{GLchar}(maxLength[])
     glGetProgramInfoLog(programID, maxLength[], actualLength, log)
     logger = get_logger(current_module())
-    warn(logger, string("program info log for GL index ", programID, ":"))
-    warn(logger, String(log))
+    info(logger, string("program info log for GL index ", programID, ":"))
+    info(logger, String(log))
 end
 
 # print verbose infos

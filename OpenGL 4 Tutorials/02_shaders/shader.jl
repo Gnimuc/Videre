@@ -18,8 +18,8 @@ function shaderlog(shaderID::GLuint)
     log = Vector{GLchar}(maxLength[])
     glGetShaderInfoLog(shaderID, maxLength[], actualLength, log)
     logger = get_logger(current_module())
-    warn(logger, string("shader info log for GL index ", shaderID, ":"))
-    warn(logger, String(log))
+    info(logger, string("shader info log for GL index ", shaderID, ":"))
+    info(logger, String(log))
 end
 
 # checkout program infos
@@ -130,7 +130,7 @@ compileResult = Ref{GLint}(-1)
 glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, compileResult)
 if compileResult[] != GL_TRUE
     logger = get_logger(current_module())
-    error(logger, string("GL vertex shader(index", vertexShaderID, ")did not compile."))
+    warn(logger, string("GL vertex shader(index", vertexShaderID, ")did not compile."))
     shaderlog(vertexShaderID)
     error("GL vertex shader(index ", vertexShaderID, " )did not compile.")
 end

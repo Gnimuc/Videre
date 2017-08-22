@@ -108,9 +108,8 @@ matrixLocation = glGetUniformLocation(shaderProgramID, "matrix")
 glUseProgram(shaderProgramID)
 glUniformMatrix4fv(matrixLocation, 1, GL_FALSE, matrix)
 
-# loop
+# render
 while !GLFW.WindowShouldClose(window)
-    # show FPS
     updatefps(window)
     # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -125,9 +124,6 @@ while !GLFW.WindowShouldClose(window)
     glDrawArrays(GL_TRIANGLES, 0, 3)
     # check and call events
     GLFW.PollEvents()
-    # if ( GLFW_PRESS == glfwGetKey( g_window, GLFW_KEY_ESCAPE ) ) {
-    #     glfwSetWindowShouldClose( g_window, 1 );
-    # }
     # swap the buffers
     GLFW.SwapBuffers(window)
 end
