@@ -113,7 +113,7 @@ Pz = -(2.0*far*near) / (far - near)
 projMatrix = GLfloat[ Sx   0.0  0.0  0.0;
                       0.0   Sy  0.0  0.0;
                       0.0  0.0   Sz   Pz;
-                      0.0  0.0 -1.0  0.0 ]
+                      0.0  0.0 -1.0  0.0]
 # view matrix
 cameraSpeed = 1.0
 cameraSpeedY = 10.0
@@ -122,12 +122,12 @@ cameraRotationY = 0.0
 transMatrix = GLfloat[ 1.0 0.0 0.0 -cameraPosition[1];
                        0.0 1.0 0.0 -cameraPosition[2];
                        0.0 0.0 1.0 -cameraPosition[3];
-                       0.0 0.0 0.0                1.0 ]
+                       0.0 0.0 0.0                1.0]
 rotationY = GLfloat[  cos(deg2rad(-cameraRotationY))  0.0  sin(deg2rad(-cameraRotationY)) 0.0;
                                                  0.0  1.0                             0.0 0.0;
                      -sin(deg2rad(-cameraRotationY))  0.0  cos(deg2rad(-cameraRotationY)) 0.0;
-                                                 0.0  0.0                             0.0 1.0 ]
-viewMatrix =  rotationY * transMatrix
+                                                 0.0  0.0                             0.0 1.0]
+viewMatrix = rotationY * transMatrix
 
 viewMatrixLocation = glGetUniformLocation(shaderProgramID, "view")
 projMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
@@ -191,11 +191,11 @@ while !GLFW.WindowShouldClose(window)
         transMatrix = GLfloat[ 1.0 0.0 0.0 -cameraPosition[1];
                                0.0 1.0 0.0 -cameraPosition[2];
                                0.0 0.0 1.0 -cameraPosition[3];
-                               0.0 0.0 0.0                1.0 ]
+                               0.0 0.0 0.0                1.0]
         rotationY = GLfloat[  cos(deg2rad(-cameraRotationY))  0.0  sin(deg2rad(-cameraRotationY)) 0.0;
                                                          0.0  1.0                             0.0 0.0;
                              -sin(deg2rad(-cameraRotationY))  0.0  cos(deg2rad(-cameraRotationY)) 0.0;
-                                                         0.0  0.0                             0.0 1.0 ]
+                                                         0.0  0.0                             0.0 1.0]
         viewMatrix = rotationY * transMatrix
         glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
     end

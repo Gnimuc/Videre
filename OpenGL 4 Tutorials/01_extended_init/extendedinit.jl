@@ -2,8 +2,6 @@ using GLFW
 using ModernGL
 using Memento
 
-GLFW.Init()
-
 # set up OpenGL context version
 # it seems OpenGL 4.1 is the highest version supported by MacOS.
 @static if is_apple()
@@ -133,7 +131,6 @@ renderer = unsafe_string(glGetString(GL_RENDERER))
 version = unsafe_string(glGetString(GL_VERSION))
 info("Renderder: ", renderer)
 info("OpenGL version supported: ", version)
-@assert parse(Float64, version[1:3]) >= 3.2 "OpenGL version must ≥ 3.2, Please upgrade your graphic driver."
 glparams()
 
 # hard-coded shaders
@@ -154,10 +151,10 @@ void main(void)
 
 # compile shaders
 vertexShaderID = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShaderID, 1, [pointer(vertexShader)], C_NULL)
+glShaderSource(vertexShaderID, 1, Ptr{GLchar}[pointer(vertexShader)], C_NULL)
 glCompileShader(vertexShaderID)
 fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShaderID, 1, [pointer(fragmentShader)], C_NULL)
+glShaderSource(fragmentShaderID, 1, Ptr{GLchar}[pointer(fragmentShader)], C_NULL)
 glCompileShader(fragmentShaderID)
 
 # create and link shader program
@@ -201,4 +198,4 @@ while !GLFW.WindowShouldClose(window)
     GLFW.SwapBuffers(window)
 end
 
-GLFW.Terminate()
+GLFW.DestroyWindow(window)

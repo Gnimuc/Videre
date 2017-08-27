@@ -22,7 +22,7 @@ const fragmentShader = readstring(joinpath(dirname(@__FILE__), "vbo.frag"))
 
 # compile shaders and check for shader compile errors
 vertexShaderID = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShaderID, 1, [pointer(vertexShader)], C_NULL)
+glShaderSource(vertexShaderID, 1, Ptr{GLchar}[pointer(vertexShader)], C_NULL)
 glCompileShader(vertexShaderID)
 # get shader compile status
 compileResult = Ref{GLint}(-1)
@@ -35,7 +35,7 @@ if compileResult[] != GL_TRUE
 end
 
 fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShaderID, 1, [pointer(fragmentShader)], C_NULL)
+glShaderSource(fragmentShaderID, 1, Ptr{GLchar}[pointer(fragmentShader)], C_NULL)
 glCompileShader(fragmentShaderID)
 # checkout shader compile status
 compileResult = Ref{GLint}(-1)
@@ -114,4 +114,4 @@ while !GLFW.WindowShouldClose(window)
     GLFW.SwapBuffers(window)
 end
 
-GLFW.Terminate()
+GLFW.DestroyWindow(window)

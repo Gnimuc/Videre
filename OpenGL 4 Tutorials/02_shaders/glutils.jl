@@ -75,8 +75,6 @@ end
 
 # start OpenGL
 function startgl()
-    GLFW.Init()
-
     @static if is_apple()
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
@@ -110,7 +108,6 @@ function startgl()
     version = unsafe_string(glGetString(GL_VERSION))
     info("Renderder: ", renderer)
     info("OpenGL version supported: ", version)
-    @assert parse(Float64, version[1:3]) >= 3.2 "OpenGL version must ≥ 3.2, Please upgrade your graphic driver."
     glparams()
 
     return true
