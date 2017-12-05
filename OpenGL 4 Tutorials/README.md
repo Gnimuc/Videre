@@ -6,16 +6,17 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 * [GLFW.jl](https://github.com/JuliaGL/GLFW.jl) : a thin wrapper for glfw3
 * [ModernGL.jl](https://github.com/JuliaGL/ModernGL.jl) : a thin wrapper for ModernGL
 * [Memento.jl](https://github.com/invenia/Memento.jl) : for logging stuff
-* [Quaternions.jl](https://github.com/JuliaGeometry/Quaternions.jl)
+* [Reactive.jl](https://github.com/JuliaGizmos/Reactive.jl) : for event-driven programming
+* [Quaternions.jl](https://github.com/JuliaGeometry/Quaternions.jl) : quaternion utility
 
 ## TODO List
 - [x] **Hello Triangle**
 - [x] **Extended Initialization**
-- [ ] **OpenGL 4 Shaders**
-- [ ] **Vertex Buffer Objects**
-- [ ] **Vectors and Matrices**
-- [ ] **Virtual Camera**
-- [ ] **Quaternion Quick-Start**
+- [x] **OpenGL 4 Shaders**
+- [x] **Vertex Buffer Objects**
+- [x] **Vectors and Matrices**
+- [x] **Virtual Camera**
+- [x] **Quaternion Quick-Start**
 - [ ] **Ray-Based Picking**
 - [ ] **Phong Lighting**
 - [ ] **Texture Maps**

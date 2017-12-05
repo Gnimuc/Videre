@@ -172,8 +172,6 @@ let
                                0.0 0.0 1.0 cameraPosition[3];
                                0.0 0.0 0.0               1.0]
         rotationMatrix[1:3,1:3] = rotationmatrix(quat)
-        @show rotationMatrix
-        @show cameraPosition
         viewMatrix = inv(rotationMatrix) * inv(transMatrix)
     end
     function rotate(axis, angle)
