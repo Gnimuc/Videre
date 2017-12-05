@@ -82,6 +82,9 @@ glBindBuffer(GL_ARRAY_BUFFER, vboID[])
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
 
+# set background color to gray
+glClearColor(0.2, 0.2, 0.2, 1.0)
+
 # render
 while !GLFW.WindowShouldClose(window)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

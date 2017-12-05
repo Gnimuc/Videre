@@ -97,7 +97,8 @@ glEnableVertexAttribArray(1)
 glEnable(GL_CULL_FACE)
 glCullFace(GL_BACK)
 glFrontFace(GL_CW)
-
+# set background color to gray
+glClearColor(0.2, 0.2, 0.2, 1.0)
 
 # camera
 near = 0.1            # clipping near plane

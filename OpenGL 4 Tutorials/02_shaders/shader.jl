@@ -192,6 +192,9 @@ glUniform4f(colorLocation, 1.0, 0.0, 0.0, 1.0)
 printall(shaderProgramID)
 @assert validprogram(shaderProgramID)
 
+# set background color to gray
+glClearColor(0.2, 0.2, 0.2, 1.0)
+
 # render
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
