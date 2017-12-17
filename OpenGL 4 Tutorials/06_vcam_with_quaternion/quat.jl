@@ -148,7 +148,7 @@ let
         value(sigDOWN) && (rotate(rgt, -cameraHeadingSpeed * elapsedCameraTime); moveFlag=true)
         value(sigZ) && (rotate(fwd, cameraHeadingSpeed * elapsedCameraTime); moveFlag=true)
         value(sigC) && (rotate(fwd, -cameraHeadingSpeed * elapsedCameraTime); moveFlag=true)
-        moveFlag && return getviewmatrix(singleFrameMove)
+        moveFlag && return get_view_matrix(singleFrameMove)
         return viewMatrix
     end
     global set_camera_position(p::Vector{GLfloat}) = cameraPosition = p
@@ -163,7 +163,7 @@ let
         set_camera_position(GLfloat[0.0, 0.0, 0.0])
         set_camera_rotation(GLfloat[0.0, 1.0, 0.0], 0.0)
     end
-    global function getviewmatrix(move=GLfloat[0.0,0.0,0.0])
+    global function get_view_matrix(move=GLfloat[0.0,0.0,0.0])
         cameraPosition += fwd[1:3] * -move[3]
         cameraPosition += up[1:3] * move[2]
         cameraPosition += rgt[1:3] * move[1]
@@ -202,7 +202,7 @@ projMatrix = GLfloat[ Sx   0.0  0.0  0.0;
 # view matrix
 resetcamera()
 set_camera_position(GLfloat[0.0, 0.0, 5.0])
-viewMatrix = getviewmatrix()
+viewMatrix = get_view_matrix()
 modelMatrixLocation = glGetUniformLocation(shaderProgramID, "model")
 viewMatrixLocation = glGetUniformLocation(shaderProgramID, "view")
 projMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
@@ -211,16 +211,16 @@ glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
 glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, projMatrix)
 
 # spheres in world
-sphereWorildPositions = GLfloat[-2.0 0.0  0.0;
-                                 2.0 0.0  0.0;
-                                -2.0 0.0 -2.0;
-                                 1.5 1.0 -1.0]
+sphereWorldPositions = GLfloat[-2.0 0.0  0.0;
+                                2.0 0.0  0.0;
+                               -2.0 0.0 -2.0;
+                                1.5 1.0 -1.0]
 modelMatrices = Array{Matrix,1}(4)
 for i = 1:4
-    modelMatrices[i] = GLfloat[ 1.0 0.0 0.0 sphereWorildPositions[i,1];
-                                0.0 1.0 0.0 sphereWorildPositions[i,2];
-                                0.0 0.0 1.0 sphereWorildPositions[i,3];
-                                0.0 0.0 0.0                        1.0]
+    modelMatrices[i] = GLfloat[ 1.0 0.0 0.0 sphereWorldPositions[i,1];
+                                0.0 1.0 0.0 sphereWorldPositions[i,2];
+                                0.0 0.0 1.0 sphereWorldPositions[i,3];
+                                0.0 0.0 0.0                      1.0]
 end
 
 # render
