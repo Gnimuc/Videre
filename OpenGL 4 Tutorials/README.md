@@ -1,5 +1,5 @@
 # Anton's OpenGL 4 Tutorials
-Note that, this is not a one-to-one correspondence translation from [this repo](https://github.com/capnramses/antons_opengl_tutorials_book).
+This is not a one-to-one correspondence translation from [this repo](https://github.com/capnramses/antons_opengl_tutorials_book).
 The only thing I can guarantee is the outputs of those codes are quite the same.
 
 ## Dependencies
@@ -8,6 +8,7 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 * [Memento.jl](https://github.com/invenia/Memento.jl) : for logging stuff
 * [Reactive.jl](https://github.com/JuliaGizmos/Reactive.jl) : for event-driven programming
 * [Quaternions.jl](https://github.com/JuliaGeometry/Quaternions.jl) : quaternion utility
+* [FileIO.jl](https://github.com/JuliaIO/FileIO.jl) or [Images.jl](https://github.com/JuliaImages/Images.jl) : for loading images
 
 ## TODO List
 - [x] **Hello Triangle**
@@ -17,9 +18,9 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 - [x] **Vectors and Matrices**
 - [x] **Virtual Camera**
 - [x] **Quaternion Quick-Start**
-- [ ] **Ray-Based Picking**
+- [x] **Ray-Based Picking**
 - [ ] **Phong Lighting**
-- [ ] **Texture Maps**
+- [x] **Texture Maps**
 - [ ] **Screen Capture**
 - [ ] **Video Capture**
 - [ ] **Debugging Shaders**

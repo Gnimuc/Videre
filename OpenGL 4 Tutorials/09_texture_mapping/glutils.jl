@@ -276,8 +276,8 @@ end
 
 # camera
 let
-    cameraSpeed = GLfloat(5.0)
-    cameraHeadingSpeed = GLfloat(100.0)
+    cameraSpeed = GLfloat(1.0)
+    cameraHeadingSpeed = GLfloat(10.0)
     cameraPosition = GLfloat[0.0, 0.0, 0.0]
     rotationMatrix = eye(GLfloat, 4, 4)
     quat = qrotation([0.0, 1.0, 0.0], 0)
@@ -339,6 +339,25 @@ let
         fwd = rotationMatrix * GLfloat[0.0, 0.0, -1.0, 0.0]
         rgt = rotationMatrix * GLfloat[1.0, 0.0, 0.0, 0.0]
         up = rotationMatrix * GLfloat[0.0, 1.0, 0.0, 0.0]
+    end
+end
+
+# projective matrix
+let
+    near = 0.1            # clipping near plane
+    far = 100.0           # clipping far plane
+    fov = deg2rad(67)
+    global function get_projective_matrix()
+        aspectRatio = glfwWidth / glfwHeight
+        range = tan(0.5*fov) * near
+        Sx = 2.0*near / (range * aspectRatio + range * aspectRatio)
+        Sy = near / range
+        Sz = -(far + near) / (far - near)
+        Pz = -(2.0*far*near) / (far - near)
+        return GLfloat[ Sx   0.0  0.0  0.0;
+                        0.0   Sy  0.0  0.0;
+                        0.0  0.0   Sz   Pz;
+                        0.0  0.0 -1.0  0.0]
     end
 end
 

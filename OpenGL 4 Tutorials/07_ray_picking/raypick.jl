@@ -25,8 +25,8 @@ let
     near = 0.1            # clipping near plane
     far = 100.0           # clipping far plane
     fov = deg2rad(67)
-    aspectRatio = glfwWidth / glfwHeight
     global function get_projective_matrix()
+        aspectRatio = glfwWidth / glfwHeight
         range = tan(0.5*fov) * near
         Sx = 2.0*near / (range * aspectRatio + range * aspectRatio)
         Sy = near / range
