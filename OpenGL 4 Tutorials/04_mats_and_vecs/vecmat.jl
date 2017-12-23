@@ -1,4 +1,4 @@
-include(joinpath(dirname(@__FILE__), "..", "03_vertex_buffer_objects", "glutils.jl"))
+include("glutils.jl")
 
 @static if is_apple()
     const VERSION_MAJOR = 4

@@ -8,7 +8,7 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 * [Memento.jl](https://github.com/invenia/Memento.jl) : for logging stuff
 * [Reactive.jl](https://github.com/JuliaGizmos/Reactive.jl) : for event-driven programming
 * [Quaternions.jl](https://github.com/JuliaGeometry/Quaternions.jl) : quaternion utility
-* [FileIO.jl](https://github.com/JuliaIO/FileIO.jl) or [Images.jl](https://github.com/JuliaImages/Images.jl) : for loading images
+* [FileIO.jl](https://github.com/JuliaIO/FileIO.jl) or [Images.jl](https://github.com/JuliaImages/Images.jl) : for loading and saving images
 
 ## TODO List
 - [x] **Hello Triangle**
@@ -19,9 +19,9 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 - [x] **Virtual Camera**
 - [x] **Quaternion Quick-Start**
 - [x] **Ray-Based Picking**
-- [ ] **Phong Lighting**
+- [x] **Phong Lighting**
 - [x] **Texture Maps**
-- [ ] **Screen Capture**
+- [x] **Screen Capture**
 - [ ] **Video Capture**
 - [ ] **Debugging Shaders**
 - [ ] **Gamma Correction**
