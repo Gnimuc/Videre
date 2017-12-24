@@ -1,5 +1,5 @@
 using OffsetArrays
-include("glutils.jl")
+include(joinpath(@__DIR__, "glutils.jl"))
 
 @static if is_apple()
     const VERSION_MAJOR = 4
@@ -83,7 +83,7 @@ glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(normalAccessor["byt
 glEnableVertexAttribArray(1)
 
 glBindBuffer(texcoordTarget, texcoordVBO[])
-glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(texcorAccessor["byteOffset"]))
+glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(texcoordAccessor["byteOffset"]))
 glEnableVertexAttribArray(2)
 
 # create shader program

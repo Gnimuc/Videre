@@ -9,6 +9,7 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 * [Reactive.jl](https://github.com/JuliaGizmos/Reactive.jl) : for event-driven programming
 * [Quaternions.jl](https://github.com/JuliaGeometry/Quaternions.jl) : quaternion utility
 * [FileIO.jl](https://github.com/JuliaIO/FileIO.jl) or [Images.jl](https://github.com/JuliaImages/Images.jl) : for loading and saving images
+* OffsetArrays.jl
 
 ## TODO List
 - [x] **Hello Triangle**

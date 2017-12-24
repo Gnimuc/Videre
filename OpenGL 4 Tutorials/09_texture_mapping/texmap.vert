@@ -9,5 +9,5 @@ out vec2 texture_coordinates;
 
 void main() {
 	texture_coordinates = vt;
-	gl_Position = proj * view * vec4 (vertex_position, 1.0);
+	gl_Position = proj * view * vec4(vertex_position, 1.0);
 }

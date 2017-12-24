@@ -1,4 +1,4 @@
-include(joinpath(dirname(@__FILE__), "glutils.jl"))
+include(joinpath(@__DIR__, "glutils.jl"))
 
 @static if is_apple()
     const VERSION_MAJOR = 4
@@ -118,8 +118,8 @@ glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
 
 # load shaders from file
-const vertexShader = readstring(joinpath(dirname(@__FILE__), "shader.vert"))
-const fragmentShader = readstring(joinpath(dirname(@__FILE__), "shader.frag"))
+const vertexShader = readstring(joinpath(@__DIR__, "shader.vert"))
+const fragmentShader = readstring(joinpath(@__DIR__, "shader.frag"))
 
 # compile shaders and check for shader compile errors
 vertexShaderID = glCreateShader(GL_VERTEX_SHADER)

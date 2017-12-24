@@ -1,4 +1,4 @@
-include("glutils.jl")
+include(joinpath(@__DIR__, "glutils.jl"))
 
 @static if is_apple()
     const VERSION_MAJOR = 4

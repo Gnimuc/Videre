@@ -1,4 +1,5 @@
-include("glutils.jl")
+using OffsetArrays
+include(joinpath(@__DIR__, "glutils.jl"))
 
 @static if is_apple()
     const VERSION_MAJOR = 4
@@ -15,10 +16,6 @@ window = C_NULL
 
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
-
-# set camera
-resetcamera()
-set_camera_position(GLfloat[0.0, 0.0, 5.0])
 
 # projective matrix
 let
@@ -134,50 +131,52 @@ GLFW.SetMouseButtonCallback(window, mouse_click_callback)
 
 # load glTF file
 sphere = JSON.parsefile(joinpath(@__DIR__, "sphere.gltf"))
-accessors = sphere["accessors"]
-bufferViews = sphere["bufferViews"]
-buffers = sphere["buffers"]
+accessors = OffsetArray(sphere["accessors"], -1)
+bufferViews = OffsetArray(sphere["bufferViews"], -1)
+buffers = OffsetArray(sphere["buffers"], -1)
 # load sphere position metadata
-posAccessor = accessors["accessor_position"]
-posBufferView = bufferViews[posAccessor["bufferView"]]
-posBuffer = buffers[posBufferView["buffer"]]
+positionAccessor = accessors[0]
+positionBufferView = bufferViews[positionAccessor["bufferView"]]
+posBuffer = buffers[positionBufferView["buffer"]]
 # load sphere index metadata
-idxAccessor = accessors["accessor_index_0"]
-idxBufferView = bufferViews[idxAccessor["bufferView"]]
-idxBuffer = buffers[idxBufferView["buffer"]]
+indexAccessor = accessors[3]
+indexBufferView = bufferViews[indexAccessor["bufferView"]]
+indexBuffer = buffers[indexBufferView["buffer"]]
 
 # load buffer-blobs
 readblob(uri, length, offset) = open(uri) do f
                                     skip(f, offset)
-                                    posBlob = read(f, length)
+                                    blob = read(f, length)
                                 end
-posBlob = readblob(joinpath(@__DIR__, idxBuffer["uri"]), posBufferView["byteLength"], posBufferView["byteOffset"])
-idxBlob = readblob(joinpath(@__DIR__, idxBuffer["uri"]), idxBufferView["byteLength"], idxBufferView["byteOffset"])
-points = reinterpret(GLfloat, posBlob) # GLENUM(posAccessor["componentType"]).name => GLfloat
-index = reinterpret(GLushort, idxBlob) # GLENUM(idxAccessor["componentType"]).name => GLushort
+positionBlob = readblob(joinpath(@__DIR__, indexBuffer["uri"]), positionBufferView["byteLength"], positionBufferView["byteOffset"])
+indexBlob = readblob(joinpath(@__DIR__, indexBuffer["uri"]), indexBufferView["byteLength"], indexBufferView["byteOffset"])
+position = reinterpret(GLfloat, positionBlob) # GLENUM(posAccessor["componentType"]).name => GLfloat
+index = reinterpret(GLushort, indexBlob) # GLENUM(indexAccessor["componentType"]).name => GLushort
 
 # create buffers located in the memory of graphic card
-pointsVBO = Ref{GLuint}(0)
-glGenBuffers(1, pointsVBO)
-posTarget = posBufferView["target"]
-glBindBuffer(posTarget, pointsVBO[])
-glBufferData(posTarget, posBufferView["byteLength"], posBlob, GL_STATIC_DRAW)
+positionVBO = Ref{GLuint}(0)
+glGenBuffers(1, positionVBO)
+positionTarget = positionBufferView["target"]
+glBindBuffer(positionTarget, positionVBO[])
+glBufferData(positionTarget, positionBufferView["byteLength"], positionBlob, GL_STATIC_DRAW)
 
 indexEBO = Ref{GLuint}(0)
 glGenBuffers(1, indexEBO)
-idxTarget = idxBufferView["target"]
-glBindBuffer(idxTarget, indexEBO[])
-glBufferData(idxTarget, idxBufferView["byteLength"], idxBlob, GL_STATIC_DRAW)
+indexTarget = indexBufferView["target"]
+glBindBuffer(indexTarget, indexEBO[])
+glBufferData(indexTarget, indexBufferView["byteLength"], indexBlob, GL_STATIC_DRAW)
 
 # create VAO
 vaoID = Ref{GLuint}(0)
 glGenVertexArrays(1, vaoID)
 glBindVertexArray(vaoID[])
-glBindBuffer(posTarget, pointsVBO[])
-posStride = posAccessor["byteStride"]
-posOffset = posAccessor["byteOffset"] + posBufferView["byteOffset"]
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLsizei(posStride), Ptr{Void}(posOffset))
+glBindBuffer(positionTarget, positionVBO[])
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(positionAccessor["byteOffset"]))
 glEnableVertexAttribArray(0)
+
+# set camera
+resetcamera()
+set_camera_position(GLfloat[0.0, 0.0, 5.0])
 
 # create shader program
 vertexShaderPath = joinpath(@__DIR__, "raypick.vert")
@@ -200,10 +199,9 @@ glClearColor(0.2, 0.2, 0.2, 1.0)
 
 
 # render
-idxTarget = idxBufferView["target"]
-idxCount = idxAccessor["count"]
-idxComponentType = idxAccessor["componentType"]
-idxByteOffset = idxAccessor["byteOffset"]
+indexCount = indexAccessor["count"]
+indexComponentType = indexAccessor["componentType"]
+indexByteOffset = indexAccessor["byteOffset"]
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
     # clear drawing surface
@@ -211,7 +209,7 @@ while !GLFW.WindowShouldClose(window)
     glViewport(0, 0, glfwWidth, glfwHeight)
     # drawing
     glUseProgram(shaderProgramID)
-    glBindBuffer(idxTarget, indexEBO[])
+    glBindBuffer(indexTarget, indexEBO[])
     for i = 1:NUM_SPHERES
         if i == selectedSphere
             glUniform1f(blueLocation, 1.0)
@@ -219,7 +217,7 @@ while !GLFW.WindowShouldClose(window)
             glUniform1f(blueLocation, 0.0)
         end
         glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrices[i])
-        glDrawElements(GL_TRIANGLES, idxCount, idxComponentType, Ptr{Void}(idxByteOffset))
+        glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Void}(indexByteOffset))
     end
     # check and call events
     GLFW.PollEvents()
