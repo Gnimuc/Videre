@@ -23,7 +23,7 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 - [x] **Texture Maps**
 - [x] **Screen Capture**
 - [ ] **Video Capture**
-- [ ] **Debugging Shaders**
+- [x] **Debugging Shaders**
 - [ ] **Gamma Correction**
 - [ ] **Extension Checks and the Debug Callback**
 - [ ] **Uniform Buffer Objects and Buffer Mapping Functions**

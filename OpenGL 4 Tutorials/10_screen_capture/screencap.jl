@@ -29,24 +29,22 @@ function screencapture()
 end
 
 # load texture
-skull = load(joinpath(@__DIR__, "skulluvmap.png"))
-texWidth, texHeight = size(skull) .|> GLsizei
-tex = Ref{GLuint}(0)
-glGenTextures(1, tex)
-glActiveTexture(GL_TEXTURE0)
-glBindTexture(GL_TEXTURE_2D, tex[])
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, flipdim(skull.',2))
-glGenerateMipmap(GL_TEXTURE_2D)
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-# GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT extension is not supported
-# max_aniso = Ref{GLfloat}(0.0)
-# glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, max_aniso)
-# # set the maximum!
-# glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_aniso)
-
+function loadtexture(path::AbstractString)
+    texImg = load(path)
+    texWidth, texHeight = size(texImg) .|> GLsizei
+    texID = Ref{GLuint}(0)
+    glGenTextures(1, texID)
+    glActiveTexture(GL_TEXTURE0)
+    glBindTexture(GL_TEXTURE_2D, texID[])
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, flipdim(texImg.',2))
+    glGenerateMipmap(GL_TEXTURE_2D)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+    return texID
+end
+texSkull = loadtexture(joinpath(@__DIR__, "skulluvmap.png"))
 
 # vertex data
 points = GLfloat[-0.5, -0.5, 0.0,
