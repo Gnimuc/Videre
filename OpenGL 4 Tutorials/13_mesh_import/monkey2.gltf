@@ -1,0 +1,159 @@
+{
+  "accessors": [
+    {
+      "name": "Suzanne_1_positions",
+      "componentType": 5126,
+      "count": 507,
+      "min": [
+        -1.3671879768371582,
+        -0.984375,
+        -0.8515620231628418
+      ],
+      "max": [
+        1.3671879768371582,
+        0.984375,
+        0.8515620231628418
+      ],
+      "type": "VEC3",
+      "bufferView": 0,
+      "byteOffset": 0
+    },
+    {
+      "name": "Suzanne_1_normals",
+      "componentType": 5126,
+      "count": 507,
+      "min": [
+        -0.99822998046875,
+        -0.9814749956130981,
+        -0.9645379781723022
+      ],
+      "max": [
+        0.99822998046875,
+        0.9997559785842896,
+        0.9999690055847168
+      ],
+      "type": "VEC3",
+      "bufferView": 0,
+      "byteOffset": 6084
+    },
+    {
+      "name": "Suzanne_1_texcoords",
+      "componentType": 5126,
+      "count": 507,
+      "min": [
+        0,
+        0
+      ],
+      "max": [
+        1,
+        1
+      ],
+      "type": "VEC2",
+      "bufferView": 1,
+      "byteOffset": 0
+    },
+    {
+      "name": "Suzanne_1_0_indices",
+      "componentType": 5123,
+      "count": 2904,
+      "min": [
+        0
+      ],
+      "max": [
+        506
+      ],
+      "type": "SCALAR",
+      "bufferView": 2,
+      "byteOffset": 0
+    }
+  ],
+  "asset": {
+    "generator": "obj2gltf",
+    "version": "2.0"
+  },
+  "buffers": [
+    {
+      "name": "monkey2",
+      "byteLength": 22032,
+      "uri": "monkey2.bin"
+    }
+  ],
+  "bufferViews": [
+    {
+      "name": "bufferView_0",
+      "buffer": 0,
+      "byteLength": 12168,
+      "byteOffset": 0,
+      "byteStride": 12,
+      "target": 34962
+    },
+    {
+      "name": "bufferView_1",
+      "buffer": 0,
+      "byteLength": 4056,
+      "byteOffset": 12168,
+      "byteStride": 8,
+      "target": 34962
+    },
+    {
+      "name": "bufferView_2",
+      "buffer": 0,
+      "byteLength": 5808,
+      "byteOffset": 16224,
+      "target": 34963
+    }
+  ],
+  "materials": [
+    {
+      "name": "default",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.5,
+          0.5,
+          0.5,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "emissiveFactor": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": false
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Suzanne_1",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "Suzanne",
+      "mesh": 0
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ]
+}
