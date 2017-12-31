@@ -74,16 +74,26 @@ glBufferData(indexTarget, indexBufferView["byteLength"], blobs[indexAccessor["bu
 vaoID = Ref{GLuint}(0)
 glGenVertexArrays(1, vaoID)
 glBindVertexArray(vaoID[])
+
+positionComponentType = positionAccessor["componentType"]
+positionByteStride = positionBufferView["byteStride"]
+positionByteOffset = positionAccessor["byteOffset"]
 glBindBuffer(positionTarget, positionVBO[])
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(positionAccessor["byteOffset"]))
+glVertexAttribPointer(0, 3, positionComponentType, GL_FALSE, GLsizei(positionByteStride), Ptr{Void}(positionByteOffset))
 glEnableVertexAttribArray(0)
 
+normalComponentType = normalAccessor["componentType"]
+normalByteStride = normalBufferView["byteStride"]
+normalByteOffset = normalAccessor["byteOffset"]
 glBindBuffer(normalTarget, normalVBO[])
-glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(normalAccessor["byteOffset"]))
+glVertexAttribPointer(1, 3, normalComponentType, GL_FALSE, GLsizei(normalByteStride), Ptr{Void}(normalByteOffset))
 glEnableVertexAttribArray(1)
 
+texcoordComponentType = texcoordAccessor["componentType"]
+texcoordByteStride = texcoordBufferView["byteStride"]
+texcoordByteOffset = texcoordAccessor["byteOffset"]
 glBindBuffer(texcoordTarget, texcoordVBO[])
-glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(texcoordAccessor["byteOffset"]))
+glVertexAttribPointer(2, 2, texcoordComponentType, GL_FALSE, GLsizei(texcoordByteStride), Ptr{Void}(texcoordByteOffset))
 glEnableVertexAttribArray(2)
 
 # create shader program

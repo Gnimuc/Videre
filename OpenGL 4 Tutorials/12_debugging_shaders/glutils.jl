@@ -12,7 +12,7 @@ function shaderlog(shaderID::GLuint)
     actualLength = Ref{GLsizei}(0)
     log = Vector{GLchar}(maxLength[])
     glGetShaderInfoLog(shaderID, maxLength[], actualLength, log)
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     info(logger, string("shader info log for GL index ", shaderID, ":"))
     info(logger, String(log))
 end
@@ -24,7 +24,7 @@ function programlog(programID::GLuint)
     actualLength = Ref{GLsizei}(0)
     log = Vector{GLchar}(maxLength[])
     glGetProgramInfoLog(programID, maxLength[], actualLength, log)
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     info(logger, string("program info log for GL index ", programID, ":"))
     info(logger, String(log))
 end
@@ -32,7 +32,7 @@ end
 # print verbose infos
 function printall(shaderProgramID::GLuint)
     result = Ref{GLint}(-1)
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     info(logger, string("Shader Program ", shaderProgramID, " verbose info:"))
     glGetProgramiv(shaderProgramID, GL_LINK_STATUS, result)
     info(logger, string("GL_LINK_STATUS = ", result[]))
@@ -97,7 +97,7 @@ function validprogram(shaderProgramID::GLuint)
     glValidateProgram(shaderProgramID)
     glGetProgramiv(shaderProgramID, GL_VALIDATE_STATUS, validResult)
     log = string("program ", shaderProgramID, " GL_VALIDATE_STATUS = ", validResult[])
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     info(logger, log)
     if validResult[] != GL_TRUE
         programlog(shaderProgramID)
@@ -133,7 +133,7 @@ function glparams()
         	  "GL_MAX_VIEWPORT_DIMS",
         	  "GL_STEREO" ]
 
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     info(logger, "GL Context Params:")
     for i = 1:10
         v = Ref{GLint}(0)
@@ -211,7 +211,7 @@ end
 
 # error callback
 function error_callback(error::Cint, description::Ptr{GLchar})
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     s = @sprintf "GLFW ERROR: code %i msg: %s" error description
 	error(logger, s)
     return nothing
@@ -231,7 +231,7 @@ function startgl()
 
     # set up GLFW log and error callbacks
     Memento.config("notice"; fmt="[ {date} | {level} ]: {msg}")
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     add_handler(logger, DefaultHandler("gl.log", DefaultFormatter("[{date} | {level}]: {msg}")))
     set_level(logger, "info")
     info(logger, "starting GLFW ...")
@@ -364,7 +364,7 @@ end
 
 # create shader
 function createshader(source::AbstractString, shaderType::GLenum)
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     info(logger, string("creating shader from ", source, "..."))
     shader = readstring(source)
     shaderID = glCreateShader(shaderType)
@@ -385,7 +385,7 @@ end
 # create program
 function createprogram(vertID::GLuint, fragID::GLuint)
     shaderProgramID = glCreateProgram()
-    logger = get_logger(current_module())
+    logger = getlogger(current_module())
     info(logger, string("creating program ", shaderProgramID, " attaching shaders: ", vertID, " and ", fragID, "..."))
     glAttachShader(shaderProgramID, vertID)
     glAttachShader(shaderProgramID, fragID)
