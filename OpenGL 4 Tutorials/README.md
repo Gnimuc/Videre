@@ -16,11 +16,8 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 
 ## TODO List
 - [ ] **Video Capture**
-- [ ] **Gamma Correction**
 - [ ] **Extension Checks and the Debug Callback**
 - [ ] **Uniform Buffer Objects and Buffer Mapping Functions**
-- [ ] **Importing a Mesh File**
-- [ ] **Multi-Texturing**
 - [ ] **Using Texture for Lighting Coefficients**
 - [ ] **Fragment Rejection**
 - [ ] **Alpha Blending for Transparency**
