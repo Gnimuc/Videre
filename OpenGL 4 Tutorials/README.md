@@ -19,8 +19,6 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 - [ ] **Extension Checks and the Debug Callback**
 - [ ] **Uniform Buffer Objects and Buffer Mapping Functions**
 - [ ] **Using Texture for Lighting Coefficients**
-- [ ] **Alpha Blending for Transparency**
-- [ ] **Spotlights and Directional Lights**
 - [ ] **Distance Fog**
 - [ ] **Normal Mapping**
 - [ ] **Cube Maps: Sky Boxes and Environment Mapping**
