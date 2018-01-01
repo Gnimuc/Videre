@@ -83,8 +83,8 @@ end
 # set up GLFW log and error callbacks
 Memento.config("notice"; fmt="[ {date} | {level} ]: {msg}")
 logger = getlogger(current_module())
-add_handler(logger, DefaultHandler("gl.log", DefaultFormatter("[{date} | {level}]: {msg}")))
-set_level(logger, "info")
+push!(logger, DefaultHandler("gl.log", DefaultFormatter("[{date} | {level}]: {msg}")))
+setlevel!(logger, "info")
 info(logger, "starting GLFW ...")
 info(logger, GLFW.GetVersionString())
 
