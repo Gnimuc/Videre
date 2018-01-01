@@ -1,6 +1,5 @@
 # Anton's OpenGL 4 Tutorials
-This is not a one-to-one correspondence translation from [this repo](https://github.com/capnramses/antons_opengl_tutorials_book).
-The only thing I can guarantee is the outputs of those codes are quite the same.
+The demo code is translated from [this repo](https://github.com/capnramses/antons_opengl_tutorials_book).
 
 ## Dependencies
 ### Basic
@@ -19,7 +18,6 @@ The only thing I can guarantee is the outputs of those codes are quite the same.
 - [ ] **Extension Checks and the Debug Callback**
 - [ ] **Uniform Buffer Objects and Buffer Mapping Functions**
 - [ ] **Using Texture for Lighting Coefficients**
-- [ ] **Distance Fog**
 - [ ] **Normal Mapping**
 - [ ] **Cube Maps: Sky Boxes and Environment Mapping**
 - [ ] **Geometry Shaders**
