@@ -20,7 +20,6 @@ The demo code is translated from [this repo](https://github.com/capnramses/anton
 - [ ] **Using Texture for Lighting Coefficients**
 - [ ] **Normal Mapping**
 - [ ] **Cube Maps: Sky Boxes and Environment Mapping**
-- [ ] **Tessellation Shaders**
 - [ ] **2d GUI Panels**
 - [ ] **Sprite Sheets and 2d Animation**
 - [ ] **Bitmap Fonts**
