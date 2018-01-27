@@ -1,19 +1,12 @@
 # Videre 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
 
-OpenGL examples written in julia.
-
-# Usage
-Please set up OpenGL version before running these examples.
-
-| Platform | Default GL Version|
-| :--------|:----------------: |
-| OSX      | 4.1               |
-| Linux    | highest possible  |
-| Windows  | highest possible  |
+OpenGL/Vulkan examples written in Julia.
 
 ## References
-[Anton's OpenGL 4 Tutorials](http://antongerdelan.net/opengl/)
+1. [Anton's OpenGL 4 Tutorials](http://antongerdelan.net/opengl/)
+2. https://vulkan-tutorial.com
+
 <!--
 [OpenGL 4 Shading Language Cookbook (2nd Ed)](http://www.amazon.com/OpenGL-Shading-Language-Cookbook-Edition/dp/1782167021)
 [OpenGL Superbible, 6th edition: Comprehensive Tutorial and Reference](http://www.openglsuperbible.com)
