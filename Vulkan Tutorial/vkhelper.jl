@@ -8,25 +8,62 @@ function GetRequiredInstanceExtensions()
     return count[], ptr, unsafe_string.(unsafe_wrap(Array, ptr, count[]))
 end
 
+vktuple2string(x) = x |> collect |> String |> s->strip(s, '\0')
+
+# helper types
+struct ExtensionProperties
+    extensionName::String
+    specVersion::Int
+end
+ExtensionProperties(extension::vk.VkExtensionProperties) = ExtensionProperties(vktuple2string(extension.extensionName), Int(extension.specVersion))
+
+struct LayerProperties
+    layerName::String
+    specVersion::Int
+    implementationVersion::Int
+    description::String
+end
+LayerProperties(layer::vk.VkLayerProperties) = LayerProperties(vktuple2string(layer.layerName), Int(layer.specVersion), Int(layer.implementationVersion), vktuple2string(layer.description))
+
+
 function get_supported_extensions()
     extensionCountRef = Ref{Cuint}(0)
     vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
     extensionCount = extensionCountRef[]
     supportedExtensions = Vector{vk.VkExtensionProperties}(extensionCount)
     vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, supportedExtensions)
-    return supportedExtensions
+    return [ExtensionProperties(ext) for ext in supportedExtensions]
 end
 
 function checkextensions(requiredExtensions::Vector{T}) where {T<:AbstractString}
     supportedExtensions = get_supported_extensions()
-    supportedExtensionNames = [ext.extensionName |> collect |> String |> x->strip(x, '\0') for ext in supportedExtensions]
-    supportedExtensionVersions = [ext.specVersion |> Int for ext in supportedExtensions]
     println("available extensions:")
-    for (ext, ver) in zip(supportedExtensionNames, supportedExtensionVersions)
-        println("  ", ext, ": ", ver)
+    for ext in supportedExtensions
+        println("  ", ext.extensionName, ": ", ext.specVersion)
     end
+    supportedExtensionNames = [ext.extensionName for ext in supportedExtensions]
     setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("all required extensions are supported.")
 end
+
+function get_supported_layers()
+    layerCountRef = Ref{Cuint}(0)
+    vk.vkEnumerateInstanceLayerProperties(layerCountRef, C_NULL)
+    layerCount = layerCountRef[]
+    availableLayers = Vector{vk.VkLayerProperties}(layerCount)
+    vk.vkEnumerateInstanceLayerProperties(layerCountRef, availableLayers)
+    return [LayerProperties(layer) for layer in availableLayers]
+end
+
+function checklayers(requiredLayers::Vector{T}) where {T<:AbstractString}
+    supportedLayers = get_supported_layers()
+    println("available layers:")
+    for layer in supportedLayers
+        println("  ", layer.layerName, ": ", layer.description, ": ", layer.specVersion, " -- ", layer.implementationVersion)
+    end
+    supportedLayerNames = [layer.layerName for layer in supportedLayers]
+    setdiff(requiredLayers, supportedLayerNames) |> isempty || error("all required layers are supported.")
+end
+
 
 
 # helper constructors
