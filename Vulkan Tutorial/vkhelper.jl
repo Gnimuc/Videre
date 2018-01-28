@@ -12,9 +12,9 @@ end
 function VkApplicationInfo(applicationName::AbstractString, applicationVersion::VersionNumber, engineName::AbstractString, engineVersion::VersionNumber, apiVersion::Integer)
     sType = vk.VK_STRUCTURE_TYPE_APPLICATION_INFO
     pNext = C_NULL    # reserved for extension-specific structure
-    pApplicationName = pointer(UInt8[applicationName...])    # TODO: use codeunits(applicationName) in julia-v0.7+
+    pApplicationName = pointer(transcode(Cuchar, applicationName))    # TODO: use codeunits(applicationName) in julia-v0.7+
     vkApplicationVersion = vk.VK_MAKE_VERSION(applicationVersion.major, applicationVersion.minor, applicationVersion.patch)
-    pEngineName = pointer(UInt8[engineName...])    # TODO: use codeunits(engineName) in julia-v0.7+
+    pEngineName = pointer(transcode(Cuchar, applicationName))    # TODO: use codeunits(engineName) in julia-v0.7+
     vkEngineVersion = vk.VK_MAKE_VERSION(engineVersion.major, engineVersion.minor, engineVersion.patch)
     return vk.VkApplicationInfo(sType, pNext, pApplicationName, vkApplicationVersion, pEngineName, vkEngineVersion, Cuint(apiVersion))
 end
