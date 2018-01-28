@@ -29,21 +29,8 @@ enabledExtensionCount, ppEnabledExtensionNames, extensions = GetRequiredInstance
 enabledLayerCount = UInt32(0)
 ppEnabledLayerNames = C_NULL
 createInfoRef = vk.VkInstanceCreateInfo(sType, C_NULL, flags, pApplicationInfo, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
-
 # check extension
-extensionCountRef = Ref{Cuint}(0)
-vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
-extensionCount = extensionCountRef[]
-supportedExtensions = Vector{vk.VkExtensionProperties}(extensionCount)
-vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, supportedExtensions)
-supportedExtensionNames = [ext.extensionName |> collect |> String |> x->strip(x, '\0') for ext in supportedExtensions]
-supportedExtensionVersions = [ext.specVersion |> Int for ext in supportedExtensions]
-println("available extensions:")
-for (ext, ver) in zip(supportedExtensionNames, supportedExtensionVersions)
-    println("  ", ext, ": ", ver)
-end
-setdiff(extensions, supportedExtensionNames) |> isempty || error("all required extensions are supported.")
-
+checkextensions(extensions)
 # create instance
 instanceRef = Ref{vk.VkInstance}(C_NULL)
 result = vk.vkCreateInstance(createInfoRef, C_NULL, instanceRef)
