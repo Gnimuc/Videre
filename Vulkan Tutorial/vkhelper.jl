@@ -8,6 +8,27 @@ function GetRequiredInstanceExtensions()
     return count[], ptr, unsafe_string.(unsafe_wrap(Array, ptr, count[]))
 end
 
+function get_supported_extensions()
+    extensionCountRef = Ref{Cuint}(0)
+    vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
+    extensionCount = extensionCountRef[]
+    supportedExtensions = Vector{vk.VkExtensionProperties}(extensionCount)
+    vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, supportedExtensions)
+    return supportedExtensions
+end
+
+function checkextensions(requiredExtensions::Vector{T}) where {T<:AbstractString}
+    supportedExtensions = get_supported_extensions()
+    supportedExtensionNames = [ext.extensionName |> collect |> String |> x->strip(x, '\0') for ext in supportedExtensions]
+    supportedExtensionVersions = [ext.specVersion |> Int for ext in supportedExtensions]
+    println("available extensions:")
+    for (ext, ver) in zip(supportedExtensionNames, supportedExtensionVersions)
+        println("  ", ext, ": ", ver)
+    end
+    setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("all required extensions are supported.")
+end
+
+
 # helper constructors
 function VkApplicationInfo(applicationName::AbstractString, applicationVersion::VersionNumber, engineName::AbstractString, engineVersion::VersionNumber, apiVersion::Integer)
     sType = vk.VK_STRUCTURE_TYPE_APPLICATION_INFO
