@@ -15,7 +15,9 @@ window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 # create instance
 apiVersion = vk.VK_VERSION
 appInfoRef = VkApplicationInfo("Application Name: Create Instance", v"1.0.0", "No Engine Name", v"1.0.0", apiVersion) |> Ref
-enabledExtensionCount, ppEnabledExtensionNames, extensions = GetRequiredInstanceExtensions()
+requiredExtensions = GLFW.GetRequiredInstanceExtensions()
+enabledExtensionCount = length(requiredExtensions)
+ppEnabledExtensionNames = strings2pp(requiredExtensions)
 createInfoRef = VkInstanceCreateInfo(appInfoRef, 0, C_NULL, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
 # create instance
 instanceRef = Ref{vk.VkInstance}(C_NULL)

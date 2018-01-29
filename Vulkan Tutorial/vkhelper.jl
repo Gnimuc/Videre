@@ -2,11 +2,14 @@ using GLFW
 using VulkanCore
 
 # helper functions
+# TODO: use GC.@preserve in Julia-v0.7+
+const gc_preserve = []
 """
     strings2pp(names) -> ppNames
 Dump a pointer that is of type `Ptr{String}` from a Julia `String` array.
 """
-strings2pp(names::Vector{String}) = (ptr = Base.cconvert(Ptr{Cstring}, names); Base.unsafe_convert(Ptr{Cstring}, ptr))
+strings2pp(names::Vector{String}) = (ptr = Base.cconvert(Ptr{Cstring}, names); push!(gc_preserve, ptr); Base.unsafe_convert(Ptr{Cstring}, ptr))
+# strings2pp(names::Vector{String}) = (ptr = Base.cconvert(Ptr{Cstring}, names); GC.@preserve ptr Base.unsafe_convert(Ptr{Cstring}, ptr))
 
 vktuple2string(x) = x |> collect |> String |> s->strip(s, '\0')
 
@@ -65,7 +68,6 @@ function checklayers(requiredLayers::Vector{T}) where {T<:AbstractString}
 end
 
 
-
 # helper constructors
 function VkApplicationInfo(applicationName::AbstractString, applicationVersion::VersionNumber, engineName::AbstractString, engineVersion::VersionNumber, apiVersion::Integer)
     sType = vk.VK_STRUCTURE_TYPE_APPLICATION_INFO
@@ -77,14 +79,18 @@ function VkApplicationInfo(applicationName::AbstractString, applicationVersion::
     return vk.VkApplicationInfo(sType, pNext, pApplicationName, vkApplicationVersion, pEngineName, vkEngineVersion, Cuint(apiVersion))
 end
 
-function VkInstanceCreateInfo(applicationInfoRef::Ref{vk.VkApplicationInfo}, layerNames::Vector{String}, extensionNames::Vector{String})
+function VkInstanceCreateInfo(applicationInfoRef::Ref{vk.VkApplicationInfo}, enabledLayerCount::Integer, ppEnabledLayerNames::Ref, enabledExtensionCount::Integer, ppEnabledExtensionNames::Ref)
     sType = vk.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
     pNext = C_NULL    # reserved for extension-specific structure
     flags = UInt32(0)    # reserved for future use
     pApplicationInfo = Base.unsafe_convert(Ptr{vk.VkApplicationInfo}, applicationInfoRef)
+    return vk.VkInstanceCreateInfo(sType, pNext, flags, pApplicationInfo, Cuint(enabledLayerCount), ppEnabledLayerNames, Cuint(enabledExtensionCount), ppEnabledExtensionNames)
+end
+
+function VkInstanceCreateInfo(applicationInfoRef, layerNames::Vector{String}, extensionNames::Vector{String})
     enabledLayerCount = length(layerNames)
     ppEnabledLayerNames = strings2pp(layerNames)
     enabledExtensionCount = length(extensionNames)
     ppEnabledExtensionNames = strings2pp(extensionNames)
-    return vk.VkInstanceCreateInfo(sType, pNext, flags, pApplicationInfo, Cuint(enabledLayerCount), ppEnabledLayerNames, Cuint(enabledExtensionCount), ppEnabledExtensionNames)
+    return VkInstanceCreateInfo(applicationInfoRef, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames)
 end
