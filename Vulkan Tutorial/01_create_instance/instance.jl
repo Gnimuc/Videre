@@ -13,22 +13,10 @@ window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 
 ## init Vulkan
 # create instance
-# fill application info
-sType = vk.VK_STRUCTURE_TYPE_APPLICATION_INFO
-pApplicationName = pointer(b"Vulkan Instance")
-applicationVersion = vk.VK_MAKE_VERSION(1, 0, 0)
-pEngineName = pointer(b"No Engine")
-engineVersion = vk.VK_MAKE_VERSION(1, 0, 0)
 apiVersion = vk.VK_VERSION
-appInfoRef = vk.VkApplicationInfo(sType, C_NULL, pApplicationName, applicationVersion, pEngineName, engineVersion, apiVersion) |> Ref
-# fill create info
-sType = vk.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
-flags = UInt32(0)
-pApplicationInfo = Base.unsafe_convert(Ptr{vk.VkApplicationInfo}, appInfoRef)
+appInfoRef = VkApplicationInfo("Application Name: Create Instance", v"1.0.0", "No Engine Name", v"1.0.0", apiVersion) |> Ref
 enabledExtensionCount, ppEnabledExtensionNames, extensions = GetRequiredInstanceExtensions()
-enabledLayerCount = UInt32(0)
-ppEnabledLayerNames = C_NULL
-createInfoRef = vk.VkInstanceCreateInfo(sType, C_NULL, flags, pApplicationInfo, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
+createInfoRef = VkInstanceCreateInfo(appInfoRef, 0, C_NULL, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
 # create instance
 instanceRef = Ref{vk.VkInstance}(C_NULL)
 result = vk.vkCreateInstance(createInfoRef, C_NULL, instanceRef)

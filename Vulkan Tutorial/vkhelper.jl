@@ -2,11 +2,11 @@ using GLFW
 using VulkanCore
 
 # helper functions
-function GetRequiredInstanceExtensions()
-    count = Ref{Cuint}(0)
-    ptr = ccall((:glfwGetRequiredInstanceExtensions, GLFW.lib), Ptr{Ptr{Cchar}}, (Ref{Cuint},), count)
-    return count[], ptr, unsafe_string.(unsafe_wrap(Array, ptr, count[]))
-end
+"""
+    strings2pp(names) -> ppNames
+Dump a pointer that is of type `Ptr{String}` from a Julia `String` array.
+"""
+strings2pp(names::Vector{String}) = (ptr = Base.cconvert(Ptr{Cstring}, names); Base.unsafe_convert(Ptr{Cstring}, ptr))
 
 vktuple2string(x) = x |> collect |> String |> s->strip(s, '\0')
 
@@ -77,10 +77,14 @@ function VkApplicationInfo(applicationName::AbstractString, applicationVersion::
     return vk.VkApplicationInfo(sType, pNext, pApplicationName, vkApplicationVersion, pEngineName, vkEngineVersion, Cuint(apiVersion))
 end
 
-function VkInstanceCreateInfo(applicationInfoRef::Ref{vk.VkApplicationInfo}, enabledLayerCount::Integer, ppEnabledLayerNames, enabledExtensionCount::Integer, ppEnabledExtensionNames)
+function VkInstanceCreateInfo(applicationInfoRef::Ref{vk.VkApplicationInfo}, layerNames::Vector{String}, extensionNames::Vector{String})
     sType = vk.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
     pNext = C_NULL    # reserved for extension-specific structure
     flags = UInt32(0)    # reserved for future use
     pApplicationInfo = Base.unsafe_convert(Ptr{vk.VkApplicationInfo}, applicationInfoRef)
+    enabledLayerCount = length(layerNames)
+    ppEnabledLayerNames = strings2pp(layerNames)
+    enabledExtensionCount = length(extensionNames)
+    ppEnabledExtensionNames = strings2pp(extensionNames)
     return vk.VkInstanceCreateInfo(sType, pNext, flags, pApplicationInfo, Cuint(enabledLayerCount), ppEnabledLayerNames, Cuint(enabledExtensionCount), ppEnabledExtensionNames)
 end
