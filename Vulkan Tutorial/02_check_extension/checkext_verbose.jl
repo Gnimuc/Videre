@@ -39,7 +39,7 @@ println("available extensions:")
 for (ext, ver) in zip(supportedExtensionNames, supportedExtensionVersions)
     println("  ", ext, ": ", ver)
 end
-setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("all required extensions are supported.")
+setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("not all required extensions are supported.")
 enabledExtensionCount = Cuint(length(requiredExtensions))
 ppEnabledExtensionNames = strings2pp(requiredExtensions)
 enabledLayerCount = Cuint(0)

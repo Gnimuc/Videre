@@ -39,7 +39,7 @@ println("available extensions:")
 for (ext, ver) in zip(supportedExtensionNames, supportedExtensionVersions)
     println("  ", ext, ": ", ver)
 end
-setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("all required extensions are supported.")
+setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("not all required extensions are supported.")
 enabledExtensionCount = Cuint(length(requiredExtensions))
 ppEnabledExtensionNames = strings2pp(requiredExtensions)
 # validation layer
@@ -55,7 +55,7 @@ println("available layers:")
 for (name,description) in zip(availableLayerNames, availableLayerDescription)
     println("  ", name, ": ", description)
 end
-setdiff(requiredLayers, availableLayerNames) |> isempty || error("all required layers are supported.")
+setdiff(requiredLayers, availableLayerNames) |> isempty || error("not all required layers are supported.")
 enabledLayerCount = Cuint(length(requiredLayers))
 ppEnabledLayerNames = strings2pp(requiredLayers)
 createInfoRef = vk.VkInstanceCreateInfo(sType, C_NULL, flags, pApplicationInfo, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames) |> Ref

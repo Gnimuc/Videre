@@ -45,7 +45,7 @@ function checkextensions(requiredExtensions::Vector{T}) where {T<:AbstractString
         println("  ", ext.extensionName, ": ", ext.specVersion)
     end
     supportedExtensionNames = [ext.extensionName for ext in supportedExtensions]
-    setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("all required extensions are supported.")
+    setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("not all required extensions are supported.")
 end
 
 function get_supported_layers()
@@ -64,7 +64,7 @@ function checklayers(requiredLayers::Vector{T}) where {T<:AbstractString}
         println("  ", layer.layerName, ": ", layer.description, ": ", layer.specVersion, " -- ", layer.implementationVersion)
     end
     supportedLayerNames = [layer.layerName for layer in supportedLayers]
-    setdiff(requiredLayers, supportedLayerNames) |> isempty || error("all required layers are supported.")
+    setdiff(requiredLayers, supportedLayerNames) |> isempty || error("not all required layers are supported.")
 end
 
 
