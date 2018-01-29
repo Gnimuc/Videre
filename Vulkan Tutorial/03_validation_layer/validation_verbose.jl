@@ -42,8 +42,22 @@ end
 setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("all required extensions are supported.")
 enabledExtensionCount = Cuint(length(requiredExtensions))
 ppEnabledExtensionNames = strings2pp(requiredExtensions)
-enabledLayerCount = Cuint(0)
-ppEnabledLayerNames = C_NULL
+# validation layer
+requiredLayers = ["VK_LAYER_LUNARG_standard_validation"]
+layerCountRef = Ref{Cuint}(0)
+vk.vkEnumerateInstanceLayerProperties(layerCountRef, C_NULL)
+layerCount = layerCountRef[]
+availableLayers = Vector{vk.VkLayerProperties}(layerCount)
+vk.vkEnumerateInstanceLayerProperties(layerCountRef, availableLayers)
+availableLayerNames = [layer.layerName |> collect |> String |> x->strip(x, '\0') for layer in availableLayers]
+availableLayerDescription = [layer.description |> collect |> String |> x->strip(x, '\0') for layer in availableLayers]
+println("available layers:")
+for (name,description) in zip(availableLayerNames, availableLayerDescription)
+    println("  ", name, ": ", description)
+end
+setdiff(requiredLayers, availableLayerNames) |> isempty || error("all required layers are supported.")
+enabledLayerCount = Cuint(length(requiredLayers))
+ppEnabledLayerNames = strings2pp(requiredLayers)
 createInfoRef = vk.VkInstanceCreateInfo(sType, C_NULL, flags, pApplicationInfo, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
 
 # create instance
