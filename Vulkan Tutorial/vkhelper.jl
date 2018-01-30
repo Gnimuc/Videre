@@ -94,3 +94,23 @@ function VkInstanceCreateInfo(applicationInfoRef, layerNames::Vector{String}, ex
     ppEnabledExtensionNames = strings2pp(extensionNames)
     return VkInstanceCreateInfo(applicationInfoRef, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames)
 end
+
+function VkDebugReportCallbackCreateInfoEXT(debugcallback::Function, flags::vk.VkDebugReportFlagBitsEXT=vk.VK_DEBUG_REPORT_ERROR_BIT_EXT, pUserData=C_NULL)
+    sType = vk.VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
+    pNext = C_NULL    # reserved for extension-specific structure
+    pfnCallback = cfunction(debugcallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT,
+                                                              Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Void}})
+    return vk.VkDebugReportCallbackCreateInfoEXT(sType, pNext, flags, pfnCallback, pUserData)
+end
+
+function VkCreateDebugReportCallbackEXT(instance, callbackInfoRef, allocatorRef, callbackRef)
+    fnptr = vk.vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT") |> vk.PFN_vkCreateDebugReportCallbackEXT
+    ccall(fnptr, vk.VkResult, (vk.VkInstance, Ptr{vk.VkDebugReportCallbackCreateInfoEXT}, Ptr{vk.VkAllocationCallbacks},
+                               Ptr{vk.VkDebugReportCallbackEXT}), instance, callbackInfoRef, allocatorRef, callbackRef)
+end
+VkCreateDebugReportCallbackEXT(instance, callbackInfoRef, callbackRef) = VkCreateDebugReportCallbackEXT(instance, callbackInfoRef, C_NULL, callbackRef)
+
+function VkDestroyDebugReportCallbackEXT(instance, callback, allocatorRef=C_NULL)
+    fnptr = vk.vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT") |> vk.PFN_vkCreateDebugReportCallbackEXT
+    ccall(fnptr, vk.VkResult, (vk.VkInstance, vk.VkDebugReportCallbackEXT, Ptr{vk.VkAllocationCallbacks}), instance, callback, allocatorRef)
+end

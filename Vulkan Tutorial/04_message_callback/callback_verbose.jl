@@ -68,27 +68,28 @@ result != vk.VK_SUCCESS && error("failed to create instance!")
 instance = instanceRef[]
 
 
-# message callback
-function debugCallback(flags::vk.VkDebugReportFlagsEXT, objType::vk.VkDebugReportObjectTypeEXT,
+## message callback
+function debugcallback(flags::vk.VkDebugReportFlagsEXT, objType::vk.VkDebugReportObjectTypeEXT,
                        obj::Culonglong, location::Csize_t, code::Cint, layerPrefix::Ptr{Cchar},
                        msg::Ptr{Cchar}, userData::Ptr{Void})::vk.VkBool32
     println("validation layer: ", Base.unsafe_string(msg))
     return vk.VK_FALSE
 end
 
-
 # fill callback info
 sType = vk.VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
 pNext = C_NULL
 flags = vk.VK_DEBUG_REPORT_ERROR_BIT_EXT
-pfnCallback = cfunction(debugCallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT, Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Void}})
+pfnCallback = cfunction(debugcallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT,
+                                                          Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Void}})
 pUserData = C_NULL
 callbackInfoRef = vk.VkDebugReportCallbackCreateInfoEXT(sType, pNext, flags, pfnCallback, pUserData) |> Ref
-# register callback
-callback = Ref{vk.VkDebugReportCallbackEXT}(C_NULL)
-funcptr = vk.vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT") |> vk.PFN_vkCreateDebugReportCallbackEXT
-ccall(funcptr, vk.VkResult, (vk.VkInstance, Ptr{vk.VkDebugReportCallbackCreateInfoEXT},
-    Ptr{vk.VkAllocationCallbacks}, Ptr{vk.VkDebugReportCallbackEXT}), instance, callbackInfoRef, C_NULL, callback)
+# create debug report callback
+callbackRef = Ref{vk.VkDebugReportCallbackEXT}(C_NULL)
+createptr = vk.vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT") |> vk.PFN_vkCreateDebugReportCallbackEXT
+ccall(createptr, vk.VkResult, (vk.VkInstance, Ptr{vk.VkDebugReportCallbackCreateInfoEXT}, Ptr{vk.VkAllocationCallbacks},
+                               Ptr{vk.VkDebugReportCallbackEXT}), instance, callbackInfoRef, C_NULL, callbackRef)
+callback = callbackRef[]
 
 ## main loop
 while !GLFW.WindowShouldClose(window)
@@ -96,5 +97,7 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## clean up
+destroyptr = vk.vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT") |> vk.PFN_vkCreateDebugReportCallbackEXT
+ccall(destroyptr, vk.VkResult, (vk.VkInstance, vk.VkDebugReportCallbackEXT, Ptr{vk.VkAllocationCallbacks}), instance, callback, C_NULL)
 vk.vkDestroyInstance(instance, C_NULL)
 GLFW.DestroyWindow(window)
