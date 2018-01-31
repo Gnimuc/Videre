@@ -95,7 +95,7 @@ function VkInstanceCreateInfo(applicationInfoRef, layerNames::Vector{String}, ex
     return VkInstanceCreateInfo(applicationInfoRef, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames)
 end
 
-function VkDebugReportCallbackCreateInfoEXT(debugcallback::Function, flags::vk.VkDebugReportFlagBitsEXT=vk.VK_DEBUG_REPORT_ERROR_BIT_EXT, pUserData=C_NULL)
+function VkDebugReportCallbackCreateInfoEXT(debugcallback::Function, flags::vk.VkDebugReportFlagsEXT=vk.VK_DEBUG_REPORT_ERROR_BIT_EXT, pUserData=C_NULL)
     sType = vk.VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
     pNext = C_NULL    # reserved for extension-specific structure
     pfnCallback = cfunction(debugcallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT,

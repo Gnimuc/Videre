@@ -79,7 +79,7 @@ end
 # fill callback info
 sType = vk.VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
 pNext = C_NULL
-flags = vk.VK_DEBUG_REPORT_ERROR_BIT_EXT
+flags = vk.VK_DEBUG_REPORT_ERROR_BIT_EXT | vk.VK_DEBUG_REPORT_WARNING_BIT_EXT
 pfnCallback = cfunction(debugcallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT,
                                                           Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Void}})
 pUserData = C_NULL

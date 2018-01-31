@@ -44,7 +44,8 @@ function debugcallback(flags::vk.VkDebugReportFlagsEXT, objType::vk.VkDebugRepor
 end
 
 # create debug report callback
-callbackInfoRef = VkDebugReportCallbackCreateInfoEXT(debugcallback) |> Ref
+flags = vk.VK_DEBUG_REPORT_ERROR_BIT_EXT | vk.VK_DEBUG_REPORT_WARNING_BIT_EXT
+callbackInfoRef = VkDebugReportCallbackCreateInfoEXT(debugcallback, flags) |> Ref
 callbackRef = Ref{vk.VkDebugReportCallbackEXT}(C_NULL)
 VkCreateDebugReportCallbackEXT(instance, callbackInfoRef, callbackRef)
 callback = callbackRef[]
