@@ -5,7 +5,8 @@ OpenGL/Vulkan examples written in Julia.
 
 ## References
 1. [Anton's OpenGL 4 Tutorials](http://antongerdelan.net/opengl/)
-2. https://vulkan-tutorial.com
+2. https://learnopengl.com
+3. https://vulkan-tutorial.com
 
 <!--
 [OpenGL 4 Shading Language Cookbook (2nd Ed)](http://www.amazon.com/OpenGL-Shading-Language-Cookbook-Edition/dp/1782167021)
