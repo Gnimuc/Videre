@@ -218,7 +218,7 @@ end
 
 # start OpenGL
 function startgl()
-    @static if is_apple()
+    @static if Sys.isapple()
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
         GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)

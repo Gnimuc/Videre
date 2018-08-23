@@ -1,15 +1,15 @@
 using GLFW
 using ModernGL
-using Memento
+using Printf
 
 # set up OpenGL context version
 # it seems OpenGL 4.1 is the highest version supported by MacOS.
-@static if is_apple()
+@static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
 
-@static if is_apple()
+@static if Sys.isapple()
     GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
     GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
     GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)
@@ -17,6 +17,7 @@ end
 else
     GLFW.DefaultWindowHints()
 end
+
 
 # _update_fps_counter
 let previousTime = time()
@@ -27,82 +28,24 @@ let previousTime = time()
         if elapsedTime > 0.25
             previousTime = currentTime
             fps = frameCount / elapsedTime
-            s = @sprintf "opengl @ fps: %.2f" fps
-            GLFW.SetWindowTitle(window, s)
+            GLFW.SetWindowTitle(window, @sprintf("opengl @ fps: %.2f", fps))
             frameCount = 0
         end
         frameCount = frameCount + 1
     end
 end
 
-# load OpenGL parameters info
-function glparams()
-    params = GLenum[ GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,
-                     GL_MAX_CUBE_MAP_TEXTURE_SIZE,
-                     GL_MAX_DRAW_BUFFERS,
-                     GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,
-                     GL_MAX_TEXTURE_IMAGE_UNITS,
-                     GL_MAX_TEXTURE_SIZE,
-                     GL_MAX_VARYING_FLOATS,
-                     GL_MAX_VERTEX_ATTRIBS,
-                     GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS,
-                     GL_MAX_VERTEX_UNIFORM_COMPONENTS,
-                     GL_MAX_VIEWPORT_DIMS,
-                     GL_STEREO ]
-    names = [ "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS",
-    	 	  "GL_MAX_CUBE_MAP_TEXTURE_SIZE",
-    		  "GL_MAX_DRAW_BUFFERS",
-    		  "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS",
-        	  "GL_MAX_TEXTURE_IMAGE_UNITS",
-        	  "GL_MAX_TEXTURE_SIZE",
-        	  "GL_MAX_VARYING_FLOATS",
-        	  "GL_MAX_VERTEX_ATTRIBS",
-        	  "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS",
-        	  "GL_MAX_VERTEX_UNIFORM_COMPONENTS",
-        	  "GL_MAX_VIEWPORT_DIMS",
-        	  "GL_STEREO" ]
-
-    logger = getlogger(current_module())
-    info(logger, "GL Context Params:")
-    for i = 1:10
-        v = Ref{GLint}(0)
-        glGetIntegerv(params[i], v)
-        info(logger, string(names[i], ": ", v[]))
-    end
-    v = GLint[0, 0]
-    s = Ref{GLboolean}(0)
-    glGetIntegerv(params[11], v)
-    info(logger, string(names[11], ": ", v[1], " | ", v[2]))
-    glGetBooleanv(params[12], s)
-    info(logger, string(names[12], ": ", s[]))
-    info(logger, "-----------------------------")
-    return nothing
-end
-
-
-# set up GLFW log and error callbacks
-Memento.config("notice"; fmt="[ {date} | {level} ]: {msg}")
-logger = getlogger(current_module())
-push!(logger, DefaultHandler("gl.log", DefaultFormatter("[{date} | {level}]: {msg}")))
-setlevel!(logger, "info")
-info(logger, "starting GLFW ...")
-info(logger, GLFW.GetVersionString())
+# set up GLFW error callbacks
+@info "starting GLFW ..."
+@info GLFW.GetVersionString()
 
 # error callback
-function error_callback(error::Cint, description::Ptr{GLchar})
-    logger = getlogger(current_module())
-    s = @sprintf "GLFW ERROR: code %i msg: %s" error description
-	error(logger, s)
-    return nothing
-end
+error_callback(error::Cint, description::Ptr{GLchar}) = @error "GLFW ERROR: code $error msg: $description"
 GLFW.SetErrorCallback(error_callback)
 
 # set up GLFW key callbacks : press Esc to escape
-function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint)
-    if (key == GLFW.KEY_ESCAPE && action == GLFW.PRESS)
-        GLFW.SetWindowShouldClose(window, GL_TRUE)
-    end
-end
+key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint) = key == GLFW.KEY_ESCAPE && action == GLFW.PRESS && GLFW.SetWindowShouldClose(window, GL_TRUE)
+
 # : change window size
 function window_size_callback(window::GLFW.Window, width::Cint, height::Cint)
 	global glfwWidth = width
@@ -111,6 +54,7 @@ function window_size_callback(window::GLFW.Window, width::Cint, height::Cint)
 	# update any perspective matrices used here
     return nothing
 end
+
 
 global glfwWidth = 640
 global glfwHeight = 480
@@ -129,9 +73,8 @@ glDepthFunc(GL_LESS)
 # get version info
 renderer = unsafe_string(glGetString(GL_RENDERER))
 version = unsafe_string(glGetString(GL_VERSION))
-info("Renderder: ", renderer)
-info("OpenGL version supported: ", version)
-glparams()
+@info "Renderder: $renderer"
+@info "OpenGL version supported: $version"
 
 # hard-coded shaders
 const vertexShader = """
@@ -169,16 +112,16 @@ points = GLfloat[ 0.0,  0.5, 0.0,
                  -0.5, -0.5, 0.0]
 
 # create buffers located in the memory of graphic card
-vboID = Ref{GLuint}(0)
-glGenBuffers(1, vboID)
-glBindBuffer(GL_ARRAY_BUFFER, vboID[])
+VBORef = Ref{GLuint}(0)
+glGenBuffers(1, VBORef)
+glBindBuffer(GL_ARRAY_BUFFER, VBORef[])
 glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
 
 # create VAO
-vaoID = Ref{GLuint}(0)
-glGenVertexArrays(1, vaoID)
-glBindVertexArray(vaoID[])
-glBindBuffer(GL_ARRAY_BUFFER, vboID[])
+VAORef = Ref{GLuint}(0)
+glGenVertexArrays(1, VAORef)
+glBindVertexArray(VAORef[])
+glBindBuffer(GL_ARRAY_BUFFER, VBORef[])
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
 
@@ -193,7 +136,7 @@ while !GLFW.WindowShouldClose(window)
     glViewport(0, 0, glfwWidth, glfwHeight)
     # drawing
     glUseProgram(shaderProgram)
-    glBindVertexArray(vaoID[])
+    glBindVertexArray(VAORef[])
     glDrawArrays(GL_TRIANGLES, 0, 3)
     # check and call events
     GLFW.PollEvents()

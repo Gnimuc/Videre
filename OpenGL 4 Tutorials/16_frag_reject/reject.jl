@@ -1,7 +1,7 @@
 using FileIO
 include(joinpath(@__DIR__, "glutils.jl"))
 
-@static if is_apple()
+@static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end

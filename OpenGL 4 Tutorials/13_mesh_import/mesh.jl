@@ -1,7 +1,7 @@
 using OffsetArrays
 include(joinpath(@__DIR__, "glutils.jl"))
 
-@static if is_apple()
+@static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
@@ -75,15 +75,15 @@ vaoID = Ref{GLuint}(0)
 glGenVertexArrays(1, vaoID)
 glBindVertexArray(vaoID[])
 glBindBuffer(positionTarget, positionVBO[])
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(positionAccessor["byteOffset"]))
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Cvoid}(positionAccessor["byteOffset"]))
 glEnableVertexAttribArray(0)
 
 glBindBuffer(normalTarget, normalVBO[])
-glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(normalAccessor["byteOffset"]))
+glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Cvoid}(normalAccessor["byteOffset"]))
 glEnableVertexAttribArray(1)
 
 glBindBuffer(texcoordTarget, texcoordVBO[])
-glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(texcoordAccessor["byteOffset"]))
+glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, Ptr{Cvoid}(texcoordAccessor["byteOffset"]))
 glEnableVertexAttribArray(2)
 
 # create shader program
@@ -116,7 +116,7 @@ while !GLFW.WindowShouldClose(window)
     glUseProgram(shaderProgramID)
     glBindVertexArray(vaoID[])
     glBindBuffer(indexTarget, indexEBO[])
-    glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Void}(indexByteOffset))
+    glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Cvoid}(indexByteOffset))
     # check and call events
     GLFW.PollEvents()
     yield()

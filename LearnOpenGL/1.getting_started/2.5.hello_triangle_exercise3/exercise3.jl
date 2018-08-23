@@ -89,13 +89,13 @@ glGenBuffers(2, vbos)
 glBindVertexArray(vaos[1])
 glBindBuffer(GL_ARRAY_BUFFER, vbos[1])
 glBufferData(GL_ARRAY_BUFFER, sizeof(firstTriangle), firstTriangle, GL_STATIC_DRAW)
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), Ptr{Void}(0))
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), Ptr{Cvoid}(0))
 glEnableVertexAttribArray(0)
 # second triangle setup
 glBindVertexArray(vaos[2])
 glBindBuffer(GL_ARRAY_BUFFER, vbos[2])
 glBufferData(GL_ARRAY_BUFFER, sizeof(secondTriangle), secondTriangle, GL_STATIC_DRAW)
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), Ptr{Void}(0))
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), Ptr{Cvoid}(0))
 glEnableVertexAttribArray(0)
 
 # uncomment this call to draw in wireframe polygons.
@@ -108,7 +108,6 @@ while !GLFW.WindowShouldClose(window)
     # render
     glClearColor(0.2, 0.3, 0.3, 1.0)
     glClear(GL_COLOR_BUFFER_BIT)
-
 
 	# draw first triangle
 	glUseProgram(shaderProgramOrange)

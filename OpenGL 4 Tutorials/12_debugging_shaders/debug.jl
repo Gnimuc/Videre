@@ -1,7 +1,7 @@
 using OffsetArrays
 include(joinpath(@__DIR__, "glutils.jl"))
 
-@static if is_apple()
+@static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
@@ -79,21 +79,21 @@ positionComponentType = positionAccessor["componentType"]
 positionByteStride = positionBufferView["byteStride"]
 positionByteOffset = positionAccessor["byteOffset"]
 glBindBuffer(positionTarget, positionVBO[])
-glVertexAttribPointer(0, 3, positionComponentType, GL_FALSE, GLsizei(positionByteStride), Ptr{Void}(positionByteOffset))
+glVertexAttribPointer(0, 3, positionComponentType, GL_FALSE, GLsizei(positionByteStride), Ptr{Cvoid}(positionByteOffset))
 glEnableVertexAttribArray(0)
 
 normalComponentType = normalAccessor["componentType"]
 normalByteStride = normalBufferView["byteStride"]
 normalByteOffset = normalAccessor["byteOffset"]
 glBindBuffer(normalTarget, normalVBO[])
-glVertexAttribPointer(1, 3, normalComponentType, GL_FALSE, GLsizei(normalByteStride), Ptr{Void}(normalByteOffset))
+glVertexAttribPointer(1, 3, normalComponentType, GL_FALSE, GLsizei(normalByteStride), Ptr{Cvoid}(normalByteOffset))
 glEnableVertexAttribArray(1)
 
 texcoordComponentType = texcoordAccessor["componentType"]
 texcoordByteStride = texcoordBufferView["byteStride"]
 texcoordByteOffset = texcoordAccessor["byteOffset"]
 glBindBuffer(texcoordTarget, texcoordVBO[])
-glVertexAttribPointer(2, 2, texcoordComponentType, GL_FALSE, GLsizei(texcoordByteStride), Ptr{Void}(texcoordByteOffset))
+glVertexAttribPointer(2, 2, texcoordComponentType, GL_FALSE, GLsizei(texcoordByteStride), Ptr{Cvoid}(texcoordByteOffset))
 glEnableVertexAttribArray(2)
 
 # create shader program
@@ -140,7 +140,7 @@ while !GLFW.WindowShouldClose(window)
     glUseProgram(shaderProgramID)
     glBindVertexArray(vaoID[])
     glBindBuffer(indexTarget, indexEBO[])
-    glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Void}(indexByteOffset))
+    glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Cvoid}(indexByteOffset))
     # check and call events
     GLFW.PollEvents()
     yield()

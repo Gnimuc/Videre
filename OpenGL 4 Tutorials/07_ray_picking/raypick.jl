@@ -1,7 +1,7 @@
 using OffsetArrays
 include(joinpath(@__DIR__, "glutils.jl"))
 
-@static if is_apple()
+@static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
@@ -171,7 +171,7 @@ vaoID = Ref{GLuint}(0)
 glGenVertexArrays(1, vaoID)
 glBindVertexArray(vaoID[])
 glBindBuffer(positionTarget, positionVBO[])
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Void}(positionAccessor["byteOffset"]))
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Cvoid}(positionAccessor["byteOffset"]))
 glEnableVertexAttribArray(0)
 
 # set camera
@@ -217,7 +217,7 @@ while !GLFW.WindowShouldClose(window)
             glUniform1f(blueLocation, 0.0)
         end
         glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrices[i])
-        glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Void}(indexByteOffset))
+        glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Cvoid}(indexByteOffset))
     end
     # check and call events
     GLFW.PollEvents()

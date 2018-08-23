@@ -99,7 +99,7 @@ function VkDebugReportCallbackCreateInfoEXT(debugcallback::Function, flags::vk.V
     sType = vk.VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
     pNext = C_NULL    # reserved for extension-specific structure
     pfnCallback = cfunction(debugcallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT,
-                                                              Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Void}})
+                                                              Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cvoid}})
     return vk.VkDebugReportCallbackCreateInfoEXT(sType, pNext, flags, pfnCallback, pUserData)
 end
 

@@ -5,12 +5,12 @@ GLFW.Init()
 
 # set up OpenGL context version
 # it seems OpenGL 4.1 is the highest version supported by MacOS.
-@static if is_apple()
+@static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
 
-@static if is_apple()
+@static if Sys.isapple()
     GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
     GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
     GLFW.WindowHint(GLFW.OPENGL_PROFILE, GLFW.OPENGL_CORE_PROFILE)

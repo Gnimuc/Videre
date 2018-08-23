@@ -71,7 +71,7 @@ instance = instanceRef[]
 ## message callback
 function debugcallback(flags::vk.VkDebugReportFlagsEXT, objType::vk.VkDebugReportObjectTypeEXT,
                        obj::Culonglong, location::Csize_t, code::Cint, layerPrefix::Ptr{Cchar},
-                       msg::Ptr{Cchar}, userData::Ptr{Void})::vk.VkBool32
+                       msg::Ptr{Cchar}, userData::Ptr{Cvoid})::vk.VkBool32
     println("validation layer: ", Base.unsafe_string(msg))
     return vk.VK_FALSE
 end
@@ -81,7 +81,7 @@ sType = vk.VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
 pNext = C_NULL
 flags = vk.VK_DEBUG_REPORT_ERROR_BIT_EXT | vk.VK_DEBUG_REPORT_WARNING_BIT_EXT
 pfnCallback = cfunction(debugcallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT,
-                                                          Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Void}})
+                                                          Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cvoid}})
 pUserData = C_NULL
 callbackInfoRef = vk.VkDebugReportCallbackCreateInfoEXT(sType, pNext, flags, pfnCallback, pUserData) |> Ref
 # create debug report callback

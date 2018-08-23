@@ -106,7 +106,7 @@ glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW)
 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
 glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW)
 
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), Ptr{Void}(0))
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), Ptr{Cvoid}(0))
 glEnableVertexAttribArray(0)
 
 # note that this is allowed, the call to glVertexAttribPointer registered VBO as
@@ -133,7 +133,7 @@ while !GLFW.WindowShouldClose(window)
 	# draw
 	glUseProgram(shaderProgram)
     glBindVertexArray(vao)
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Ptr{Void}(0))
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Ptr{Cvoid}(0))
     # swap buffers and poll IO events
     GLFW.SwapBuffers(window)
     GLFW.PollEvents()

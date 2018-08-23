@@ -38,7 +38,7 @@ instance = instanceRef[]
 ## message callback
 function debugcallback(flags::vk.VkDebugReportFlagsEXT, objType::vk.VkDebugReportObjectTypeEXT,
                        obj::Culonglong, location::Csize_t, code::Cint, layerPrefix::Ptr{Cchar},
-                       msg::Ptr{Cchar}, userData::Ptr{Void})::vk.VkBool32
+                       msg::Ptr{Cchar}, userData::Ptr{Cvoid})::vk.VkBool32
     println("validation layer: ", Base.unsafe_string(msg))
     return vk.VK_FALSE
 end

@@ -1,9 +1,9 @@
-include(joinpath(@__DIR__, "glutils.jl"))
-
-@static if is_apple()
+@static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
+
+include(joinpath(@__DIR__, "glutils.jl"))
 
 # window init global variables
 glfwWidth = 640
@@ -16,50 +16,50 @@ window = C_NULL
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
 
+# start OpenGL
+@assert startgl()
+
+glEnable(GL_DEPTH_TEST)
+glDepthFunc(GL_LESS)
+
 # load shaders from file
-const vertexShader = readstring(joinpath(@__DIR__, "vbo.vert"))
-const fragmentShader = readstring(joinpath(@__DIR__, "vbo.frag"))
+const vertexShaderSource = read(joinpath(@__DIR__, "vbo.vert"), String)
+const fragmentShaderSource = read(joinpath(@__DIR__, "vbo.frag"), String)
 
 # compile shaders and check for shader compile errors
-vertexShaderID = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShaderID, 1, Ptr{GLchar}[pointer(vertexShader)], C_NULL)
-glCompileShader(vertexShaderID)
+vertexShader = glCreateShader(GL_VERTEX_SHADER)
+glShaderSource(vertexShader, 1, Ptr{GLchar}[pointer(vertexShaderSource)], C_NULL)
+glCompileShader(vertexShader)
 # get shader compile status
-compileResult = Ref{GLint}(-1)
-glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, compileResult)
-if compileResult[] != GL_TRUE
-    logger = getlogger(current_module())
-    warn(logger, string("GL vertex shader(index", vertexShaderID, ")did not compile."))
-    shaderlog(vertexShaderID)
-    error("GL vertex shader(index ", vertexShaderID, " )did not compile.")
+resultRef = Ref{GLint}(-1)
+glGetShaderiv(vertexShader, GL_COMPILE_STATUS, resultRef)
+if resultRef[] != GL_TRUE
+    shader_info_log(vertexShader)
+    @error "GL vertex shader(index $vertexShader) did not compile."
 end
 
-fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShaderID, 1, Ptr{GLchar}[pointer(fragmentShader)], C_NULL)
-glCompileShader(fragmentShaderID)
+fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
+glShaderSource(fragmentShader, 1, Ptr{GLchar}[pointer(fragmentShaderSource)], C_NULL)
+glCompileShader(fragmentShader)
 # checkout shader compile status
-compileResult = Ref{GLint}(-1)
-glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, compileResult)
-if compileResult[] != GL_TRUE
-    logger = getlogger(current_module())
-    warn(logger, string("GL fragment shader(index ", fragmentShaderID, " )did not compile."))
-    shaderlog(fragmentShaderID)
-    error("GL fragment shader(index ", fragmentShaderID, " )did not compile.")
+resultRef = Ref{GLint}(-1)
+glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, resultRef)
+if resultRef[] != GL_TRUE
+    shaderlog(fragmentShader)
+    @error "GL fragment shader(index $fragmentShader) did not compile."
 end
 
 # create and link shader program
-shaderProgramID = glCreateProgram()
-glAttachShader(shaderProgramID, vertexShaderID)
-glAttachShader(shaderProgramID, fragmentShaderID)
-glLinkProgram(shaderProgramID)
+shaderProgram = glCreateProgram()
+glAttachShader(shaderProgram, vertexShader)
+glAttachShader(shaderProgram, fragmentShader)
+glLinkProgram(shaderProgram)
 # checkout programe linking status
-linkingResult = Ref{GLint}(-1)
-glGetProgramiv(shaderProgramID, GL_LINK_STATUS, linkingResult)
-if linkingResult[] != GL_TRUE
-    logger = getlogger(current_module())
-    warn(logger, string("Could not link shader programme GL index: ", shaderProgramID))
-    programlog(shaderProgramID)
-    error("Could not link shader programme GL index: ", shaderProgramID)
+resultRef = Ref{GLint}(-1)
+glGetProgramiv(shaderProgram, GL_LINK_STATUS, resultRef)
+if resultRef[] != GL_TRUE
+    programme_info_log(shaderProgram)
+    @error "Could not link shader programme GL index: $shaderProgram"
 end
 
 # vertex data
@@ -72,26 +72,32 @@ colors = GLfloat[ 1.0, 0.0, 0.0,
                   0.0, 0.0, 1.0]
 
 # create buffers located in the memory of graphic card
-pointsVBO = Ref{GLuint}(0)
-glGenBuffers(1, pointsVBO)
-glBindBuffer(GL_ARRAY_BUFFER, pointsVBO[])
+pointsRef = Ref{GLuint}(0)
+glGenBuffers(1, pointsRef)
+glBindBuffer(GL_ARRAY_BUFFER, pointsRef[])
 glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
 
-colorsVBO = Ref{GLuint}(0)
-glGenBuffers(1, colorsVBO)
-glBindBuffer(GL_ARRAY_BUFFER, colorsVBO[])
+colorsRef = Ref{GLuint}(0)
+glGenBuffers(1, colorsRef)
+glBindBuffer(GL_ARRAY_BUFFER, colorsRef[])
 glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW)
 
 # create VAO
-vaoID = Ref{GLuint}(0)
-glGenVertexArrays(1, vaoID)
-glBindVertexArray(vaoID[])
-glBindBuffer(GL_ARRAY_BUFFER, pointsVBO[])
+vaoRef = Ref{GLuint}(0)
+glGenVertexArrays(1, vaoRef)
+glBindVertexArray(vaoRef[])
+glBindBuffer(GL_ARRAY_BUFFER, pointsRef[])
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
-glBindBuffer(GL_ARRAY_BUFFER, colorsVBO[])
+glBindBuffer(GL_ARRAY_BUFFER, colorsRef[])
 glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
 glEnableVertexAttribArray(1)
+
+# create buffers located in the memory of graphic card
+vboRef = Ref{GLuint}(0)
+glGenBuffers(1, vboRef)
+glBindBuffer(GL_ARRAY_BUFFER, vboRef[])
+glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
 
 # enable cull face
 glEnable(GL_CULL_FACE)
@@ -107,8 +113,8 @@ while !GLFW.WindowShouldClose(window)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glViewport(0, 0, glfwWidth, glfwHeight)
     # drawing
-    glUseProgram(shaderProgramID)
-    glBindVertexArray(vaoID[])
+    glUseProgram(shaderProgram)
+    glBindVertexArray(vaoRef[])
     glDrawArrays(GL_TRIANGLES, 0, 3)
     # check and call events
     GLFW.PollEvents()
