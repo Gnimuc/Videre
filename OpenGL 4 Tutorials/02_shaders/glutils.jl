@@ -4,7 +4,7 @@ using Printf
 
 ## GLFW initialization
 # set up GLFW key callbacks : press Esc to escape
-function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint)
+function key_callback(window::GLFW.Window, key::GLFW.Key, scancode::Cint, action::GLFW.Action, mods::Cint)
 	key == GLFW.KEY_ESCAPE && action == GLFW.PRESS && GLFW.SetWindowShouldClose(window, GL_TRUE)
 end
 
@@ -18,11 +18,11 @@ function framebuffer_size_callback(window::GLFW.Window, buffer_width::Cint, buff
 end
 
 # error callback
-error_callback(error::Cint, description::Ptr{GLchar}) = @error "GLFW ERROR: code $error msg: $description"
+error_callback(err::GLFW.GLFWError) = @error "GLFW ERROR: code $(err.code) msg: $(err.description)"
 GLFW.SetErrorCallback(error_callback)
 
 # start OpenGL
-function startgl()
+function startgl(width, height)
 	@static if Sys.isapple()
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MAJOR, VERSION_MAJOR)
         GLFW.WindowHint(GLFW.CONTEXT_VERSION_MINOR, VERSION_MINOR)
@@ -35,7 +35,7 @@ function startgl()
     @info "starting GLFW ..."
     @info GLFW.GetVersionString()
 
-	global window = GLFW.CreateWindow(width, height, "Extended Init.")
+	window = GLFW.CreateWindow(width, height, "Extended Init.")
 	window == C_NULL && error("could not open window with GLFW3.")
 
 	GLFW.SetKeyCallback(window, key_callback)
@@ -49,7 +49,7 @@ function startgl()
     @info "Renderder: $renderer"
     @info "OpenGL version supported: $version"
 
-    return true
+    return window
 end
 
 # _update_fps_counter

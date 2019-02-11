@@ -1,67 +1,58 @@
-include(joinpath(@__DIR__, "glutils.jl"))
+using CSyntax
 
 @static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
 
-# window init global variables
-glfwWidth = 640
-glfwHeight = 480
-window = C_NULL
+include(joinpath(@__DIR__, "glutils.jl"))
 
-# start OpenGL
-@assert startgl()
+# init window
+width, height = 640, 480
+window = startgl(width, height)
 
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
 
 # load shaders from file
-const vertexShader = readstring(joinpath(@__DIR__, "camera.vert"))
-const fragmentShader = readstring(joinpath(@__DIR__, "camera.frag"))
+const vert_source = read(joinpath(@__DIR__, "camera.vert"), String)
+const frag_source = read(joinpath(@__DIR__, "camera.frag"), String)
 
 # compile shaders and check for shader compile errors
-vertexShaderID = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShaderID, 1, Ptr{GLchar}[pointer(vertexShader)], C_NULL)
-glCompileShader(vertexShaderID)
+vert_shader = glCreateShader(GL_VERTEX_SHADER)
+glShaderSource(vert_shader, 1, Ptr{GLchar}[pointer(vert_source)], C_NULL)
+glCompileShader(vert_shader)
 # get shader compile status
-compileResult = Ref{GLint}(-1)
-glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, compileResult)
-if compileResult[] != GL_TRUE
-    logger = getlogger(current_module())
-    warn(logger, string("GL vertex shader(index", vertexShaderID, ")did not compile."))
-    shaderlog(vertexShaderID)
-    error("GL vertex shader(index ", vertexShaderID, " )did not compile.")
+result = GLint(-1)
+@c glGetShaderiv(vert_shader, GL_COMPILE_STATUS, &result)
+if result != GL_TRUE
+    shader_info_log(vert_shader)
+    @error "GL vertex shader(index $vert_shader) did not compile."
 end
 
-fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShaderID, 1, Ptr{GLchar}[pointer(fragmentShader)], C_NULL)
-glCompileShader(fragmentShaderID)
+frag_shader = glCreateShader(GL_FRAGMENT_SHADER)
+glShaderSource(frag_shader, 1, Ptr{GLchar}[pointer(frag_source)], C_NULL)
+glCompileShader(frag_shader)
 # checkout shader compile status
-compileResult = Ref{GLint}(-1)
-glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, compileResult)
-if compileResult[] != GL_TRUE
-    logger = getlogger(current_module())
-    warn(logger, string("GL fragment shader(index ", fragmentShaderID, " )did not compile."))
-    shaderlog(fragmentShaderID)
-    error("GL fragment shader(index ", fragmentShaderID, " )did not compile.")
+result = GLint(-1)
+@c glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &result)
+if result != GL_TRUE
+    shaderlog(frag_shader)
+    @error "GL fragment shader(index $frag_shader) did not compile."
 end
 
 # create and link shader program
-shaderProgramID = glCreateProgram()
-glAttachShader(shaderProgramID, vertexShaderID)
-glAttachShader(shaderProgramID, fragmentShaderID)
-glLinkProgram(shaderProgramID)
+shader_prog = glCreateProgram()
+glAttachShader(shader_prog, vert_shader)
+glAttachShader(shader_prog, frag_shader)
+glLinkProgram(shader_prog)
 # checkout programe linking status
-linkingResult = Ref{GLint}(-1)
-glGetProgramiv(shaderProgramID, GL_LINK_STATUS, linkingResult)
-if linkingResult[] != GL_TRUE
-    logger = getlogger(current_module())
-    warn(logger, string("Could not link shader programme GL index: ", shaderProgramID))
-    programlog(shaderProgramID)
-    error("Could not link shader programme GL index: ", shaderProgramID)
+result = GLint(-1)
+@c glGetProgramiv(shader_prog, GL_LINK_STATUS, &result)
+if result != GL_TRUE
+    programme_info_log(shader_prog)
+    @error "Could not link shader programme GL index: $shader_prog"
 end
-
 # vertex data
 points = GLfloat[ 0.0,  0.5, 0.0,
                   0.5, -0.5, 0.0,
@@ -72,23 +63,23 @@ colors = GLfloat[ 1.0, 0.0, 0.0,
                   0.0, 0.0, 1.0]
 
 # create buffers located in the memory of graphic card
-pointsVBO = Ref{GLuint}(0)
-glGenBuffers(1, pointsVBO)
-glBindBuffer(GL_ARRAY_BUFFER, pointsVBO[])
+points_vbo = GLuint(0)
+@c glGenBuffers(1, &points_vbo)
+glBindBuffer(GL_ARRAY_BUFFER, points_vbo)
 glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
 
-colorsVBO = Ref{GLuint}(0)
-glGenBuffers(1, colorsVBO)
-glBindBuffer(GL_ARRAY_BUFFER, colorsVBO[])
+colors_vbo = GLuint(0)
+@c glGenBuffers(1, &colors_vbo)
+glBindBuffer(GL_ARRAY_BUFFER, colors_vbo)
 glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW)
 
 # create VAO
-vaoID = Ref{GLuint}(0)
-glGenVertexArrays(1, vaoID)
-glBindVertexArray(vaoID[])
-glBindBuffer(GL_ARRAY_BUFFER, pointsVBO[])
+vao = GLuint(0)
+@c glGenVertexArrays(1, &vao)
+glBindVertexArray(vao)
+glBindBuffer(GL_ARRAY_BUFFER, points_vbo)
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
-glBindBuffer(GL_ARRAY_BUFFER, colorsVBO[])
+glBindBuffer(GL_ARRAY_BUFFER, colors_vbo)
 glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
 glEnableVertexAttribArray(1)
@@ -104,82 +95,75 @@ glClearColor(0.2, 0.2, 0.2, 1.0)
 near = 0.1            # clipping near plane
 far = 100.0           # clipping far plane
 fov = deg2rad(67)
-aspectRatio = glfwWidth / glfwHeight
+aspect_ratio = width / height
 # perspective matrix
 range = tan(0.5*fov) * near
-Sx = 2.0*near / (range * aspectRatio + range * aspectRatio)
+Sx = 2.0*near / (range * aspect_ratio + range * aspect_ratio)
 Sy = near / range
 Sz = -(far + near) / (far - near)
 Pz = -(2.0*far*near) / (far - near)
-projMatrix = GLfloat[ Sx  0.0  0.0  0.0;
-                     0.0   Sy  0.0  0.0;
-                     0.0  0.0   Sz   Pz;
-                     0.0  0.0 -1.0  0.0]
+proj_matrix = GLfloat[ Sx  0.0  0.0  0.0;
+                      0.0   Sy  0.0  0.0;
+                      0.0  0.0   Sz   Pz;
+                      0.0  0.0 -1.0  0.0]
 # view matrix
-cameraPosition = GLfloat[0.0, 0.0, 2.0]   # don't start at zero, or we will be too close
-cameraYaw = Ref{GLfloat}(0.0)             # y-rotation in degrees
-transMatrix = GLfloat[ 1.0 0.0 0.0 -cameraPosition[1];
-                       0.0 1.0 0.0 -cameraPosition[2];
-                       0.0 0.0 1.0 -cameraPosition[3];
-                       0.0 0.0 0.0                1.0]
-rotationY = GLfloat[ cosd(-cameraYaw[])  0.0  sind(-cameraYaw[]) 0.0;
-                                    0.0  1.0                 0.0 0.0;
-                    -sind(-cameraYaw[])  0.0  cosd(-cameraYaw[]) 0.0;
-                                    0.0  0.0                 0.0 1.0]
-viewMatrix = rotationY * transMatrix    # only rotate around the Y axis
+camera_speed = GLfloat(1.0)
+camera_yaw_speed = GLfloat(10.0)
+camera_pos = GLfloat[0.0, 0.0, 2.0]   # don't start at zero, or we will be too close
+camera_yaw = GLfloat(0.0)             # y-rotation in degrees
+trans_matrix = GLfloat[1.0 0.0 0.0 -camera_pos[1];
+                       0.0 1.0 0.0 -camera_pos[2];
+                       0.0 0.0 1.0 -camera_pos[3];
+                       0.0 0.0 0.0            1.0]
+rotation_y = GLfloat[cosd(-camera_yaw)  0.0  sind(-camera_yaw)  0.0;
+                                   0.0  1.0                0.0  0.0;
+                    -sind(-camera_yaw)  0.0  cosd(-camera_yaw)  0.0;
+                                   0.0  0.0                0.0  1.0]
+view_matrix = rotation_y * trans_matrix    # only rotate around the Y axis
 
-viewMatrixLocation = glGetUniformLocation(shaderProgramID, "view")
-projMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
-glUseProgram(shaderProgramID)
-glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
-glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, projMatrix)
-
-let
-    cameraSpeed = GLfloat(1.0)
-    cameraYawSpeed = GLfloat(10.0)
-    previousCameraTime = time()
-    global function updatecamera!(cameraPosition, cameraYaw)
-        currentCameraTime = time()
-        elapsedCameraTime = currentCameraTime - previousCameraTime
-        previousCameraTime = currentCameraTime
-        value(sigA) && (cameraPosition[1] += cameraSpeed * elapsedCameraTime)
-        value(sigD) && (cameraPosition[1] -= cameraSpeed * elapsedCameraTime)
-        value(sigPAGE_UP) && (cameraPosition[2] -= cameraSpeed * elapsedCameraTime)
-        value(sigPAGE_DOWN) && (cameraPosition[2] += cameraSpeed * elapsedCameraTime)
-        value(sigW) && (cameraPosition[3] -= cameraSpeed * elapsedCameraTime)
-        value(sigS) && (cameraPosition[3] += cameraSpeed * elapsedCameraTime)
-        value(sigLEFT) && (cameraYaw[] += cameraYawSpeed * elapsedCameraTime)
-        value(sigRIGHT) && (cameraYaw[] -= cameraYawSpeed * elapsedCameraTime)
-    end
-end
+view_matrix_loc = glGetUniformLocation(shader_prog, "view")
+proj_matrix_loc = glGetUniformLocation(shader_prog, "proj")
+glUseProgram(shader_prog)
+glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, view_matrix)
+glUniformMatrix4fv(proj_matrix_loc, 1, GL_FALSE, proj_matrix)
 
 # render
+previous = time()
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
     # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glViewport(0, 0, glfwWidth, glfwHeight)
+    glViewport(0, 0, GLFW.GetWindowSize(window)...)
     # drawing
-    glUseProgram(shaderProgramID)
-    glBindVertexArray(vaoID[])
+    glUseProgram(shader_prog)
+    glBindVertexArray(vao)
     glDrawArrays(GL_TRIANGLES, 0, 3)
     # check and call events
     GLFW.PollEvents()
-    yield()
     # move camera
-    updatecamera!(cameraPosition, cameraYaw)
-    if any(value.([sigA, sigD, sigPAGE_UP, sigPAGE_DOWN, sigW, sigS, sigLEFT, sigRIGHT]))
-        transMatrix = GLfloat[ 1.0 0.0 0.0 -cameraPosition[1];
-                               0.0 1.0 0.0 -cameraPosition[2];
-                               0.0 0.0 1.0 -cameraPosition[3];
-                               0.0 0.0 0.0                1.0]
-        rotationY = GLfloat[ cosd(-cameraYaw[])  0.0  sind(-cameraYaw[]) 0.0;
-                                            0.0  1.0                 0.0 0.0;
-                            -sind(-cameraYaw[])  0.0  cosd(-cameraYaw[]) 0.0;
-                                            0.0  0.0                 0.0 1.0]
-        viewMatrix = rotationY * transMatrix
-        glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
-    end
+    global previous; global camera_pos; global camera_speed; global camera_yaw
+    current = time()
+    elapsed = current - previous
+    previous = current
+    GLFW.GetKey(window, GLFW.KEY_A) && (camera_pos[1] -= camera_speed * elapsed)
+    GLFW.GetKey(window, GLFW.KEY_D) && (camera_pos[1] += camera_speed * elapsed)
+    GLFW.GetKey(window, GLFW.KEY_PAGE_UP) && (camera_pos[2] += camera_speed * elapsed)
+    GLFW.GetKey(window, GLFW.KEY_PAGE_DOWN) && (camera_pos[2] -= camera_speed * elapsed)
+    GLFW.GetKey(window, GLFW.KEY_W) && (camera_pos[3] -= camera_speed * elapsed)
+    GLFW.GetKey(window, GLFW.KEY_S) && (camera_pos[3] += camera_speed * elapsed)
+    GLFW.GetKey(window, GLFW.KEY_LEFT) && (camera_yaw += camera_yaw_speed * elapsed)
+    GLFW.GetKey(window, GLFW.KEY_RIGHT) && (camera_yaw -= camera_yaw_speed * elapsed)
+    # update view matrix
+    trans_matrix .= GLfloat[1.0 0.0 0.0 -camera_pos[1];
+                            0.0 1.0 0.0 -camera_pos[2];
+                            0.0 0.0 1.0 -camera_pos[3];
+                            0.0 0.0 0.0            1.0]
+    rotation_y .= GLfloat[cosd(-camera_yaw)  0.0  sind(-camera_yaw) 0.0;
+                                       0.0   1.0               0.0  0.0;
+                         -sind(-camera_yaw)  0.0  cosd(-camera_yaw) 0.0;
+                                       0.0   0.0               0.0  1.0]
+    view_matrix .= rotation_y * trans_matrix
+    glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, view_matrix)
     # swap the buffers
     GLFW.SwapBuffers(window)
 end

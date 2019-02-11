@@ -41,11 +41,11 @@ end
 @info GLFW.GetVersionString()
 
 # error callback
-error_callback(error::Cint, description::Ptr{GLchar}) = @error "GLFW ERROR: code $error msg: $description"
+error_callback(err::GLFW.GLFWError) = @error "GLFW ERROR: code $(err.code) msg: $(err.description)"
 GLFW.SetErrorCallback(error_callback)
 
 # set up GLFW key callbacks : press Esc to escape
-function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint)
+function key_callback(window::GLFW.Window, key::GLFW.Key, scancode::Cint, action::GLFW.Action, mods::Cint)
 	key == GLFW.KEY_ESCAPE && action == GLFW.PRESS && GLFW.SetWindowShouldClose(window, GL_TRUE)
 end
 

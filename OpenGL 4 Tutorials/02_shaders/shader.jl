@@ -7,11 +7,6 @@ end
 
 include(joinpath(@__DIR__, "glutils.jl"))
 
-# window init global variables
-width = 640
-height = 480
-window = C_NULL
-
 # print errors in shader compilation
 function shader_info_log(shader::GLuint)
     max_length = GLsizei(0)
@@ -104,8 +99,9 @@ function print_all(shader_prog::GLuint)
 end
 
 
-# start OpenGL
-@assert startgl()
+# init window
+width, height = 640, 480
+window = startgl(width, height)
 
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
