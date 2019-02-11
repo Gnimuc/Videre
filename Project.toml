@@ -2,3 +2,9 @@ name = "Videre"
 uuid = "e3de0964-2da0-11e9-140e-77718febbd11"
 authors = ["Gnimuc <qiyupei@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
+LibCSFML = "fa3694d3-b849-58b5-b76d-e00022040519"
+ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"

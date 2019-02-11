@@ -34,14 +34,14 @@ glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
 
 # hard-coded shaders
-const vertex_shader = """
+const vert_source = """
 #version 410 core
 in vec3 vp;
 void main(void)
 {
     gl_Position = vec4(vp, 1.0);
 }"""
-const fragment_shader = """
+const frag_source = """
 #version 410 core
 out vec4 frag_colour;
 void main(void)
@@ -50,18 +50,18 @@ void main(void)
 }"""
 
 # compile shaders
-vertex_shader_id = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertex_shader_id, 1, Ptr{GLchar}[pointer(vertex_shader)], C_NULL)
-glCompileShader(vertex_shader_id)
-fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragment_shader_id, 1, Ptr{GLchar}[pointer(fragment_shader)], C_NULL)
-glCompileShader(fragment_shader_id)
+vert_shader = glCreateShader(GL_VERTEX_SHADER)
+glShaderSource(vert_shader, 1, Ptr{GLchar}[pointer(vert_source)], C_NULL)
+glCompileShader(vert_shader)
+frag_shader = glCreateShader(GL_FRAGMENT_SHADER)
+glShaderSource(frag_shader, 1, Ptr{GLchar}[pointer(frag_source)], C_NULL)
+glCompileShader(frag_shader)
 
 # create and link shader program
-program_id = glCreateProgram()
-glAttachShader(program_id, vertex_shader_id)
-glAttachShader(program_id, fragment_shader_id)
-glLinkProgram(program_id)
+program = glCreateProgram()
+glAttachShader(program, vert_shader)
+glAttachShader(program, frag_shader)
+glLinkProgram(program)
 
 # vertex data
 points = GLfloat[ 0.0,  0.5, 0.0,
@@ -88,7 +88,7 @@ glClearColor(0.2, 0.2, 0.2, 1.0)
 # render
 while !GLFW.WindowShouldClose(window)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glUseProgram(program_id)
+    glUseProgram(program)
     glBindVertexArray(vao)
     glDrawArrays(GL_TRIANGLES, 0, 3)
     # check and call events

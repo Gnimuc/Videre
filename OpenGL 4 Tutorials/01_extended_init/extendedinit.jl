@@ -1,5 +1,6 @@
 using GLFW
 using ModernGL
+using CSyntax
 using Printf
 
 # set up OpenGL context version
@@ -20,18 +21,18 @@ end
 
 
 # _update_fps_counter
-let previousTime = time()
-    frameCount = 0
+let previous = time()
+    frame_count = 0
     global function updatefps(window::GLFW.Window)
-        currentTime = time()
-        elapsedTime = currentTime - previousTime
-        if elapsedTime > 0.25
-            previousTime = currentTime
-            fps = frameCount / elapsedTime
+        current = time()
+        elapsed = current - previous
+        if elapsed > 0.25
+            previous = current
+            fps = frame_count / elapsed
             GLFW.SetWindowTitle(window, @sprintf("opengl @ fps: %.2f", fps))
-            frameCount = 0
+            frame_count = 0
         end
-        frameCount = frameCount + 1
+        frame_count += 1
     end
 end
 
@@ -44,25 +45,25 @@ error_callback(error::Cint, description::Ptr{GLchar}) = @error "GLFW ERROR: code
 GLFW.SetErrorCallback(error_callback)
 
 # set up GLFW key callbacks : press Esc to escape
-key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint) = key == GLFW.KEY_ESCAPE && action == GLFW.PRESS && GLFW.SetWindowShouldClose(window, GL_TRUE)
+function key_callback(window::GLFW.Window, key::Cint, scancode::Cint, action::Cint, mods::Cint)
+	key == GLFW.KEY_ESCAPE && action == GLFW.PRESS && GLFW.SetWindowShouldClose(window, GL_TRUE)
+end
 
-# : change window size
-function window_size_callback(window::GLFW.Window, width::Cint, height::Cint)
-	global glfwWidth = width
-	global glfwHeight = height
-	println("width", width, "height", height)
+# tell GLFW to run this function whenever the framebuffer size is changed
+function framebuffer_size_callback(window::GLFW.Window, buffer_width::Cint, buffer_height::Cint)
+	global width = buffer_width
+	global height = buffer_height
+	println("width", buffer_width, "height", buffer_height)
 	# update any perspective matrices used here
     return nothing
 end
 
-
-global glfwWidth = 640
-global glfwHeight = 480
-window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Extended Init.")
+width, height = 640, 480
+window = GLFW.CreateWindow(width, height, "Extended Init.")
 window == C_NULL && error("could not open window with GLFW3.")
 
 GLFW.SetKeyCallback(window, key_callback)
-GLFW.SetWindowSizeCallback(window, window_size_callback)
+GLFW.SetFramebufferSizeCallback(window, framebuffer_size_callback)
 GLFW.MakeContextCurrent(window)
 GLFW.WindowHint(GLFW.SAMPLES, 4)
 
@@ -77,14 +78,14 @@ version = unsafe_string(glGetString(GL_VERSION))
 @info "OpenGL version supported: $version"
 
 # hard-coded shaders
-const vertexShader = """
+const vert_source = """
 #version 410 core
 in vec3 vp;
 void main(void)
 {
     gl_Position = vec4(vp, 1.0);
 }"""
-const fragmentShader = """
+const frag_source = """
 #version 410 core
 out vec4 frag_colour;
 void main(void)
@@ -93,18 +94,18 @@ void main(void)
 }"""
 
 # compile shaders
-vertexShaderID = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertexShaderID, 1, Ptr{GLchar}[pointer(vertexShader)], C_NULL)
-glCompileShader(vertexShaderID)
-fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragmentShaderID, 1, Ptr{GLchar}[pointer(fragmentShader)], C_NULL)
-glCompileShader(fragmentShaderID)
+vert_shader = glCreateShader(GL_VERTEX_SHADER)
+glShaderSource(vert_shader, 1, Ptr{GLchar}[pointer(vert_source)], C_NULL)
+glCompileShader(vert_shader)
+frag_shader = glCreateShader(GL_FRAGMENT_SHADER)
+glShaderSource(frag_shader, 1, Ptr{GLchar}[pointer(frag_source)], C_NULL)
+glCompileShader(frag_shader)
 
 # create and link shader program
-shaderProgram = glCreateProgram()
-glAttachShader(shaderProgram, vertexShaderID)
-glAttachShader(shaderProgram, fragmentShaderID)
-glLinkProgram(shaderProgram)
+shader_prog = glCreateProgram()
+glAttachShader(shader_prog, vert_shader)
+glAttachShader(shader_prog, frag_shader)
+glLinkProgram(shader_prog)
 
 # vertex data
 points = GLfloat[ 0.0,  0.5, 0.0,
@@ -112,16 +113,16 @@ points = GLfloat[ 0.0,  0.5, 0.0,
                  -0.5, -0.5, 0.0]
 
 # create buffers located in the memory of graphic card
-VBORef = Ref{GLuint}(0)
-glGenBuffers(1, VBORef)
-glBindBuffer(GL_ARRAY_BUFFER, VBORef[])
+vbo = GLuint(0)
+@c glGenBuffers(1, &vbo)
+glBindBuffer(GL_ARRAY_BUFFER, vbo)
 glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW)
 
 # create VAO
-VAORef = Ref{GLuint}(0)
-glGenVertexArrays(1, VAORef)
-glBindVertexArray(VAORef[])
-glBindBuffer(GL_ARRAY_BUFFER, VBORef[])
+vao = GLuint(0)
+@c glGenVertexArrays(1, &vao)
+glBindVertexArray(vao)
+glBindBuffer(GL_ARRAY_BUFFER, vbo)
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
 
@@ -133,10 +134,10 @@ while !GLFW.WindowShouldClose(window)
     updatefps(window)
     # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glViewport(0, 0, glfwWidth, glfwHeight)
+    glViewport(0, 0, width, height)
     # drawing
-    glUseProgram(shaderProgram)
-    glBindVertexArray(VAORef[])
+    glUseProgram(shader_prog)
+    glBindVertexArray(vao)
     glDrawArrays(GL_TRIANGLES, 0, 3)
     # check and call events
     GLFW.PollEvents()
