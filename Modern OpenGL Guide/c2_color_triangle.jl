@@ -1,4 +1,4 @@
-using LibCSFML
+using CSFML.LibCSFML
 using ModernGL
 using CSyntax
 using CSyntax.CSwitch

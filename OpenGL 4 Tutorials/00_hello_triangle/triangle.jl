@@ -20,7 +20,7 @@ end
 
 # create window
 window = GLFW.CreateWindow(640, 480, "Hello Triangle")
-window == C_NULL && error("could not open window with GLFW3.")
+@assert window != C_NULL "could not open window with GLFW3."
 GLFW.MakeContextCurrent(window)
 
 # get version info

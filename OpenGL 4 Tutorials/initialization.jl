@@ -20,7 +20,7 @@ else
 end
 
 window = GLFW.CreateWindow(640, 480, "Initialization")
-window == C_NULL && error("could not open window with GLFW3.")
+@assert window != C_NULL "could not open window with GLFW3."
 
 GLFW.MakeContextCurrent(window)
 

@@ -36,7 +36,7 @@ function startgl(width, height)
     @info GLFW.GetVersionString()
 
 	window = GLFW.CreateWindow(width, height, "Extended Init.")
-	window == C_NULL && error("could not open window with GLFW3.")
+	@assert window != C_NULL "could not open window with GLFW3."
 
 	GLFW.SetKeyCallback(window, key_callback)
 	GLFW.SetFramebufferSizeCallback(window, framebuffer_size_callback)

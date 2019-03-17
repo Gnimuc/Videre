@@ -240,7 +240,7 @@ function startgl()
 
     # create window
     global window = GLFW.CreateWindow(glfwWidth, glfwHeight, "Extended Init.")
-    window == C_NULL && error("could not open window with GLFW3.")
+    @assert window != C_NULL "could not open window with GLFW3."
 
     # set callbacks
     GLFW.SetKeyCallback(window, key_callback)
