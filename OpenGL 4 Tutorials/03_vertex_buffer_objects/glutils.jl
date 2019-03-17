@@ -94,6 +94,55 @@ function print_all(shader_prog::GLuint)
     programme_info_log(shader_prog)
 end
 
+# create shader
+function createshader(path::AbstractString, type::GLenum)
+    source = read(path, String)
+    id = glCreateShader(type)
+    glShaderSource(id, 1, Ptr{GLchar}[pointer(source)], C_NULL)
+    glCompileShader(id)
+    # get shader compile status and print logs
+    result = GLint(-1)
+    @c glGetShaderiv(id, GL_COMPILE_STATUS, &result)
+    if result != GL_TRUE
+        @error "$(GLENUM(type).name)(id:$id) failed to compile!"
+        max_length = GLsizei(0)
+        @c glGetShaderiv(id, GL_INFO_LOG_LENGTH, &maxLength)
+        actual_length = GLsizei(0)
+        log = Vector{GLchar}(undef, max_length)
+        @c glGetShaderInfoLog(id, maxLength, &actual_length, log)
+        @error String(log)
+    end
+    @info "$(GLENUM(type).name)(id:$id) successfully compiled!"
+    return id
+end
+
+# create program
+function createprogram(shaders::GLuint...)
+    id = glCreateProgram()
+    @info "Creating program(id:$id) ..."
+    for shader in shaders
+        @info "  attempting to attach shader(id:$shader) ..."
+        glAttachShader(id, shader)
+    end
+    glLinkProgram(id)
+    # checkout linking status
+    result = GLint(-1)
+    @c glGetProgramiv(id, GL_LINK_STATUS, &result)
+    if result != GL_TRUE
+        @error "Could not link shader program(id:$id)!"
+		max_length = GLsizei(0)
+        @c glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength)
+        actual_length = GLsizei(0)
+        log = Vector{GLchar}(undef, max_length)
+        @c glGetProgramInfoLog(id, maxLength, &actualLength, log)
+        @error String(log)
+        error("Could not link shader program(id:$id)!")
+    end
+    @assert is_valid(id)
+	foreach(id->glDeleteShader(id), shaders)
+    return id
+end
+
 ## GLFW initialization
 # set up GLFW key callbacks : press Esc to escape
 function key_callback(window::GLFW.Window, key::GLFW.Key, scancode::Cint, action::GLFW.Action, mods::Cint)
