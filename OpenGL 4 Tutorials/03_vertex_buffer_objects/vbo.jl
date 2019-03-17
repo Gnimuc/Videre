@@ -92,7 +92,9 @@ glFrontFace(GL_CW)
 # set background color to gray
 glClearColor(0.2, 0.2, 0.2, 1.0)
 
-# render
+let
+updatefps = FPSCounter()
+# rendering loop
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
     # clear drawing surface
@@ -107,5 +109,6 @@ while !GLFW.WindowShouldClose(window)
     # swap the buffers
     GLFW.SwapBuffers(window)
 end
+end # let
 
 GLFW.DestroyWindow(window)

@@ -102,6 +102,8 @@ matrix_location = glGetUniformLocation(shader_prog, "matrix")
 glUseProgram(shader_prog)
 glUniformMatrix4fv(matrix_location, 1, GL_FALSE, matrix)
 
+let
+updatefps = FPSCounter()
 # render
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
@@ -121,5 +123,6 @@ while !GLFW.WindowShouldClose(window)
     # swap the buffers
     GLFW.SwapBuffers(window)
 end
+end # let
 
 GLFW.DestroyWindow(window)

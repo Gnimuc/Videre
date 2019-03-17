@@ -127,6 +127,8 @@ glUseProgram(shader_prog)
 glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, view_matrix)
 glUniformMatrix4fv(proj_matrix_loc, 1, GL_FALSE, proj_matrix)
 
+let
+updatefps = FPSCounter()
 # render
 previous = time()
 while !GLFW.WindowShouldClose(window)
@@ -141,7 +143,7 @@ while !GLFW.WindowShouldClose(window)
     # check and call events
     GLFW.PollEvents()
     # move camera
-    global previous; global camera_pos; global camera_speed; global camera_yaw
+    global camera_pos; global camera_speed; global camera_yaw
     current = time()
     elapsed = current - previous
     previous = current
@@ -167,5 +169,6 @@ while !GLFW.WindowShouldClose(window)
     # swap the buffers
     GLFW.SwapBuffers(window)
 end
+end # let
 
 GLFW.DestroyWindow(window)

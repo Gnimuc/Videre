@@ -144,18 +144,20 @@ function startgl(width, height)
     return window
 end
 
-# _update_fps_counter
-let previous = time()
-    frame_count = 0
-    global function updatefps(window::GLFW.Window)
-        current = time()
-        elapsed = current - previous
-        if elapsed > 0.25
-            previous = current
-            fps = frame_count / elapsed
-            GLFW.SetWindowTitle(window, @sprintf("opengl @ fps: %.2f", fps))
-            frame_count = 0
-        end
-        frame_count += 1
-    end
+# _update_fps_counter functor
+mutable struct FPSCounter{T<:AbstractFloat}
+	previous_time::T
+	frame_count::Int
+end
+FPSCounter() = FPSCounter(time(), 0)
+function (obj::FPSCounter)(window::GLFW.Window)
+	current_time = time()
+	elapsed_time = current_time - obj.previous_time
+	if elapsed_time > 0.25
+		obj.previous_time = current_time
+		fps = obj.frame_count / elapsed_time
+		GC.@preserve fps GLFW.SetWindowTitle(window, @sprintf("opengl @ fps: %.2f", fps))
+		obj.frame_count = 0
+	end
+	obj.frame_count += 1
 end
