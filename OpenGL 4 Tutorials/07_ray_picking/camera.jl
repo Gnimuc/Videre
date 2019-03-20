@@ -1,3 +1,4 @@
+using Quaternions
 using LinearAlgebra
 using StaticArrays
 
