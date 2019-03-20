@@ -1,133 +1,117 @@
+using CSyntax
+using Quaternions
 using OffsetArrays
-include(joinpath(@__DIR__, "glutils.jl"))
+using JSON
 
 @static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
 
-# window init global variables
-glfwWidth = 640
-glfwHeight = 480
-window = C_NULL
+include(joinpath(@__DIR__, "glutils.jl"))
+include(joinpath(@__DIR__, "camera.jl"))
 
-# start OpenGL
-@assert startgl()
+# init window
+width, height = 640, 480
+window = startgl(width, height)
 
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
 
-# projective matrix
-let
-    near = 0.1            # clipping near plane
-    far = 100.0           # clipping far plane
-    fov = deg2rad(67)
-    global function get_projective_matrix()
-        aspectRatio = glfwWidth / glfwHeight
-        range = tan(0.5*fov) * near
-        Sx = 2.0*near / (range * aspectRatio + range * aspectRatio)
-        Sy = near / range
-        Sz = -(far + near) / (far - near)
-        Pz = -(2.0*far*near) / (far - near)
-        return GLfloat[ Sx   0.0  0.0  0.0;
-                        0.0   Sy  0.0  0.0;
-                        0.0  0.0   Sz   Pz;
-                        0.0  0.0 -1.0  0.0]
-    end
-end
+# camera
+camera = PerspectiveCamera()
+setposition!(camera, [0.0, 0.0, 5.0])
 
 # ray casting
-function screen2world(mouseX::Real, mouseY::Real)
+function screen2world(window::GLFW.Window, mouse_x::Real, mouse_y::Real)
     # screen space (window space)
-    x = 2.0*mouseX/glfwWidth - 1.0
-    y = 1.0 - (2.0*mouseY)/glfwHeight
+    x = 2.0 * mouse_x / width - 1.0
+    y = 1.0 - (2.0 * mouse_y) / height
     z = 1.0
     # normalised device space [-1:1, -1:1, -1:1]
-    rayNDS = GLfloat[x, y, z]
+    ray_nds = GLfloat[x, y, z]
     # clip space [-1:1, -1:1, -1:1, -1:1]
-    rayClip = GLfloat[rayNDS[1], rayNDS[2], -1, 1]
+    ray_clip = GLfloat[ray_nds[1], ray_nds[2], -1, 1]
     # eye space [-x:x, -y:y, -z:z, -w:w]
-    rayEye = inv(get_projective_matrix()) * rayClip
-    rayEye = GLfloat[rayEye[1], rayEye[2], -1, 0]
+    ray_eye = inv(get_projective_matrix(window, camera)) * ray_clip
+    ray_eye = GLfloat[ray_eye[1], ray_eye[2], -1, 0]
     # world space [-x:x, -y:y, -z:z, -w:w]
-    rayWorldHomo = inv(get_view_matrix()) * rayEye
-    rayWorld = rayWorldHomo[1:3]
+    ray_world_homogenous = inv(get_view_matrix(camera)) * ray_eye
+    ray_world = ray_world_homogenous[1:3]
     # normalize
-    normalize!(rayWorld)
-    return rayWorld
+    normalize!(ray_world)
+    return ray_world
 end
 
-function raysphere(rayOriginWorld, rayDirectionWorld, sphereCenterWorld, shpereRadius)
-    intersectionDistance = 0
+function raysphere(ray_origin_world, ray_direction_world, sphere_center_world, sphere_radius)
+    intersection_dist = 0
     # quadratic parameters
-    distance = rayOriginWorld - sphereCenterWorld
-    b = rayDirectionWorld ⋅ distance
-    c = distance ⋅ distance - shpereRadius * shpereRadius
-    b²MinusC = b * b - c
+    dist = ray_origin_world - sphere_center_world
+    b = ray_direction_world ⋅ dist
+    c = dist ⋅ dist - sphere_radius * sphere_radius
+    Δ = b * b - c
     # no intersection
-    b²MinusC < 0 && (flag = false)
+    Δ < 0 && (flag = false;)
     # one intersection (tangent ray)
-    if b²MinusC == 0
+    if Δ == 0
         # if behind viewer, throw away
-        t = -b + sqrt(b²MinusC)
-        t < 0 && (flag = false)
-        intersectionDistance = t
+        t = -b + √(Δ)
+        t < 0 && (flag = false;)
+        intersection_dist = t
         flag = true
     end
     # two intersections (secant ray)
-    if b²MinusC > 0
-        t₁ = -b + sqrt(b²MinusC)
-        t₂ = -b - sqrt(b²MinusC)
-        intersectionDistance = t₂
+    if Δ > 0
+        t₁ = -b + √(Δ)
+        t₂ = -b - √(Δ)
+        intersection_dist = t₂
         # if behind viewer, throw away
-        t₁ < 0 && t₂ < 0 && (flag = false)
-        t₁ ≥ 0 && t₂ < 0 && (intersectionDistance = t₁)
+        t₁ < 0 && t₂ < 0 && (flag = false;)
+        t₁ ≥ 0 && t₂ < 0 && (intersection_dist = t₁;)
         flag = true
     end
-    return flag, intersectionDistance
+    return flag, intersection_dist
 end
 
 # spheres in world
 const NUM_SPHERES = 4
-sphereWorldPositions = GLfloat[-2.0 0.0  0.0;
-                                2.0 0.0  0.0;
-                               -2.0 0.0 -2.0;
-                                1.5 1.0 -1.0]
-modelMatrices = Array{Matrix,1}(4)
+sphere_world = GLfloat[-2.0 0.0  0.0;
+                        2.0 0.0  0.0;
+                       -2.0 0.0 -2.0;
+                        1.5 1.0 -1.0]
+model_mats = Vector{Matrix}(undef, NUM_SPHERES)
 for i = 1:NUM_SPHERES
-    modelMatrices[i] = GLfloat[ 1.0 0.0 0.0 sphereWorldPositions[i,1];
-                                0.0 1.0 0.0 sphereWorldPositions[i,2];
-                                0.0 0.0 1.0 sphereWorldPositions[i,3];
-                                0.0 0.0 0.0                      1.0]
+    model_mats[i] = GLfloat[ 1.0 0.0 0.0 sphere_world[i,1];
+                             0.0 1.0 0.0 sphere_world[i,2];
+                             0.0 0.0 1.0 sphere_world[i,3];
+                             0.0 0.0 0.0               1.0]
 end
 
 const SPHERE_RADIUS = 1
-selectedSphere = -1
-function mouse_click_callback(window::GLFW.Window, button::Cint, action::Cint, mods::Cint)
+selected = -1
+function mouse_click_callback(window::GLFW.Window, button::GLFW.MouseButton, action::GLFW.Action, mods::Cint)
     if GLFW.PRESS == action
         xpos, ypos = GLFW.GetCursorPos(window)
-        rayWorld = screen2world(xpos, ypos)
+        ray_world = screen2world(window, xpos, ypos)
         # ray sphere
-        closestSphereClicked = -1
-        closestIntersection = 0
+        clicked = -1
+        intersect = 0
         for i = 1:NUM_SPHERES
-            sp = collect(sphereWorldPositions[i,:])
-            flag, distance = raysphere(get_camera_position(), rayWorld, sp, SPHERE_RADIUS)
-            if flag
-                if (closestSphereClicked == -1) || (distance < closestIntersection)
-                    closestSphereClicked = i
-                    closestIntersection = distance
-                end
+            sp = collect(sphere_world[i,:])
+            flag, dist = raysphere(vec(camera.position), ray_world, sp, SPHERE_RADIUS)
+            flag || continue
+            if (clicked == -1) || (dist < intersect)
+                clicked = i
+                intersect = dist
             end
         end
-        global selectedSphere = closestSphereClicked
-        println("sphere ", selectedSphere, " was clicked")
+        global selected = clicked
+        println("sphere ", selected, " was clicked")
     end
     return nothing
 end
 # set mouse click callback
 GLFW.SetMouseButtonCallback(window, mouse_click_callback)
-
 
 # load glTF file
 sphere = JSON.parsefile(joinpath(@__DIR__, "sphere.gltf"))
@@ -135,60 +119,57 @@ accessors = OffsetArray(sphere["accessors"], -1)
 bufferViews = OffsetArray(sphere["bufferViews"], -1)
 buffers = OffsetArray(sphere["buffers"], -1)
 # load sphere position metadata
-positionAccessor = accessors[0]
-positionBufferView = bufferViews[positionAccessor["bufferView"]]
-posBuffer = buffers[positionBufferView["buffer"]]
+pos_accessor = accessors[0]
+pos_bv = bufferViews[pos_accessor["bufferView"]]
+pos_uri = joinpath(@__DIR__, buffers[pos_bv["buffer"]]["uri"])
 # load sphere index metadata
-indexAccessor = accessors[3]
-indexBufferView = bufferViews[indexAccessor["bufferView"]]
-indexBuffer = buffers[indexBufferView["buffer"]]
+idx_accessor = accessors[3]
+idx_bv = bufferViews[idx_accessor["bufferView"]]
+idx_uri = joinpath(@__DIR__, buffers[idx_bv["buffer"]]["uri"])
 
 # load buffer-blobs
 readblob(uri, length, offset) = open(uri) do f
                                     skip(f, offset)
                                     blob = read(f, length)
                                 end
-positionBlob = readblob(joinpath(@__DIR__, indexBuffer["uri"]), positionBufferView["byteLength"], positionBufferView["byteOffset"])
-indexBlob = readblob(joinpath(@__DIR__, indexBuffer["uri"]), indexBufferView["byteLength"], indexBufferView["byteOffset"])
-position = reinterpret(GLfloat, positionBlob) # GLENUM(posAccessor["componentType"]).name => GLfloat
-index = reinterpret(GLushort, indexBlob) # GLENUM(indexAccessor["componentType"]).name => GLushort
+pos_blob = readblob(pos_uri, pos_bv["byteLength"], pos_bv["byteOffset"])
+idx_blob = readblob(idx_uri, idx_bv["byteLength"], idx_bv["byteOffset"])
+position = reinterpret(GLfloat, pos_blob) # GLENUM(pos_accessor["componentType"]).name => GLfloat
+index = reinterpret(GLushort, idx_blob) # GLENUM(idx_accessor["componentType"]).name => GLushort
 
 # create buffers located in the memory of graphic card
-positionVBO = Ref{GLuint}(0)
-glGenBuffers(1, positionVBO)
-positionTarget = positionBufferView["target"]
-glBindBuffer(positionTarget, positionVBO[])
-glBufferData(positionTarget, positionBufferView["byteLength"], positionBlob, GL_STATIC_DRAW)
+pos_vbo = GLuint(0)
+@c glGenBuffers(1, &pos_vbo)
+glBindBuffer(pos_bv["target"], pos_vbo)
+glBufferData(pos_bv["target"], pos_bv["byteLength"], position, GL_STATIC_DRAW)
 
-indexEBO = Ref{GLuint}(0)
-glGenBuffers(1, indexEBO)
-indexTarget = indexBufferView["target"]
-glBindBuffer(indexTarget, indexEBO[])
-glBufferData(indexTarget, indexBufferView["byteLength"], indexBlob, GL_STATIC_DRAW)
+idx_ebo = GLuint(0)
+@c glGenBuffers(1, &idx_ebo)
+glBindBuffer(idx_bv["target"], idx_ebo)
+glBufferData(idx_bv["target"], idx_bv["byteLength"], index, GL_STATIC_DRAW)
 
 # create VAO
-vaoID = Ref{GLuint}(0)
-glGenVertexArrays(1, vaoID)
-glBindVertexArray(vaoID[])
-glBindBuffer(positionTarget, positionVBO[])
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Cvoid}(positionAccessor["byteOffset"]))
+vao = GLuint(0)
+@c glGenVertexArrays(1, &vao)
+glBindVertexArray(vao)
+glBindBuffer(pos_bv["target"], pos_vbo)
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Cvoid}(pos_accessor["byteOffset"]))
 glEnableVertexAttribArray(0)
 
-# set camera
-resetcamera()
-set_camera_position(GLfloat[0.0, 0.0, 5.0])
+# load and compile shaders from file
+vert_shader = createshader(joinpath(@__DIR__, "raypick.vert"), GL_VERTEX_SHADER)
+frag_shader = createshader(joinpath(@__DIR__, "raypick.frag"), GL_FRAGMENT_SHADER)
 
-# create shader program
-vertexShaderPath = joinpath(@__DIR__, "raypick.vert")
-fragmentShaderPath = joinpath(@__DIR__, "raypick.frag")
-shaderProgramID = createprogram(vertexShaderPath, fragmentShaderPath)
-modelMatrixLocation = glGetUniformLocation(shaderProgramID, "model")
-viewMatrixLocation = glGetUniformLocation(shaderProgramID, "view")
-projMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
-blueLocation = glGetUniformLocation(shaderProgramID, "blue")
-glUseProgram(shaderProgramID)
-glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, get_view_matrix())
-glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, get_projective_matrix())
+# link program
+shader_prog = createprogram(vert_shader, frag_shader)
+
+model_loc = glGetUniformLocation(shader_prog, "model")
+view_loc = glGetUniformLocation(shader_prog, "view")
+proj_loc = glGetUniformLocation(shader_prog, "proj")
+blue_loc = glGetUniformLocation(shader_prog, "blue")
+glUseProgram(shader_prog)
+glUniformMatrix4fv(view_loc, 1, GL_FALSE, get_view_matrix(camera))
+glUniformMatrix4fv(proj_loc, 1, GL_FALSE, get_projective_matrix(window, camera))
 
 # enable cull face
 glEnable(GL_CULL_FACE)
@@ -197,36 +178,37 @@ glFrontFace(GL_CCW)
 # set background color to gray
 glClearColor(0.2, 0.2, 0.2, 1.0)
 
-
+let
+updatefps = FPSCounter()
+count = idx_accessor["count"]
+type = idx_accessor["componentType"]
+offset = idx_accessor["byteOffset"]
 # render
-indexCount = indexAccessor["count"]
-indexComponentType = indexAccessor["componentType"]
-indexByteOffset = indexAccessor["byteOffset"]
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
     # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glViewport(0, 0, glfwWidth, glfwHeight)
+    glViewport(0, 0, GLFW.GetFramebufferSize(window)...)
     # drawing
-    glUseProgram(shaderProgramID)
-    glBindBuffer(indexTarget, indexEBO[])
+    glUseProgram(shader_prog)
+    glBindBuffer(idx_bv["target"], idx_ebo)
     for i = 1:NUM_SPHERES
-        if i == selectedSphere
-            glUniform1f(blueLocation, 1.0)
+        if i == selected
+            glUniform1f(blue_loc, 1.0)
         else
-            glUniform1f(blueLocation, 0.0)
+            glUniform1f(blue_loc, 0.0)
         end
-        glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrices[i])
-        glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Cvoid}(indexByteOffset))
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, model_mats[i])
+        glDrawElements(GL_TRIANGLES, count, type, Ptr{Cvoid}(offset))
     end
     # check and call events
     GLFW.PollEvents()
-    yield()
     # move camera
-    viewMatrix = updatecamera()
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
+    updatecamera!(window, camera)
+    glUniformMatrix4fv(view_loc, 1, GL_FALSE, get_view_matrix(camera))
     # swap the buffers
     GLFW.SwapBuffers(window)
 end
+end # let
 
 GLFW.DestroyWindow(window)
