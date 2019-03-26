@@ -19,7 +19,7 @@ pApplicationName = pointer(b"Vulkan Instance")
 applicationVersion = vk.VK_MAKE_VERSION(1, 0, 0)
 pEngineName = pointer(b"No Engine")
 engineVersion = vk.VK_MAKE_VERSION(1, 0, 0)
-apiVersion = vk.VK_VERSION
+apiVersion = vk.VK_MAKE_VERSION(1, 1, 0)
 appInfoRef = vk.VkApplicationInfo(sType, C_NULL, pApplicationName, applicationVersion, pEngineName, engineVersion, apiVersion) |> Ref
 
 # fill create info
@@ -31,7 +31,7 @@ requiredExtensions = GLFW.GetRequiredInstanceExtensions()
 extensionCountRef = Ref{Cuint}(0)
 vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
 extensionCount = extensionCountRef[]
-supportedExtensions = Vector{vk.VkExtensionProperties}(extensionCount)
+supportedExtensions = Vector{vk.VkExtensionProperties}(undef, extensionCount)
 vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, supportedExtensions)
 supportedExtensionNames = [ext.extensionName |> collect |> String |> x->strip(x, '\0') for ext in supportedExtensions]
 supportedExtensionVersions = [ext.specVersion |> Int for ext in supportedExtensions]

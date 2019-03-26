@@ -16,12 +16,12 @@ window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 # fill application info
 sType = vk.VK_STRUCTURE_TYPE_APPLICATION_INFO
 pApplicationName = pointer(b"Vulkan Instance")
-applicationVersion = vk.VK_MAKE_VERSION(1, 0, 0)
+applicationVersion = vk.VK_MAKE_VERSION(1, 1, 0)
 pEngineName = pointer(b"No Engine")
-engineVersion = vk.VK_MAKE_VERSION(1, 0, 0)
-apiVersion = vk.VK_VERSION
+engineVersion = vk.VK_MAKE_VERSION(1, 1, 0)
+apiVersion = vk.VK_MAKE_VERSION(1, 1, 0)
 appInfoRef = vk.VkApplicationInfo(sType, C_NULL, pApplicationName, applicationVersion, pEngineName, engineVersion, apiVersion) |> Ref
-
+GLFW.VulkanSupported()
 # fill create info
 sType = vk.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
 flags = UInt32(0)

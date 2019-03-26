@@ -2,14 +2,11 @@ using GLFW
 using VulkanCore
 
 # helper functions
-# TODO: use GC.@preserve in Julia-v0.7+
-const gc_preserve = []
 """
     strings2pp(names) -> ppNames
 Dump a pointer that is of type `Ptr{String}` from a Julia `String` array.
 """
-strings2pp(names::Vector{String}) = (ptr = Base.cconvert(Ptr{Cstring}, names); push!(gc_preserve, ptr); Base.unsafe_convert(Ptr{Cstring}, ptr))
-# strings2pp(names::Vector{String}) = (ptr = Base.cconvert(Ptr{Cstring}, names); GC.@preserve ptr Base.unsafe_convert(Ptr{Cstring}, ptr))
+strings2pp(names::Vector{String}) = (ptr = Base.cconvert(Ptr{Cstring}, names); GC.@preserve ptr Base.unsafe_convert(Ptr{Cstring}, ptr))
 
 vktuple2string(x) = x |> collect |> String |> s->strip(s, '\0')
 
@@ -33,7 +30,7 @@ function get_supported_extensions()
     extensionCountRef = Ref{Cuint}(0)
     vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
     extensionCount = extensionCountRef[]
-    supportedExtensions = Vector{vk.VkExtensionProperties}(extensionCount)
+    supportedExtensions = Vector{vk.VkExtensionProperties}(undef, extensionCount)
     vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, supportedExtensions)
     return [ExtensionProperties(ext) for ext in supportedExtensions]
 end
@@ -52,7 +49,7 @@ function get_supported_layers()
     layerCountRef = Ref{Cuint}(0)
     vk.vkEnumerateInstanceLayerProperties(layerCountRef, C_NULL)
     layerCount = layerCountRef[]
-    availableLayers = Vector{vk.VkLayerProperties}(layerCount)
+    availableLayers = Vector{vk.VkLayerProperties}(undef, layerCount)
     vk.vkEnumerateInstanceLayerProperties(layerCountRef, availableLayers)
     return [LayerProperties(layer) for layer in availableLayers]
 end
@@ -95,12 +92,15 @@ function VkInstanceCreateInfo(applicationInfoRef, layerNames::Vector{String}, ex
     return VkInstanceCreateInfo(applicationInfoRef, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames)
 end
 
-function VkDebugReportCallbackCreateInfoEXT(debugcallback::Function, flags::vk.VkDebugReportFlagsEXT=vk.VK_DEBUG_REPORT_ERROR_BIT_EXT, pUserData=C_NULL)
+function VkDebugReportCallbackCreateInfoEXT(debugcallback, flags::vk.VkDebugReportFlagsEXT=vk.VK_DEBUG_REPORT_ERROR_BIT_EXT, pUserData=C_NULL)
     sType = vk.VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
     pNext = C_NULL    # reserved for extension-specific structure
-    pfnCallback = cfunction(debugcallback, vk.VkBool32, Tuple{vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT,
-                                                              Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cvoid}})
-    return vk.VkDebugReportCallbackCreateInfoEXT(sType, pNext, flags, pfnCallback, pUserData)
+    pfnCallback = @cfunction($debugcallback, vk.VkBool32, (vk.VkDebugReportFlagsEXT, vk.VkDebugReportObjectTypeEXT, Culonglong, Csize_t, Cint, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cvoid}))
+    GC.@preserve pfnCallback begin
+        ptr = Base.unsafe_convert(Ptr{Cvoid}, pfnCallback)
+        ret = vk.VkDebugReportCallbackCreateInfoEXT(sType, pNext, flags, ptr, pUserData)
+    end
+    return ret
 end
 
 function VkCreateDebugReportCallbackEXT(instance, callbackInfoRef, allocatorRef, callbackRef)
