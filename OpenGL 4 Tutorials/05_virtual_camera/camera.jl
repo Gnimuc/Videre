@@ -8,7 +8,7 @@ end
 include(joinpath(@__DIR__, "glutils.jl"))
 
 # init window
-width, height = 640, 480
+width, height = fb_width, fb_height = 640, 480
 window = startgl(width, height)
 
 glEnable(GL_DEPTH_TEST)

@@ -12,7 +12,7 @@ include(joinpath(@__DIR__, "glutils.jl"))
 include(joinpath(@__DIR__, "camera.jl"))
 
 # init window
-width, height = 640, 480
+width, height = fb_width, fb_height = 640, 480
 window = startgl(width, height)
 
 glEnable(GL_DEPTH_TEST)
@@ -206,6 +206,7 @@ while !GLFW.WindowShouldClose(window)
     # move camera
     updatecamera!(window, camera)
     glUniformMatrix4fv(view_loc, 1, GL_FALSE, get_view_matrix(camera))
+    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, get_projective_matrix(window, camera))
     # swap the buffers
     GLFW.SwapBuffers(window)
 end

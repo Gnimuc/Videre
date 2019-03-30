@@ -150,11 +150,18 @@ function key_callback(window::GLFW.Window, key::GLFW.Key, scancode::Cint, action
 end
 
 # tell GLFW to run this function whenever the framebuffer size is changed
-function framebuffer_size_callback(window::GLFW.Window, buffer_width::Cint, buffer_height::Cint)
-	global width = buffer_width
-	global height = buffer_height
-	println("width", buffer_width, "height", buffer_height)
-	# update any perspective matrices used here
+function framebuffer_size_callback(window::GLFW.Window, w::Cint, h::Cint)
+	global fb_width = w
+	global fb_height = h
+	println("framebuffer size: ($w, $h)")
+    return nothing
+end
+
+# tell GLFW to run this function whenever the window size is changed
+function window_size_callback(window::GLFW.Window, w::Cint, h::Cint)
+	global width = w
+	global height = h
+	println("window size: ($w, $h)")
     return nothing
 end
 
@@ -180,6 +187,7 @@ function startgl(width, height)
 	@assert window != C_NULL "could not open window with GLFW3."
 
 	GLFW.SetKeyCallback(window, key_callback)
+	GLFW.SetWindowSizeCallback(window, window_size_callback)
 	GLFW.SetFramebufferSizeCallback(window, framebuffer_size_callback)
 	GLFW.MakeContextCurrent(window)
 	GLFW.WindowHint(GLFW.SAMPLES, 4)

@@ -88,10 +88,7 @@ function update_view_matrix!(camera::AbstractCamera, move::AbstractVector)
     camera.viewMatrix = inv(homogenousMatrix)
 end
 
-function get_current_aspectratio(window::GLFW.Window)
-    width, height = GLFW.GetFramebufferSize(window)
-    return width / height
-end
+get_current_aspectratio(window::GLFW.Window) = GLFW.GetFramebufferSize(window) |> x->x[1]/x[2]
 
 function get_projective_matrix(camera::PerspectiveCamera, aspectRatio::Real)
     near = camera.near
