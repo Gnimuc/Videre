@@ -1,7 +1,7 @@
 using GLFW
 using VulkanCore
-
-include(joinpath(@__DIR__, "..", "vkhelper.jl"))
+using VulkanCore.LibVulkan
+using CSyntax
 
 const WIDTH = 800
 const HEIGHT = 600
@@ -13,17 +13,29 @@ window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 
 ## init Vulkan
 # create instance
-apiVersion = vk.VK_API_VERSION_1_0()
-appInfoRef = VkApplicationInfo("Application Name: Create Instance", v"1.0.0", "No Engine Name", v"1.0.0", apiVersion) |> Ref
-requiredExtensions = GLFW.GetRequiredInstanceExtensions()
-enabledExtensionCount = length(requiredExtensions)
-ppEnabledExtensionNames = strings2pp(requiredExtensions)
-createInfoRef = VkInstanceCreateInfo(appInfoRef, 0, C_NULL, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
+# fill application info
+sType = VK_STRUCTURE_TYPE_APPLICATION_INFO
+pApplicationName = pointer(b"Vulkan Instance")
+applicationVersion = VK_MAKE_VERSION(1, 1, 0)
+pEngineName = pointer(b"No Engine")
+engineVersion = VK_MAKE_VERSION(1, 1, 0)
+apiVersion = VK_MAKE_VERSION(1, 1, 0)
+appInfo = VkApplicationInfo(sType, C_NULL, pApplicationName, applicationVersion, pEngineName, engineVersion, apiVersion)
+GLFW.VulkanSupported()
+# fill create info
+sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
+flags = UInt32(0)
+pApplicationInfo = @c Base.unsafe_convert(Ptr{VkApplicationInfo}, &appInfo)
+enabledExtensionCount = Cuint(0)
+ppEnabledExtensionNames = @c GLFW.GetRequiredInstanceExtensions(&enabledExtensionCount)
+enabledLayerCount = Cuint(0)
+ppEnabledLayerNames = C_NULL
+createInfo = @c VkInstanceCreateInfo(sType, C_NULL, flags, pApplicationInfo, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames)
+
 # create instance
-instanceRef = Ref{vk.VkInstance}(C_NULL)
-result = vk.vkCreateInstance(createInfoRef, C_NULL, instanceRef)
-result != vk.VK_SUCCESS && error("failed to create instance!")
-instance = instanceRef[]
+instance = VkInstance(C_NULL)
+result = @c vkCreateInstance(&createInfo, C_NULL, &instance)
+result != VK_SUCCESS && error("failed to create instance!")
 
 ## main loop
 while !GLFW.WindowShouldClose(window)
@@ -31,5 +43,5 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## clean up
-vk.vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instance, C_NULL)
 GLFW.DestroyWindow(window)
