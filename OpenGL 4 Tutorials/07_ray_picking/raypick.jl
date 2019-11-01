@@ -1,7 +1,6 @@
 using CSyntax
 using Quaternions
-using OffsetArrays
-using JSON
+using GLTF
 
 @static if Sys.isapple()
     const VERSION_MAJOR = 4
@@ -17,6 +16,44 @@ window = startgl(width, height)
 
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
+
+# we use glTF file format because it's OpenGL friendly and we don't need to care about
+# how to parse and extract mesh data from other mesh file format like .obj format.
+# load glTF file
+sphere = GLTF.load(joinpath(@__DIR__, "sphere.gltf"))
+sphere_data = [read(joinpath(@__DIR__, b.uri)) for b in sphere.buffers]
+
+# load sphere position metadata
+search_name(x, keyword) = x[findfirst(x->occursin(keyword, x.name), x)]
+pos = search_name(sphere.accessors, "position")
+pos_bv = sphere.bufferViews[pos.bufferView]
+# load sphere index metadata
+indices = search_name(sphere.accessors, "indices")
+idx_bv = sphere.bufferViews[indices.bufferView]
+
+# create VBO and EBO
+vbo = GLuint(0)
+@c glGenBuffers(1, &vbo)
+glBindBuffer(pos_bv.target, vbo)
+glBufferData(pos_bv.target, pos_bv.byteLength, C_NULL, GL_STATIC_DRAW)
+pos_data = sphere_data[pos_bv.buffer]
+@c glBufferSubData(pos_bv.target, 0, pos_bv.byteLength, &pos_data[pos_bv.byteOffset])
+
+ebo = GLuint(0)
+@c glGenBuffers(1, &ebo)
+glBindBuffer(idx_bv.target, ebo)
+glBufferData(idx_bv.target, idx_bv.byteLength, C_NULL, GL_STATIC_DRAW)
+idx_data = sphere_data[idx_bv.buffer]
+@c glBufferSubData(idx_bv.target, 0, idx_bv.byteLength, &idx_data[idx_bv.byteOffset])
+
+# create VAO
+vao = GLuint(0)
+@c glGenVertexArrays(1, &vao)
+glBindVertexArray(vao)
+glBindBuffer(pos_bv.target, vbo)
+glVertexAttribPointer(0, 3, pos.componentType, pos.normalized, pos_bv.byteStride, Ptr{Cvoid}(pos.byteOffset))
+glEnableVertexAttribArray(0)
+
 
 # camera
 camera = PerspectiveCamera()
@@ -79,12 +116,11 @@ sphere_world = GLfloat[-2.0 0.0  0.0;
                         2.0 0.0  0.0;
                        -2.0 0.0 -2.0;
                         1.5 1.0 -1.0]
-model_mats = Vector{Matrix}(undef, NUM_SPHERES)
-for i = 1:NUM_SPHERES
-    model_mats[i] = GLfloat[ 1.0 0.0 0.0 sphere_world[i,1];
-                             0.0 1.0 0.0 sphere_world[i,2];
-                             0.0 0.0 1.0 sphere_world[i,3];
-                             0.0 0.0 0.0               1.0]
+model_mats = map(1:4) do i
+    GLfloat[ 1.0 0.0 0.0 sphere_world[i,1];
+             0.0 1.0 0.0 sphere_world[i,2];
+             0.0 0.0 1.0 sphere_world[i,3];
+             0.0 0.0 0.0       1.0        ]
 end
 
 const SPHERE_RADIUS = 1
@@ -113,49 +149,6 @@ end
 # set mouse click callback
 GLFW.SetMouseButtonCallback(window, mouse_click_callback)
 
-# load glTF file
-sphere = JSON.parsefile(joinpath(@__DIR__, "sphere.gltf"))
-accessors = OffsetArray(sphere["accessors"], -1)
-bufferViews = OffsetArray(sphere["bufferViews"], -1)
-buffers = OffsetArray(sphere["buffers"], -1)
-# load sphere position metadata
-pos_accessor = accessors[0]
-pos_bv = bufferViews[pos_accessor["bufferView"]]
-pos_uri = joinpath(@__DIR__, buffers[pos_bv["buffer"]]["uri"])
-# load sphere index metadata
-idx_accessor = accessors[3]
-idx_bv = bufferViews[idx_accessor["bufferView"]]
-idx_uri = joinpath(@__DIR__, buffers[idx_bv["buffer"]]["uri"])
-
-# load buffer-blobs
-readblob(uri, length, offset) = open(uri) do f
-                                    skip(f, offset)
-                                    blob = read(f, length)
-                                end
-pos_blob = readblob(pos_uri, pos_bv["byteLength"], pos_bv["byteOffset"])
-idx_blob = readblob(idx_uri, idx_bv["byteLength"], idx_bv["byteOffset"])
-position = reinterpret(GLfloat, pos_blob) # GLENUM(pos_accessor["componentType"]).name => GLfloat
-index = reinterpret(GLushort, idx_blob) # GLENUM(idx_accessor["componentType"]).name => GLushort
-
-# create buffers located in the memory of graphic card
-pos_vbo = GLuint(0)
-@c glGenBuffers(1, &pos_vbo)
-glBindBuffer(pos_bv["target"], pos_vbo)
-glBufferData(pos_bv["target"], pos_bv["byteLength"], position, GL_STATIC_DRAW)
-
-idx_ebo = GLuint(0)
-@c glGenBuffers(1, &idx_ebo)
-glBindBuffer(idx_bv["target"], idx_ebo)
-glBufferData(idx_bv["target"], idx_bv["byteLength"], index, GL_STATIC_DRAW)
-
-# create VAO
-vao = GLuint(0)
-@c glGenVertexArrays(1, &vao)
-glBindVertexArray(vao)
-glBindBuffer(pos_bv["target"], pos_vbo)
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, Ptr{Cvoid}(pos_accessor["byteOffset"]))
-glEnableVertexAttribArray(0)
-
 # load and compile shaders from file
 vert_shader = createshader(joinpath(@__DIR__, "raypick.vert"), GL_VERTEX_SHADER)
 frag_shader = createshader(joinpath(@__DIR__, "raypick.frag"), GL_FRAGMENT_SHADER)
@@ -180,9 +173,6 @@ glClearColor(0.2, 0.2, 0.2, 1.0)
 
 let
 updatefps = FPSCounter()
-count = idx_accessor["count"]
-type = idx_accessor["componentType"]
-offset = idx_accessor["byteOffset"]
 # render
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
@@ -191,7 +181,8 @@ while !GLFW.WindowShouldClose(window)
     glViewport(0, 0, GLFW.GetFramebufferSize(window)...)
     # drawing
     glUseProgram(shader_prog)
-    glBindBuffer(idx_bv["target"], idx_ebo)
+    glBindVertexArray(vao)
+    glBindBuffer(idx_bv.target, ebo)
     for i = 1:NUM_SPHERES
         if i == selected
             glUniform1f(blue_loc, 1.0)
@@ -199,7 +190,7 @@ while !GLFW.WindowShouldClose(window)
             glUniform1f(blue_loc, 0.0)
         end
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, model_mats[i])
-        glDrawElements(GL_TRIANGLES, count, type, Ptr{Cvoid}(offset))
+        glDrawElements(GL_TRIANGLES, indices.count, indices.componentType, Ptr{Cvoid}(0))
     end
     # check and call events
     GLFW.PollEvents()
