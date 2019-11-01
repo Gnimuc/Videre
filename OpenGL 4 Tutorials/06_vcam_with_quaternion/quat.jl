@@ -83,12 +83,11 @@ sphere_world = GLfloat[-2.0 0.0  0.0;
                         2.0 0.0  0.0;
                        -2.0 0.0 -2.0;
                         1.5 1.0 -1.0]
-model_mats = Vector{Matrix}(undef, 4)
-for i = 1:4
-    model_mats[i] = GLfloat[ 1.0 0.0 0.0 sphere_world[i,1];
-                             0.0 1.0 0.0 sphere_world[i,2];
-                             0.0 0.0 1.0 sphere_world[i,3];
-                             0.0 0.0 0.0               1.0]
+model_mats = map(1:4) do i
+    GLfloat[ 1.0 0.0 0.0 sphere_world[i,1];
+             0.0 1.0 0.0 sphere_world[i,2];
+             0.0 0.0 1.0 sphere_world[i,3];
+             0.0 0.0 0.0       1.0        ]
 end
 
 let
