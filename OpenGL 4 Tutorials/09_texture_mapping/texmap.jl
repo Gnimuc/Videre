@@ -1,5 +1,5 @@
 using CSyntax
-using Images
+using STBImage.LibSTBImage
 
 @static if Sys.isapple()
     const VERSION_MAJOR = 4
@@ -21,14 +21,23 @@ camera = PerspectiveCamera()
 setposition!(camera, [0.0, 0.0, 2.0])
 
 # load texture
-skull = load(joinpath(@__DIR__, "skulluvmap.png"))
-skull = reverse(transpose(skull), dims=2)
-tex_width, tex_height = size(skull) .|> GLsizei
+x = Cint(0)
+y = Cint(0)
+n = Cint(0)
+force_channels = Cint(0)
+skull_filename = joinpath(@__DIR__, "skulluvmap.png")
+# the following function call flips the image
+# needs to be called before each stbi_load(...);
+stbi_set_flip_vertically_on_load(true)
+skull_data = @c stbi_load(skull_filename, &x, &y, &n, force_channels)
+skull_data == C_NULL && @error "could not load $skull_filename."
+( ( x & ( x - 1 ) ) != 0 || ( y & ( y - 1 ) ) != 0 ) && @warn "texture $skull_filename is not power-of-2 dimensions."
+
 tex = GLuint(0)
 @c glGenTextures(1, &tex)
 glActiveTexture(GL_TEXTURE0)
 glBindTexture(GL_TEXTURE_2D, tex)
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, skull)
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, skull_data)
 glGenerateMipmap(GL_TEXTURE_2D)
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
