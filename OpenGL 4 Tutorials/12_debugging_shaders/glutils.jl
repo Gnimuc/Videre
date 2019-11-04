@@ -134,7 +134,7 @@ function createprogram(shaders::GLuint...)
         @c glGetProgramiv(id, GL_INFO_LOG_LENGTH, &max_length)
         actual_length = GLsizei(0)
         log = Vector{GLchar}(undef, max_length)
-        @c glGetProgramInfoLog(id, max_length, &actualLength, log)
+        @c glGetProgramInfoLog(id, max_length, &actual_length, log)
         @error String(log)
         error("Could not link shader program(id:$id)!")
     end

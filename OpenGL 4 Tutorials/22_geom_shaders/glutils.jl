@@ -6,9 +6,9 @@ using Memento
 function shaderlog(shaderID::GLuint)
     max_length = Ref{GLsizei}(0)
     glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, max_length)
-    actualLength = Ref{GLsizei}(0)
+    actual_length = Ref{GLsizei}(0)
     log = Vector{GLchar}(max_length[])
-    glGetShaderInfoLog(shaderID, max_length[], actualLength, log)
+    glGetShaderInfoLog(shaderID, max_length[], actual_length, log)
     logger = getlogger(current_module())
     info(logger, string("shader info log for GL index ", shaderID, ":"))
     info(logger, String(log))
@@ -18,9 +18,9 @@ end
 function programlog(programID::GLuint)
     max_length = Ref{GLsizei}(0)
     glGetProgramiv(programID, GL_INFO_LOG_LENGTH, max_length)
-    actualLength = Ref{GLsizei}(0)
+    actual_length = Ref{GLsizei}(0)
     log = Vector{GLchar}(max_length[])
-    glGetProgramInfoLog(programID, max_length[], actualLength, log)
+    glGetProgramInfoLog(programID, max_length[], actual_length, log)
     logger = getlogger(current_module())
     info(logger, string("program info log for GL index ", programID, ":"))
     info(logger, String(log))
@@ -43,11 +43,11 @@ function printall(shaderProgramID::GLuint)
     for i in 1:result[]
         max_length = Ref{GLsizei}(0)
         glGetProgramiv(shaderProgramID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, max_length)
-        actualLength = Ref{GLsizei}(0)
+        actual_length = Ref{GLsizei}(0)
         attributeSize = Ref{GLint}(0)
         attributeType = Ref{GLenum}(0)
         name = Vector{GLchar}(max_length[])
-        glGetActiveAttrib(shaderProgramID, i-1, max_length[], actualLength, attributeSize, attributeType, name)
+        glGetActiveAttrib(shaderProgramID, i-1, max_length[], actual_length, attributeSize, attributeType, name)
         if attributeSize[] > 1
             for j = 1:attributeSize[]
                 longName = @sprintf "%s[%i]" name j
@@ -67,11 +67,11 @@ function printall(shaderProgramID::GLuint)
     for i in 1:result[]
         max_length = Ref{GLsizei}(0)
         glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORM_MAX_LENGTH, max_length)
-        actualLength = Ref{GLsizei}(0)
+        actual_length = Ref{GLsizei}(0)
         attributeSize = Ref{GLint}(0)
         attributeType = Ref{GLenum}(0)
         name = Vector{GLchar}(max_length[])
-        glGetActiveUniform(shaderProgramID, i-1, max_length[], actualLength, attributeSize, attributeType, name)
+        glGetActiveUniform(shaderProgramID, i-1, max_length[], actual_length, attributeSize, attributeType, name)
         if attributeSize[] > 1
             for j = 1:attributeSize[]
                 longName = @sprintf "%s[%i]" name j
