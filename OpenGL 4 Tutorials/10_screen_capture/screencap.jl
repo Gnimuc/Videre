@@ -1,5 +1,6 @@
 using CSyntax
-using Images
+using STBImage.LibSTBImage
+using Dates
 
 @static if Sys.isapple()
     const VERSION_MAJOR = 4
@@ -21,21 +22,31 @@ camera = PerspectiveCamera()
 setposition!(camera, [0.0, 0.0, 2.0])
 
 # screen capture
-function screencapture()
-    buffer = zeros(RGB{N0f8}, width, height)
+function screen_capture()
+    buffer = zeros(Cuchar, 3 * width * height)
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer)
-    save(joinpath(@__DIR__, "$(basename(tempname())).png"), reverse(transpose(buffer), dims=2))
+    filename = joinpath(@__DIR__, "screenshot_"*"$(Dates.format(Dates.now(), "yyyy_mm_ddTH_M_S"))"*".png")
+    stbi_flip_vertically_on_write(true)
+    stbi_write_png(filename, width, height, 3, buffer, 3 * width) != 0 && return true
+    return false
 end
 
 # load texture
-function loadtexture(path::AbstractString)
-    img = load(path)
-    w, h = size(img) .|> GLsizei
+function load_texture(path::AbstractString)
+    x, y, n = Cint(0), Cint(0), Cint(0)
+    force_channels = 4
+    stbi_set_flip_vertically_on_load(true)
+    tex_data = @c stbi_load(path, &x, &y, &n, force_channels)
+    if tex_data == C_NULL
+        @error "could not load $path."
+        return nothing
+    end
+    ( ( x & ( x - 1 ) ) != 0 || ( y & ( y - 1 ) ) != 0 ) && @warn "texture $path is not power-of-2 dimensions."
     id = GLuint(0)
     @c glGenTextures(1, &id)
     glActiveTexture(GL_TEXTURE0)
     glBindTexture(GL_TEXTURE_2D, id)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, reverse(transpose(img), dims=2))
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data)
     glGenerateMipmap(GL_TEXTURE_2D)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
@@ -43,7 +54,7 @@ function loadtexture(path::AbstractString)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
     return id
 end
-loadtexture(joinpath(@__DIR__, "skulluvmap.png"))
+load_texture(joinpath(@__DIR__, "skulluvmap.png"))
 
 # vertex data
 points = GLfloat[-0.5, -0.5, 0.0,
@@ -117,7 +128,10 @@ while !GLFW.WindowShouldClose(window)
     # check and call events
     GLFW.PollEvents()
     # screen capture
-    GLFW.GetKey(window, GLFW.KEY_SPACE) && (println("screen captured"); screencapture())
+    if GLFW.GetKey(window, GLFW.KEY_SPACE)
+        println("screen captured")
+        screen_capture()
+    end
     # move camera
     updatecamera!(window, camera)
     glUniformMatrix4fv(view_loc, 1, GL_FALSE, get_view_matrix(camera))
