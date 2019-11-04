@@ -106,10 +106,10 @@ function createshader(path::AbstractString, type::GLenum)
     if result != GL_TRUE
         @error "$(GLENUM(type).name)(id:$id) failed to compile!"
         max_length = GLsizei(0)
-        @c glGetShaderiv(id, GL_INFO_LOG_LENGTH, &maxLength)
+        @c glGetShaderiv(id, GL_INFO_LOG_LENGTH, &max_length)
         actual_length = GLsizei(0)
         log = Vector{GLchar}(undef, max_length)
-        @c glGetShaderInfoLog(id, maxLength, &actual_length, log)
+        @c glGetShaderInfoLog(id, max_length, &actual_length, log)
         @error String(log)
     end
     @info "$(GLENUM(type).name)(id:$id) successfully compiled!"
@@ -131,10 +131,10 @@ function createprogram(shaders::GLuint...)
     if result != GL_TRUE
         @error "Could not link shader program(id:$id)!"
 		max_length = GLsizei(0)
-        @c glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength)
+        @c glGetProgramiv(id, GL_INFO_LOG_LENGTH, &max_length)
         actual_length = GLsizei(0)
         log = Vector{GLchar}(undef, max_length)
-        @c glGetProgramInfoLog(id, maxLength, &actualLength, log)
+        @c glGetProgramInfoLog(id, max_length, &actualLength, log)
         @error String(log)
         error("Could not link shader program(id:$id)!")
     end

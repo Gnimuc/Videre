@@ -106,10 +106,10 @@ function createshader(path::AbstractString, type::GLenum)
     if result != GL_TRUE
         @error "$(GLENUM(type).name)(id:$id) failed to compile!"
         max_length = GLsizei(0)
-        @c glGetShaderiv(id, GL_INFO_LOG_LENGTH, &maxLength)
+        @c glGetShaderiv(id, GL_INFO_LOG_LENGTH, &max_length)
         actual_length = GLsizei(0)
         log = Vector{GLchar}(undef, max_length)
-        @c glGetShaderInfoLog(id, maxLength, &actual_length, log)
+        @c glGetShaderInfoLog(id, max_length, &actual_length, log)
         @error String(log)
     end
     @info "$(GLENUM(type).name)(id:$id) successfully compiled!"
@@ -131,10 +131,10 @@ function createprogram(shaders::GLuint...)
     if result != GL_TRUE
         @error "Could not link shader program(id:$id)!"
 		max_length = GLsizei(0)
-        @c glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength)
+        @c glGetProgramiv(id, GL_INFO_LOG_LENGTH, &max_length)
         actual_length = GLsizei(0)
         log = Vector{GLchar}(undef, max_length)
-        @c glGetProgramInfoLog(id, maxLength, &actualLength, log)
+        @c glGetProgramInfoLog(id, max_length, &actualLength, log)
         @error String(log)
         error("Could not link shader program(id:$id)!")
     end
@@ -217,4 +217,38 @@ function (obj::FPSCounter)(window::GLFW.Window)
 		obj.frame_count = 0
 	end
 	obj.frame_count += 1
+end
+
+
+# screen capture
+function screen_capture()
+    buffer = zeros(Cuchar, 3 * width * height)
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer)
+    filename = joinpath(@__DIR__, "screenshot_"*"$(Dates.format(Dates.now(), "yyyy_mm_ddTH_M_S"))"*".png")
+    stbi_flip_vertically_on_write(true)
+    stbi_write_png(filename, width, height, 3, buffer, 3 * width) != 0 && return true
+    return false
+end
+
+# load texture
+function load_texture(path::AbstractString)
+    x, y, n = Cint(0), Cint(0), Cint(0)
+    force_channels = 4
+    stbi_set_flip_vertically_on_load(true)
+    tex_data = @c stbi_load(path, &x, &y, &n, force_channels)
+    if tex_data == C_NULL
+        @error "could not load $path."
+        return nothing
+    end
+    ( ( x & ( x - 1 ) ) != 0 || ( y & ( y - 1 ) ) != 0 ) && @warn "texture $path is not power-of-2 dimensions."
+    id = GLuint(0)
+    @c glGenTextures(1, &id)
+    glBindTexture(GL_TEXTURE_2D, id)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data)
+    glGenerateMipmap(GL_TEXTURE_2D)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+    return id
 end

@@ -6,11 +6,11 @@ using Quaternions
 
 # checkout shader infos
 function shaderlog(shaderID::GLuint)
-    maxLength = Ref{GLsizei}(0)
-    glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, maxLength)
+    max_length = Ref{GLsizei}(0)
+    glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, max_length)
     actualLength = Ref{GLsizei}(0)
-    log = Vector{GLchar}(maxLength[])
-    glGetShaderInfoLog(shaderID, maxLength[], actualLength, log)
+    log = Vector{GLchar}(max_length[])
+    glGetShaderInfoLog(shaderID, max_length[], actualLength, log)
     logger = getlogger(current_module())
     info(logger, string("shader info log for GL index ", shaderID, ":"))
     info(logger, String(log))
@@ -18,11 +18,11 @@ end
 
 # checkout program infos
 function programlog(programID::GLuint)
-    maxLength = Ref{GLsizei}(0)
-    glGetProgramiv(programID, GL_INFO_LOG_LENGTH, maxLength)
+    max_length = Ref{GLsizei}(0)
+    glGetProgramiv(programID, GL_INFO_LOG_LENGTH, max_length)
     actualLength = Ref{GLsizei}(0)
-    log = Vector{GLchar}(maxLength[])
-    glGetProgramInfoLog(programID, maxLength[], actualLength, log)
+    log = Vector{GLchar}(max_length[])
+    glGetProgramInfoLog(programID, max_length[], actualLength, log)
     logger = getlogger(current_module())
     info(logger, string("program info log for GL index ", programID, ":"))
     info(logger, String(log))
@@ -43,13 +43,13 @@ function printall(shaderProgramID::GLuint)
     info(logger, string("GL_ACTIVE_ATTRIBUTES = ", result[]))
 
     for i in 1:result[]
-        maxLength = Ref{GLsizei}(0)
-        glGetProgramiv(shaderProgramID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, maxLength)
+        max_length = Ref{GLsizei}(0)
+        glGetProgramiv(shaderProgramID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, max_length)
         actualLength = Ref{GLsizei}(0)
         attributeSize = Ref{GLint}(0)
         attributeType = Ref{GLenum}(0)
-        name = Vector{GLchar}(maxLength[])
-        glGetActiveAttrib(shaderProgramID, i-1, maxLength[], actualLength, attributeSize, attributeType, name)
+        name = Vector{GLchar}(max_length[])
+        glGetActiveAttrib(shaderProgramID, i-1, max_length[], actualLength, attributeSize, attributeType, name)
         if attributeSize[] > 1
             for j = 1:attributeSize[]
                 longName = @sprintf "%s[%i]" name j
@@ -67,13 +67,13 @@ function printall(shaderProgramID::GLuint)
     glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORMS, result)
     info(logger, string("GL_ACTIVE_UNIFORMS = ", result[]))
     for i in 1:result[]
-        maxLength = Ref{GLsizei}(0)
-        glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORM_MAX_LENGTH, maxLength)
+        max_length = Ref{GLsizei}(0)
+        glGetProgramiv(shaderProgramID, GL_ACTIVE_UNIFORM_MAX_LENGTH, max_length)
         actualLength = Ref{GLsizei}(0)
         attributeSize = Ref{GLint}(0)
         attributeType = Ref{GLenum}(0)
-        name = Vector{GLchar}(maxLength[])
-        glGetActiveUniform(shaderProgramID, i-1, maxLength[], actualLength, attributeSize, attributeType, name)
+        name = Vector{GLchar}(max_length[])
+        glGetActiveUniform(shaderProgramID, i-1, max_length[], actualLength, attributeSize, attributeType, name)
         if attributeSize[] > 1
             for j = 1:attributeSize[]
                 longName = @sprintf "%s[%i]" name j
