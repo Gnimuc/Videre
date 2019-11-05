@@ -1,129 +1,119 @@
-using OffsetArrays
-include(joinpath(@__DIR__, "glutils.jl"))
+using GLTF
 
 @static if Sys.isapple()
     const VERSION_MAJOR = 4
     const VERSION_MINOR = 1
 end
 
-# window init global variables
-glfwWidth = 640
-glfwHeight = 480
-window = C_NULL
+include(joinpath(@__DIR__, "glutils.jl"))
+include(joinpath(@__DIR__, "camera.jl"))
 
-# start OpenGL
-@assert startgl()
+# init window
+width, height = 640, 480
+window = startgl(width, height)
 
 glEnable(GL_DEPTH_TEST)
 glDepthFunc(GL_LESS)
 
-# set camera
-resetcamera()
-set_camera_position(GLfloat[0.0, 0.0, 5.0])
-
+# we use glTF file format because it's OpenGL friendly and we don't need to care about
+# how to parse and extract mesh data from other mesh file format like .obj format.
 # load glTF file
-suzanne = JSON.parsefile(joinpath(@__DIR__, "monkey.gltf"))
-accessors = OffsetArray(suzanne["accessors"], -1)
-bufferViews = OffsetArray(suzanne["bufferViews"], -1)
-buffers = OffsetArray(suzanne["buffers"], -1)
-positionAccessor, normalAccessor, texcoordAccessor, indexAccessor = accessors
-# load suzanne position & normal & texture coordinate & index bufferView
-positionBufferView = bufferViews[positionAccessor["bufferView"]]
-normalBufferView = bufferViews[normalAccessor["bufferView"]]
-texcoordBufferView = bufferViews[texcoordAccessor["bufferView"]]
-indexBufferView = bufferViews[indexAccessor["bufferView"]]
+suzanne = GLTF.load(joinpath(@__DIR__, "monkey.gltf"))
+suzanne_data = [read(joinpath(@__DIR__, b.uri)) for b in suzanne.buffers]
 
-# load buffer-blobs
-readblob(uri, length, offset) = open(uri) do f
-                                    skip(f, offset)
-                                    blob = read(f, length)
-                                end
-blobs = Vector{UInt8}[]
-for bv in bufferViews
-    uri = buffers[bv["buffer"]]["uri"]
-    push!(blobs, readblob(joinpath(@__DIR__, uri), bv["byteLength"], bv["byteOffset"]))
-end
-blobs = OffsetArray(blobs, -1)
+# load suzanne position metadata
+search_name(x, keyword) = x[findfirst(x->occursin(keyword, x.name), x)]
+pos = search_name(suzanne.accessors, "positions")
+pos_bv = suzanne.bufferViews[pos.bufferView]
+# load suzanne index metadata
+indices = search_name(suzanne.accessors, "indices")
+idx_bv = suzanne.bufferViews[indices.bufferView]
+# load suzanne texture coordinate metadata
+texcoords = search_name(suzanne.accessors, "texcoords")
+tex_bv = suzanne.bufferViews[texcoords.bufferView]
+# load suzanne normal metadata
+normals = search_name(suzanne.accessors, "normals")
+normal_bv = suzanne.bufferViews[normals.bufferView]
 
-boo = read(joinpath(@__DIR__, "monkey.bin"))
+# create VBO and EBO
+pos_vbo = GLuint(0)
+@c glGenBuffers(1, &pos_vbo)
+glBindBuffer(pos_bv.target, pos_vbo)
+glBufferData(pos_bv.target, pos_bv.byteLength, C_NULL, GL_STATIC_DRAW)
+pos_data = suzanne_data[pos_bv.buffer]
+@c glBufferSubData(pos_bv.target, 0, pos_bv.byteLength, &pos_data[pos_bv.byteOffset])
 
-# create buffers located in the memory of graphic card
-positionVBO = Ref{GLuint}(0)
-glGenBuffers(1, positionVBO)
-positionTarget = positionBufferView["target"]
-glBindBuffer(positionTarget, positionVBO[])
-glBufferData(positionTarget, positionBufferView["byteLength"], blobs[positionAccessor["bufferView"]], GL_STATIC_DRAW)
+normal_vbo = GLuint(0)
+@c glGenBuffers(1, &normal_vbo)
+glBindBuffer(normal_bv.target, normal_vbo)
+glBufferData(normal_bv.target, normal_bv.byteLength, C_NULL, GL_STATIC_DRAW)
+normal_data = suzanne_data[normal_bv.buffer]
+@c glBufferSubData(normal_bv.target, 0, normal_bv.byteLength, &normal_data[normal_bv.byteOffset])
 
-normalVBO = Ref{GLuint}(0)
-glGenBuffers(1, normalVBO)
-normalTarget = normalBufferView["target"]
-glBindBuffer(normalTarget, normalVBO[])
-glBufferData(normalTarget, normalBufferView["byteLength"], blobs[normalAccessor["bufferView"]], GL_STATIC_DRAW)
+tex_vbo = GLuint(0)
+@c glGenBuffers(1, &tex_vbo)
+glBindBuffer(tex_bv.target, tex_vbo)
+glBufferData(tex_bv.target, tex_bv.byteLength, C_NULL, GL_STATIC_DRAW)
+tex_data = suzanne_data[tex_bv.buffer]
+@c glBufferSubData(tex_bv.target, 0, tex_bv.byteLength, &tex_data[tex_bv.byteOffset])
 
-texcoordVBO = Ref{GLuint}(0)
-glGenBuffers(1, texcoordVBO)
-texcoordTarget = texcoordBufferView["target"]
-glBindBuffer(texcoordTarget, texcoordVBO[])
-glBufferData(texcoordTarget, texcoordBufferView["byteLength"], blobs[texcoordAccessor["bufferView"]], GL_STATIC_DRAW)
-
-indexEBO = Ref{GLuint}(0)
-glGenBuffers(1, indexEBO)
-indexTarget = indexBufferView["target"]
-glBindBuffer(indexTarget, indexEBO[])
-glBufferData(indexTarget, indexBufferView["byteLength"], blobs[indexAccessor["bufferView"]], GL_STATIC_DRAW)
+idx_ebo = GLuint(0)
+@c glGenBuffers(1, &idx_ebo)
+glBindBuffer(idx_bv.target, idx_ebo)
+glBufferData(idx_bv.target, idx_bv.byteLength, C_NULL, GL_STATIC_DRAW)
+idx_data = suzanne_data[idx_bv.buffer]
+@c glBufferSubData(idx_bv.target, 0, idx_bv.byteLength, &idx_data[idx_bv.byteOffset])
 
 # create VAO
-vaoID = Ref{GLuint}(0)
-glGenVertexArrays(1, vaoID)
-glBindVertexArray(vaoID[])
-
-positionComponentType = positionAccessor["componentType"]
-positionByteStride = positionBufferView["byteStride"]
-positionByteOffset = positionAccessor["byteOffset"]
-glBindBuffer(positionTarget, positionVBO[])
-glVertexAttribPointer(0, 3, positionComponentType, GL_FALSE, GLsizei(positionByteStride), Ptr{Cvoid}(positionByteOffset))
+vao = GLuint(0)
+@c glGenVertexArrays(1, &vao)
+glBindVertexArray(vao)
+# bind position vbo
+glBindBuffer(pos_bv.target, pos_vbo)
+glVertexAttribPointer(0, 3, pos.componentType, pos.normalized, pos_bv.byteStride, Ptr{Cvoid}(pos.byteOffset))
 glEnableVertexAttribArray(0)
-
-normalComponentType = normalAccessor["componentType"]
-normalByteStride = normalBufferView["byteStride"]
-normalByteOffset = normalAccessor["byteOffset"]
-glBindBuffer(normalTarget, normalVBO[])
-glVertexAttribPointer(1, 3, normalComponentType, GL_FALSE, GLsizei(normalByteStride), Ptr{Cvoid}(normalByteOffset))
+# bind normal vbo
+glBindBuffer(normal_bv.target, normal_vbo)
+glVertexAttribPointer(1, 3, normals.componentType, normals.normalized, normal_bv.byteStride, Ptr{Cvoid}(normals.byteOffset))
 glEnableVertexAttribArray(1)
-
-texcoordComponentType = texcoordAccessor["componentType"]
-texcoordByteStride = texcoordBufferView["byteStride"]
-texcoordByteOffset = texcoordAccessor["byteOffset"]
-glBindBuffer(texcoordTarget, texcoordVBO[])
-glVertexAttribPointer(2, 2, texcoordComponentType, GL_FALSE, GLsizei(texcoordByteStride), Ptr{Cvoid}(texcoordByteOffset))
+# bind texture coordinate vbo
+glBindBuffer(tex_bv.target, tex_vbo)
+glVertexAttribPointer(2, 2, texcoords.componentType, texcoords.normalized, tex_bv.byteStride, Ptr{Cvoid}(texcoords.byteOffset))
 glEnableVertexAttribArray(2)
 
+# camera
+camera = PerspectiveCamera()
+setposition!(camera, [0.0, 0.0, 5.0])
+
 # create shader program
-vertexShaderPath = joinpath(@__DIR__, "phongtex.vert")
-fragmentShaderPath = joinpath(@__DIR__, "phongtex.frag")
-shaderProgramID = createprogram(vertexShaderPath, fragmentShaderPath)
-viewMatrixLocation = glGetUniformLocation(shaderProgramID, "view")
-projMatrixLocation = glGetUniformLocation(shaderProgramID, "proj")
-diffuseMapLocation = glGetUniformLocation(shaderProgramID, "diffuse_map")
-specularMapLocation = glGetUniformLocation(shaderProgramID, "specular_map")
-ambientMapLocation = glGetUniformLocation(shaderProgramID, "ambient_map")
-emissionMapLocation = glGetUniformLocation(shaderProgramID, "emission_map")
-glUseProgram(shaderProgramID)
-glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, get_view_matrix())
-glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, get_projective_matrix())
-glUniform1i(diffuseMapLocation, 0)
-glUniform1i(specularMapLocation, 1)
-glUniform1i(ambientMapLocation, 2)
-glUniform1i(emissionMapLocation, 3)
+vert_shader = createshader(joinpath(@__DIR__, "phongtex.vert"), GL_VERTEX_SHADER)
+frag_shader = createshader(joinpath(@__DIR__, "phongtex.frag"), GL_FRAGMENT_SHADER)
+
+# link program
+shader_prog = createprogram(vert_shader, frag_shader)
+
+view_loc = glGetUniformLocation(shader_prog, "view")
+proj_loc = glGetUniformLocation(shader_prog, "proj")
+diffuse_map_loc = glGetUniformLocation(shader_prog, "diffuse_map")
+specular_map_loc = glGetUniformLocation(shader_prog, "specular_map")
+ambient_map_loc = glGetUniformLocation(shader_prog, "ambient_map")
+emission_map_loc = glGetUniformLocation(shader_prog, "emission_map")
+glUseProgram(shader_prog)
+glUniformMatrix4fv(view_loc, 1, GL_FALSE, get_view_matrix(camera))
+glUniformMatrix4fv(proj_loc, 1, GL_FALSE, get_projective_matrix(window, camera))
+glUniform1i(diffuse_map_loc, 0) # read from active texture 0
+glUniform1i(specular_map_loc, 1) # read from active texture 1
+glUniform1i(ambient_map_loc, 2) # read from active texture 2
+glUniform1i(emission_map_loc, 3) # read from active texture 3
 
 glActiveTexture(GL_TEXTURE0)
-loadtexture(joinpath(@__DIR__, "boulder_diff.png"))
+load_texture(joinpath(@__DIR__, "boulder_diff.png"), false)
 glActiveTexture(GL_TEXTURE1)
-loadtexture(joinpath(@__DIR__, "boulder_spec.png"))
+load_texture(joinpath(@__DIR__, "boulder_spec.png"), false)
 glActiveTexture(GL_TEXTURE2)
-loadtexture(joinpath(@__DIR__, "ao.png"))
+load_texture(joinpath(@__DIR__, "ao.png"), false)
 glActiveTexture(GL_TEXTURE3)
-loadtexture(joinpath(@__DIR__, "tileable9b_emiss.png"))
+load_texture(joinpath(@__DIR__, "tileable9b_emiss.png"), true)
 
 # # enable cull face
 glEnable(GL_CULL_FACE)
@@ -132,30 +122,28 @@ glFrontFace(GL_CCW)
 # set background color to gray
 glClearColor(0.2, 0.2, 0.2, 1.0)
 
+let
+updatefps = FPSCounter()
 # render
-indexCount = indexAccessor["count"]
-indexComponentType = indexAccessor["componentType"]
-indexByteOffset = indexAccessor["byteOffset"]
 while !GLFW.WindowShouldClose(window)
     updatefps(window)
     # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glViewport(0, 0, glfwWidth, glfwHeight)
+    glViewport(0, 0, GLFW.GetFramebufferSize(window)...)
     # drawing
-    glUseProgram(shaderProgramID)
-    glBindVertexArray(vaoID[])
-    glBindBuffer(indexTarget, indexEBO[])
-    glDrawElements(GL_TRIANGLES, indexCount, indexComponentType, Ptr{Cvoid}(indexByteOffset))
+    glUseProgram(shader_prog)
+    glBindVertexArray(vao)
+    glBindBuffer(idx_bv.target, idx_ebo)
+    glDrawElements(GL_TRIANGLES, indices.count, indices.componentType, Ptr{Cvoid}(0))
     # check and call events
     GLFW.PollEvents()
-    yield()
-    # screen capture
-    GLFW.GetKey(window, GLFW.KEY_SPACE) && (println("screen captured"); screencapture())
     # move camera
-    viewMatrix = updatecamera()
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix)
+    updatecamera!(window, camera)
+    glUniformMatrix4fv(view_loc, 1, GL_FALSE, get_view_matrix(camera))
+    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, get_projective_matrix(window, camera))
     # swap the buffers
     GLFW.SwapBuffers(window)
 end
+end # let
 
 GLFW.DestroyWindow(window)

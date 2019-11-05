@@ -2,6 +2,8 @@ using GLFW
 using ModernGL
 using CSyntax
 using Printf
+using STBImage.LibSTBImage
+using Dates
 
 # print errors in shader compilation
 function shader_info_log(shader::GLuint)
@@ -231,10 +233,10 @@ function screen_capture()
 end
 
 # load texture
-function load_texture(path::AbstractString)
+function load_texture(path::AbstractString, flip=true)
     x, y, n = Cint(0), Cint(0), Cint(0)
     force_channels = 4
-    stbi_set_flip_vertically_on_load(true)
+    stbi_set_flip_vertically_on_load(flip)
     tex_data = @c stbi_load(path, &x, &y, &n, force_channels)
     if tex_data == C_NULL
         @error "could not load $path."
@@ -250,5 +252,5 @@ function load_texture(path::AbstractString)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-    return id
+	return id
 end

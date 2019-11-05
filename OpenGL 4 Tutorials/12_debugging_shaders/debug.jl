@@ -1,4 +1,3 @@
-using FileIO
 using GLTF
 
 @static if Sys.isapple()
@@ -102,35 +101,19 @@ emission_map_loc = glGetUniformLocation(shader_prog, "emission_map")
 glUseProgram(shader_prog)
 glUniformMatrix4fv(view_loc, 1, GL_FALSE, get_view_matrix(camera))
 glUniformMatrix4fv(proj_loc, 1, GL_FALSE, get_projective_matrix(window, camera))
-glUniform1i(diffuse_map_loc, 0)
-glUniform1i(specular_map_loc, 1)
-glUniform1i(ambient_map_loc, 2)
-glUniform1i(emission_map_loc, 3)
-
-# load texture
-function load_texture(path::AbstractString)
-    img = FileIO.load(path)
-    w, h = size(img) .|> GLsizei
-    img = vec(img)
-    tex = GLuint(0)
-    @c glGenTextures(1, &tex)
-    glBindTexture(GL_TEXTURE_2D, tex)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img)
-    glGenerateMipmap(GL_TEXTURE_2D)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-    return tex
-end
+glUniform1i(diffuse_map_loc, 0) # read from active texture 0
+glUniform1i(specular_map_loc, 1) # read from active texture 1
+glUniform1i(ambient_map_loc, 2) # read from active texture 2
+glUniform1i(emission_map_loc, 3) # read from active texture 3
 
 glActiveTexture(GL_TEXTURE0)
-load_texture(joinpath(@__DIR__, "boulder_diff.png"))
-load_texture(joinpath(@__DIR__, "boulder_spec.png"))
-load_texture(joinpath(@__DIR__, "ao.png"))
-load_texture(joinpath(@__DIR__, "tileable9b_emiss.png"))
-
-FileIO.load(joinpath(@__DIR__, "boulder_diff.png"))
+load_texture(joinpath(@__DIR__, "boulder_diff.png"), false)
+glActiveTexture(GL_TEXTURE1)
+load_texture(joinpath(@__DIR__, "boulder_spec.png"), false)
+glActiveTexture(GL_TEXTURE2)
+load_texture(joinpath(@__DIR__, "ao.png"), false)
+glActiveTexture(GL_TEXTURE3)
+load_texture(joinpath(@__DIR__, "tileable9b_emiss.png"), false)
 
 # # enable cull face
 glEnable(GL_CULL_FACE)

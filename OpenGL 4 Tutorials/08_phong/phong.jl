@@ -29,7 +29,7 @@ normals = GLfloat[0.0, 0.0, 1.0,
                   0.0, 0.0, 1.0,
                   0.0, 0.0, 1.0]
 
-# create buffers located in the memory of graphic card
+# create VBO
 points_vbo = GLuint(0)
 @c glGenBuffers(1, &points_vbo)
 glBindBuffer(GL_ARRAY_BUFFER, points_vbo)
