@@ -7,7 +7,7 @@ using Dates
 
 # print errors in shader compilation
 function shader_info_log(shader::GLuint)
-    max_length = GLsizei(0)
+    max_length = GLint(0)
     @c glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length)
     actual_length = GLsizei(0)
     log = Vector{GLchar}(undef, max_length)
@@ -17,7 +17,7 @@ end
 
 # print errors in shader linking
 function programme_info_log(program::GLuint)
-    max_length = GLsizei(0)
+    max_length = GLint(0)
     @c glGetShaderiv(program, GL_INFO_LOG_LENGTH, &max_length)
     actual_length = GLsizei(0)
     log = Vector{GLchar}(undef, max_length)
@@ -51,7 +51,7 @@ function print_all(shader_prog::GLuint)
     @c glGetProgramiv(shader_prog, GL_ACTIVE_ATTRIBUTES, &params)
     @debug "GL_ACTIVE_ATTRIBUTES = $params"
 
-    max_length = GLsizei(0)
+    max_length = GLint(0)
     @c glGetProgramiv(shader_prog, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &max_length)
     name = Vector{GLchar}(undef, max_length)
     for i in 0:params-1
@@ -74,7 +74,7 @@ function print_all(shader_prog::GLuint)
     @c glGetProgramiv(shader_prog, GL_ACTIVE_UNIFORMS, &params)
     @debug "GL_ACTIVE_UNIFORMS = $(paramsRef[])"
     for i in 0:params-1
-        max_length = GLsizei(0)
+        max_length = GLint(0)
         @c glGetProgramiv(shader_prog, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length)
         name = Vector{GLchar}(undef, max_length)
         actual_length = GLsizei(0)
@@ -107,7 +107,7 @@ function createshader(path::AbstractString, type::GLenum)
     @c glGetShaderiv(id, GL_COMPILE_STATUS, &result)
     if result != GL_TRUE
         @error "$(GLENUM(type).name)(id:$id) failed to compile!"
-        max_length = GLsizei(0)
+        max_length = GLint(0)
         @c glGetShaderiv(id, GL_INFO_LOG_LENGTH, &max_length)
         actual_length = GLsizei(0)
         log = Vector{GLchar}(undef, max_length)
@@ -132,7 +132,7 @@ function createprogram(shaders::GLuint...)
     @c glGetProgramiv(id, GL_LINK_STATUS, &result)
     if result != GL_TRUE
         @error "Could not link shader program(id:$id)!"
-		max_length = GLsizei(0)
+		max_length = GLint(0)
         @c glGetProgramiv(id, GL_INFO_LOG_LENGTH, &max_length)
         actual_length = GLsizei(0)
         log = Vector{GLchar}(undef, max_length)
