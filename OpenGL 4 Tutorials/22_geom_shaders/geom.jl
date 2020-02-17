@@ -23,7 +23,7 @@ colors = GLfloat[ 1.0, 0.0, 0.0,
                   0.0, 1.0, 0.0,
                   0.0, 0.0, 1.0]
 
-# create buffers located in the memory of graphic card
+# create VBO
 points_vbo = GLuint(0)
 @c glGenBuffers(1, &points_vbo)
 glBindBuffer(GL_ARRAY_BUFFER, points_vbo)
@@ -45,12 +45,10 @@ glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, C_NULL)
 glEnableVertexAttribArray(0)
 glEnableVertexAttribArray(1)
 
-# load and compile shaders from file
+# create shader program
 vert_shader = createshader(joinpath(@__DIR__, "geom.vert"), GL_VERTEX_SHADER)
 geom_shader = createshader(joinpath(@__DIR__, "geom.geom"), GL_GEOMETRY_SHADER)
 frag_shader = createshader(joinpath(@__DIR__, "geom.frag"), GL_FRAGMENT_SHADER)
-
-# link program
 shader_prog = createprogram(vert_shader, geom_shader, frag_shader)
 
 # set background color to gray

@@ -17,7 +17,7 @@ glDepthFunc(GL_LESS)
 
 # camera
 camera = PerspectiveCamera()
-setposition!(camera, [0.0, 1.0, 5.0])
+setposition!(camera, [0.0, 0.0, 2.0])
 
 # load texture
 skull_tex = load_texture(joinpath(@__DIR__, "skulluvmap.png"))
