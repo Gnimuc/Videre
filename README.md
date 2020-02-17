@@ -3,6 +3,24 @@
 
 OpenGL/Vulkan examples written in Julia.
 
+The following examples require the STBImage package.
+
+09_texture_mapping
+10_screen_capture
+12_debugging_shaders
+14_multi_tex
+15_phongtextures
+
+Simply use `]` to access the package manager in the
+julia REPL and run the following command:
+
+pkg>dev https://github.com/Gnimuc/STBImage.jl.git
+
+The following programs still do not work due to unresolved bugs
+  16_frag_reject
+  22_geom_shaders
+  23_tessellation_shaders
+                                                
 ## References
 1. [Anton's OpenGL 4 Tutorials](http://antongerdelan.net/opengl/)
 2. https://learnopengl.com
