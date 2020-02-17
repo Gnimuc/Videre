@@ -2,8 +2,12 @@
 These demo code are ported from [this repo](https://github.com/capnramses/antons_opengl_tutorials_book).
 
 ## Dependencies
+Simply use `]` to access the package manager in the julia REPL and run the following command:
+
 ```julia
 pkg> add ModernGL GLFW CSyntax GLTF Quaternions StaticArrays
+
+pkg> dev https://github.com/Gnimuc/STBImage.jl.git
 
 ```
 
