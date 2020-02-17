@@ -3,7 +3,7 @@ These demo code are ported from [this repo](https://github.com/capnramses/antons
 
 ## Dependencies
 ```julia
-pkg> add ModernGL GLFW CSyntax GLTF Quaternions
+pkg> add ModernGL GLFW CSyntax GLTF Quaternions StaticArrays
 
 ```
 
