@@ -63,7 +63,7 @@ while !GLFW.WindowShouldClose(window)
     updatefps(window)
     # clear drawing surface
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glViewport(0, 0, width, height)
+    glViewport(0, 0, GLFW.GetFramebufferSize(window)...)
     # drawing
     glUseProgram(shader_prog)
     glBindVertexArray(vao)
