@@ -148,7 +148,7 @@ end
 ## GLFW initialization
 # set up GLFW key callbacks : press Esc to escape
 function key_callback(window::GLFW.Window, key::GLFW.Key, scancode::Cint, action::GLFW.Action, mods::Cint)
-	key == GLFW.KEY_ESCAPE && action == GLFW.PRESS && GLFW.SetWindowShouldClose(window, GL_TRUE)
+	key == GLFW.KEY_ESCAPE && action == GLFW.PRESS && GLFW.SetWindowShouldClose(window, true)
 end
 
 # tell GLFW to run this function whenever the framebuffer size is changed
