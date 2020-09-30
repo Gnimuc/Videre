@@ -1,7 +1,11 @@
 using GLFW
 using VulkanCore
+using VulkanCore.LibVulkan
+using CSyntax
 
-include(joinpath(@__DIR__, "..", "vkhelper.jl"))
+@assert GLFW.VulkanSupported()
+
+include(joinpath(@__DIR__, "vkhelper.jl"))
 
 const WIDTH = 800
 const HEIGHT = 600
@@ -13,20 +17,24 @@ window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 
 ## init Vulkan
 # create instance
-apiVersion = vk.VK_MAKE_VERSION(1, 1, 0)
-appInfoRef = VkApplicationInfo("Application Name: Create Instance", v"1.0.0", "No Engine Name", v"1.0.0", apiVersion) |> Ref
-requiredExtensions = GLFW.GetRequiredInstanceExtensions()
-# check extension
-checkextensions(requiredExtensions)
-enabledExtensionCount = length(requiredExtensions)
-ppEnabledExtensionNames = strings2pp(requiredExtensions)
-createInfoRef = VkInstanceCreateInfo(appInfoRef, 0, C_NULL, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
+appInfoRef = VkApplicationInfo(
+    "Application Name: Create Instance",
+    v"1.0.0",
+    "No Engine Name",
+    v"1.0.0",
+    VK_API_VERSION_1_2,
+) |> Ref
+
+layers = String[]
+extensions = GLFW.GetRequiredInstanceExtensions()
+@assert check_extensions(extensions) "not all required extensions are supported."
+
+createInfo = LibVulkan.VkInstanceCreateInfo(appInfoRef, layers, extensions)
 
 # create instance
-instanceRef = Ref{vk.VkInstance}(C_NULL)
-result = vk.vkCreateInstance(createInfoRef, C_NULL, instanceRef)
-result != vk.VK_SUCCESS && error("failed to create instance!")
-instance = instanceRef[]
+instance = VkInstance(C_NULL)
+result = GC.@preserve appInfoRef layers extensions @c vkCreateInstance(&createInfo, C_NULL, &instance)
+@assert result == VK_SUCCESS "failed to create instance!"
 
 ## main loop
 while !GLFW.WindowShouldClose(window)
@@ -34,5 +42,5 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## clean up
-vk.vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instance, C_NULL)
 GLFW.DestroyWindow(window)

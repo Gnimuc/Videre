@@ -1,7 +1,9 @@
 using GLFW
 using VulkanCore
+using VulkanCore.LibVulkan
+using CSyntax
 
-include(joinpath(@__DIR__, "..", "vkhelper.jl"))
+@assert GLFW.VulkanSupported()
 
 const WIDTH = 800
 const HEIGHT = 600
@@ -14,43 +16,68 @@ window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 ## init Vulkan
 # create instance
 # fill application info
-sType = vk.VK_STRUCTURE_TYPE_APPLICATION_INFO
-pApplicationName = pointer(b"Vulkan Instance")
-applicationVersion = vk.VK_MAKE_VERSION(1, 0, 0)
-pEngineName = pointer(b"No Engine")
-engineVersion = vk.VK_MAKE_VERSION(1, 0, 0)
-apiVersion = vk.VK_MAKE_VERSION(1, 1, 0)
-appInfoRef = vk.VkApplicationInfo(sType, C_NULL, pApplicationName, applicationVersion, pEngineName, engineVersion, apiVersion) |> Ref
+sType = VK_STRUCTURE_TYPE_APPLICATION_INFO
+pApplicationName = pointer("Vulkan Instance")
+applicationVersion = VK_MAKE_VERSION(1, 0, 0)
+pEngineName = pointer("No Engine")
+engineVersion = VK_MAKE_VERSION(1, 0, 0)
+apiVersion = VK_API_VERSION_1_2
+appInfoRef = VkApplicationInfo(
+    sType,
+    C_NULL,
+    pApplicationName,
+    applicationVersion,
+    pEngineName,
+    engineVersion,
+    apiVersion,
+) |> Ref
 
 # fill create info
-sType = vk.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
+sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
 flags = UInt32(0)
-pApplicationInfo = Base.unsafe_convert(Ptr{vk.VkApplicationInfo}, appInfoRef)
-requiredExtensions = GLFW.GetRequiredInstanceExtensions()
+pApplicationInfo = Base.unsafe_convert(Ptr{VkApplicationInfo}, appInfoRef)
+
 # check extension
-extensionCountRef = Ref{Cuint}(0)
-vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
-extensionCount = extensionCountRef[]
-supportedExtensions = Vector{vk.VkExtensionProperties}(undef, extensionCount)
-vk.vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, supportedExtensions)
-supportedExtensionNames = [ext.extensionName |> collect |> String |> x->strip(x, '\0') for ext in supportedExtensions]
-supportedExtensionVersions = [ext.specVersion |> Int for ext in supportedExtensions]
-println("available extensions:")
-for (ext, ver) in zip(supportedExtensionNames, supportedExtensionVersions)
-    println("  ", ext, ": ", ver)
+requiredExtensions = GLFW.GetRequiredInstanceExtensions()
+
+extensionCount = Cuint(0)
+@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, C_NULL)
+extensions = Vector{VkExtensionProperties}(undef, extensionCount)
+@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, extensions)
+extensionNames = map(extensions) do extension
+    extension.extensionName |> collect |> String |> x -> strip(x, '\0')
 end
-setdiff(requiredExtensions, supportedExtensionNames) |> isempty || error("not all required extensions are supported.")
+extensionVersions = [ext.specVersion |> Int for ext in extensions]
+
+@info "available extensions:"
+for (ext, ver) in zip(extensionNames, extensionVersions)
+    @info "  $ext: $ver"
+end
+if !all(x->x in extensionNames, requiredExtensions)
+    @error "not all required extensions are supported."
+end
+
+# add required extensions create info
 enabledExtensionCount = Cuint(length(requiredExtensions))
-ppEnabledExtensionNames = strings2pp(requiredExtensions)
+ppEnabledExtensionNames = @c GLFW.GetRequiredInstanceExtensions(&enabledExtensionCount)
+
 enabledLayerCount = Cuint(0)
 ppEnabledLayerNames = C_NULL
-createInfoRef = vk.VkInstanceCreateInfo(sType, C_NULL, flags, pApplicationInfo, enabledLayerCount, ppEnabledLayerNames, enabledExtensionCount, ppEnabledExtensionNames) |> Ref
+createInfo = VkInstanceCreateInfo(
+    sType,
+    C_NULL,
+    flags,
+    pApplicationInfo,
+    enabledLayerCount,
+    ppEnabledLayerNames,
+    enabledExtensionCount,
+    ppEnabledExtensionNames,
+)
 
 # create instance
-instanceRef = Ref{vk.VkInstance}(C_NULL)
-result = vk.vkCreateInstance(createInfoRef, C_NULL, instanceRef)
-result != vk.VK_SUCCESS && error("failed to create instance!")
-instance = instanceRef[]
+instance = VkInstance(C_NULL)
+result = GC.@preserve appInfoRef @c vkCreateInstance(&createInfo, C_NULL, &instance)
+@assert result == VK_SUCCESS "failed to create instance!"
 
 ## main loop
 while !GLFW.WindowShouldClose(window)
@@ -58,5 +85,5 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## clean up
-vk.vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instance, C_NULL)
 GLFW.DestroyWindow(window)
