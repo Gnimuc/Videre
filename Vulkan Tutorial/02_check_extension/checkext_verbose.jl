@@ -14,7 +14,7 @@ GLFW.WindowHint(GLFW.RESIZABLE, 0)
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 
 ## init Vulkan
-# create instance
+# creating instance
 # fill application info
 sType = VK_STRUCTURE_TYPE_APPLICATION_INFO
 pApplicationName = pointer("Vulkan Instance")
@@ -32,12 +32,7 @@ appInfoRef = VkApplicationInfo(
     apiVersion,
 ) |> Ref
 
-# fill create info
-sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
-flags = UInt32(0)
-pApplicationInfo = Base.unsafe_convert(Ptr{VkApplicationInfo}, appInfoRef)
-
-# check extension
+# checking for extension support
 requiredExtensions = GLFW.GetRequiredInstanceExtensions()
 
 extensionCount = Cuint(0)
@@ -57,12 +52,17 @@ if !all(x->x in extensionNames, requiredExtensions)
     @error "not all required extensions are supported."
 end
 
-# add required extensions create info
+# add required extensions
 enabledExtensionCount = Cuint(length(requiredExtensions))
 ppEnabledExtensionNames = @c GLFW.GetRequiredInstanceExtensions(&enabledExtensionCount)
 
 enabledLayerCount = Cuint(0)
 ppEnabledLayerNames = C_NULL
+
+# create info
+sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
+flags = UInt32(0)
+pApplicationInfo = Base.unsafe_convert(Ptr{VkApplicationInfo}, appInfoRef)
 createInfo = VkInstanceCreateInfo(
     sType,
     C_NULL,
@@ -84,6 +84,6 @@ while !GLFW.WindowShouldClose(window)
     GLFW.PollEvents()
 end
 
-## clean up
+## cleaning up
 vkDestroyInstance(instance, C_NULL)
 GLFW.DestroyWindow(window)

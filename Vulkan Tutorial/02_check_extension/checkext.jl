@@ -16,7 +16,7 @@ GLFW.WindowHint(GLFW.RESIZABLE, 0)
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 
 ## init Vulkan
-# create instance
+# creating instance
 appInfoRef = VkApplicationInfo(
     "Application Name: Create Instance",
     v"1.0.0",
@@ -27,11 +27,9 @@ appInfoRef = VkApplicationInfo(
 
 layers = String[]
 extensions = GLFW.GetRequiredInstanceExtensions()
-@assert check_extensions(extensions) "not all required extensions are supported."
-
+@assert check_extensions(extensions)
 createInfo = LibVulkan.VkInstanceCreateInfo(appInfoRef, layers, extensions)
 
-# create instance
 instance = VkInstance(C_NULL)
 result = GC.@preserve appInfoRef layers extensions @c vkCreateInstance(&createInfo, C_NULL, &instance)
 @assert result == VK_SUCCESS "failed to create instance!"
@@ -41,6 +39,6 @@ while !GLFW.WindowShouldClose(window)
     GLFW.PollEvents()
 end
 
-## clean up
+## cleaning up
 vkDestroyInstance(instance, C_NULL)
 GLFW.DestroyWindow(window)

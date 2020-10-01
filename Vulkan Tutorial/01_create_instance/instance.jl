@@ -14,7 +14,7 @@ GLFW.WindowHint(GLFW.RESIZABLE, 0)
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 
 ## init Vulkan
-# create instance
+# creating instance
 # fill application info
 sType = VK_STRUCTURE_TYPE_APPLICATION_INFO
 pApplicationName = pointer("Vulkan Instance")
@@ -62,6 +62,6 @@ while !GLFW.WindowShouldClose(window)
     GLFW.PollEvents()
 end
 
-## clean up
+## cleaning up
 vkDestroyInstance(instance, C_NULL)
 GLFW.DestroyWindow(window)

@@ -20,13 +20,26 @@ Convert a Vulkan version integer to a `major.minor.patch` `VersionNumber`.
 """
 int2version(v::Integer) = VersionNumber(VK_VERSION_MAJOR(v), VK_VERSION_MINOR(v), VK_VERSION_PATCH(v))
 
-# extension checking 
+# extension & layer checking 
 struct ExtensionProperties
     name::String
     version::VersionNumber
 end
 ExtensionProperties(extension::VkExtensionProperties) =
     ExtensionProperties(to_string(extension.extensionName), int2version(extension.specVersion))
+
+struct LayerProperties
+    name::String
+    spec_ver::VersionNumber
+    impl_ver::VersionNumber
+    description::String
+end
+LayerProperties(layer::VkLayerProperties) = LayerProperties(
+    to_string(layer.layerName),
+    int2version(layer.specVersion),
+    int2version(layer.implementationVersion),
+    to_string(layer.description),
+)
 
 """
     get_supported_extensions() -> Vector{String}
@@ -56,6 +69,38 @@ function check_extensions(required_extensions::Vector{<:AbstractString})
         return true
     else
         @error "not all required extensions are supported."
+        return false
+    end
+end
+
+"""
+    get_supported_layers() -> Vector{String}
+Return a vector of supported layers.
+"""
+function get_supported_layers()
+    count_ref = Ref{Cuint}(0)
+    vkEnumerateInstanceLayerProperties(count_ref, C_NULL)
+    count = count_ref[]
+    layers = Vector{VkLayerProperties}(undef, count)
+    vkEnumerateInstanceLayerProperties(count_ref, layers)
+    return [LayerProperties(layer) for layer in layers]
+end
+
+"""
+    check_layers(required_layers::Vector{<:AbstractString}) -> Bool
+Return `true` when all of the `required_layers` are supported.
+"""
+function check_layers(required_layers::Vector{<:AbstractString})
+    supported = get_supported_layers()
+    @info "available layers:"
+    for x in supported
+        @info "  $(x.name): $(x.description)($(x.spec_ver)) -- implementation version: $(x.impl_ver)"
+    end
+    names = [layer.name for layer in supported]
+    if all(x->x in names, required_layers)  
+        return true
+    else
+        @error "not all required layers are supported."
         return false
     end
 end
