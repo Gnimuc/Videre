@@ -1,7 +1,6 @@
 using GLFW
 using VulkanCore
 using VulkanCore.LibVulkan
-using CSyntax
 
 @assert GLFW.VulkanSupported()
 
@@ -28,10 +27,10 @@ appInfoRef = VkApplicationInfo(
 layers = String[]
 extensions = GLFW.GetRequiredInstanceExtensions()
 @assert check_extensions(extensions)
-createInfo = LibVulkan.VkInstanceCreateInfo(appInfoRef, layers, extensions)
+createInfoRef = VkInstanceCreateInfo(appInfoRef, layers, extensions) |> Ref
 
-instance = VkInstance(C_NULL)
-result = GC.@preserve appInfoRef layers extensions @c vkCreateInstance(&createInfo, C_NULL, &instance)
+instanceRef = Ref(VkInstance(C_NULL))
+result = GC.@preserve appInfoRef layers extensions vkCreateInstance(createInfoRef, C_NULL, instanceRef)
 @assert result == VK_SUCCESS "failed to create instance!"
 
 ## main loop
@@ -40,5 +39,5 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## cleaning up
-vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instanceRef[], C_NULL)
 GLFW.DestroyWindow(window)

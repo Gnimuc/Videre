@@ -1,7 +1,6 @@
 using GLFW
 using VulkanCore
 using VulkanCore.LibVulkan
-using CSyntax
 
 @assert GLFW.VulkanSupported()
 
@@ -35,10 +34,10 @@ appInfoRef = VkApplicationInfo(
 # checking for extension support
 requiredExtensions = GLFW.GetRequiredInstanceExtensions()
 
-extensionCount = Cuint(0)
-@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, C_NULL)
-extensions = Vector{VkExtensionProperties}(undef, extensionCount)
-@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, extensions)
+extensionCountRef = Ref(Cuint(0))
+vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
+extensions = Vector{VkExtensionProperties}(undef, extensionCountRef[])
+vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, extensions)
 extensionNames = map(extensions) do extension
     extension.extensionName |> collect |> String |> x -> strip(x, '\0')
 end
@@ -54,10 +53,10 @@ end
 
 # using validation layers
 requiredLayers = ["VK_LAYER_KHRONOS_validation"]
-layerCount = Cuint(0)
-@c vkEnumerateInstanceLayerProperties(&layerCount, C_NULL)
-availableLayers = Vector{VkLayerProperties}(undef, layerCount)
-@c vkEnumerateInstanceLayerProperties(&layerCount, availableLayers)
+layerCountRef = Ref(Cuint(0))
+vkEnumerateInstanceLayerProperties(layerCountRef, C_NULL)
+availableLayers = Vector{VkLayerProperties}(undef, layerCountRef[])
+vkEnumerateInstanceLayerProperties(layerCountRef, availableLayers)
 availableLayerNames = [strip(String(collect(layer.layerName)), '\0') for layer in availableLayers]
 availableLayerDescription = [strip(String(collect(layer.description)), '\0') for layer in availableLayers]
 @info "available layers:"
@@ -69,8 +68,9 @@ if !all(x->x in availableLayerNames, requiredLayers)
 end
 
 # add required extensions and layers
-enabledExtensionCount = Cuint(length(requiredExtensions))
-ppEnabledExtensionNames = @c GLFW.GetRequiredInstanceExtensions(&enabledExtensionCount)
+enabledExtensionCountRef = Ref(Cuint(length(requiredExtensions)))
+ppEnabledExtensionNames = GLFW.GetRequiredInstanceExtensions(enabledExtensionCountRef)
+enabledExtensionCount = enabledExtensionCountRef[]
 
 enabledLayerCount = Cuint(length(requiredLayers))
 ppEnabledLayerNames = Base.unsafe_convert(Ptr{Cstring}, Base.cconvert(Ptr{Cstring}, requiredLayers))
@@ -79,7 +79,7 @@ ppEnabledLayerNames = Base.unsafe_convert(Ptr{Cstring}, Base.cconvert(Ptr{Cstrin
 sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
 flags = UInt32(0)
 pApplicationInfo = Base.unsafe_convert(Ptr{VkApplicationInfo}, appInfoRef)
-createInfo = VkInstanceCreateInfo(
+createInfoRef = VkInstanceCreateInfo(
     sType,
     C_NULL,
     flags,
@@ -88,11 +88,11 @@ createInfo = VkInstanceCreateInfo(
     ppEnabledLayerNames,
     enabledExtensionCount,
     ppEnabledExtensionNames,
-)
+) |> Ref
 
 # create instance
-instance = VkInstance(C_NULL)
-result = GC.@preserve appInfoRef requiredLayers @c vkCreateInstance(&createInfo, C_NULL, &instance)
+instanceRef = Ref(VkInstance(C_NULL))
+result = GC.@preserve appInfoRef requiredLayers vkCreateInstance(createInfoRef, C_NULL, instanceRef)
 @assert result == VK_SUCCESS "failed to create instance!"
 
 ## main loop
@@ -101,5 +101,5 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## cleaning up
-vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instanceRef[], C_NULL)
 GLFW.DestroyWindow(window)

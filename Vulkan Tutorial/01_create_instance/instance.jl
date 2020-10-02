@@ -37,11 +37,12 @@ appInfoRef =
 sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
 flags = UInt32(0)
 pApplicationInfo = Base.unsafe_convert(Ptr{VkApplicationInfo}, appInfoRef)
-enabledExtensionCount = Cuint(0)
-ppEnabledExtensionNames = @c GLFW.GetRequiredInstanceExtensions(&enabledExtensionCount)
+enabledExtensionCountRef = Ref(Cuint(0))
+ppEnabledExtensionNames = GLFW.GetRequiredInstanceExtensions(enabledExtensionCountRef)
+enabledExtensionCount = enabledExtensionCountRef[]
 enabledLayerCount = Cuint(0)
 ppEnabledLayerNames = C_NULL
-createInfo = VkInstanceCreateInfo(
+createInfoRef = VkInstanceCreateInfo(
     sType,
     C_NULL,
     flags,
@@ -50,11 +51,11 @@ createInfo = VkInstanceCreateInfo(
     ppEnabledLayerNames,
     enabledExtensionCount,
     ppEnabledExtensionNames,
-)
+) |> Ref
 
 # create instance
-instance = VkInstance(C_NULL)
-result = GC.@preserve appInfoRef @c vkCreateInstance(&createInfo, C_NULL, &instance)
+instanceRef = Ref(VkInstance(C_NULL))
+result = GC.@preserve appInfoRef vkCreateInstance(createInfoRef, C_NULL, instanceRef)
 @assert result == VK_SUCCESS "failed to create instance!"
 
 ## main loop
@@ -63,5 +64,5 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## cleaning up
-vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instanceRef[], C_NULL)
 GLFW.DestroyWindow(window)
