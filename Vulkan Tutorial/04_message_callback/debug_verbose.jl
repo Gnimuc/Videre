@@ -1,7 +1,6 @@
 using GLFW
 using VulkanCore
 using VulkanCore.LibVulkan
-using CSyntax
 
 @assert GLFW.VulkanSupported()
 
@@ -40,10 +39,10 @@ if enableValidationLayers
     push!(requiredExtensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME)  # for debugging, see message callback section
 end
 
-extensionCount = Cuint(0)
-@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, C_NULL)
-extensions = Vector{VkExtensionProperties}(undef, extensionCount)
-@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, extensions)
+extensionCountRef = Ref(Cuint(0))
+vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
+extensions = Vector{VkExtensionProperties}(undef, extensionCountRef[])
+vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, extensions)
 extensionNames = map(extensions) do extension
     extension.extensionName |> collect |> String |> x -> strip(x, '\0')
 end
@@ -59,12 +58,17 @@ end
 
 # using validation layers
 requiredLayers = ["VK_LAYER_KHRONOS_validation"]
-layerCount = Cuint(0)
-@c vkEnumerateInstanceLayerProperties(&layerCount, C_NULL)
-availableLayers = Vector{VkLayerProperties}(undef, layerCount)
-@c vkEnumerateInstanceLayerProperties(&layerCount, availableLayers)
-availableLayerNames = [strip(String(collect(layer.layerName)), '\0') for layer in availableLayers]
-availableLayerDescription = [strip(String(collect(layer.description)), '\0') for layer in availableLayers]
+layerCountRef = Ref(Cuint(0))
+vkEnumerateInstanceLayerProperties(layerCountRef, C_NULL)
+availableLayers = Vector{VkLayerProperties}(undef, layerCountRef[])
+vkEnumerateInstanceLayerProperties(layerCountRef, availableLayers)
+availableLayerNames = map(availableLayers) do layer
+    strip(String(collect(layer.layerName)), '\0')
+end
+availableLayerDescription = map(availableLayers) do layer
+    strip(String(collect(layer.description)), '\0')
+end
+
 @info "available layers:"
 for (name,description) in zip(availableLayerNames, availableLayerDescription)
     @info "  $name: $description"
@@ -84,7 +88,7 @@ ppEnabledLayerNames = Base.unsafe_convert(Ptr{Cstring}, Base.cconvert(Ptr{Cstrin
 sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
 flags = UInt32(0)
 pApplicationInfo = Base.unsafe_convert(Ptr{VkApplicationInfo}, appInfoRef)
-createInfo = VkInstanceCreateInfo(
+createInfoRef = VkInstanceCreateInfo(
     sType,
     C_NULL,
     flags,
@@ -93,11 +97,11 @@ createInfo = VkInstanceCreateInfo(
     ppEnabledLayerNames,
     enabledExtensionCount,
     ppEnabledExtensionNames,
-)
+) |> Ref
 
 # create instance
-instance = VkInstance(C_NULL)
-result = GC.@preserve appInfoRef requiredExtensions requiredLayers @c vkCreateInstance(&createInfo, C_NULL, &instance)
+instanceRef = Ref(VkInstance(C_NULL))
+result = GC.@preserve appInfoRef requiredExtensions requiredLayers vkCreateInstance(createInfoRef, C_NULL, instanceRef)
 @assert result == VK_SUCCESS "failed to create instance!"
 
 ## message callback
@@ -120,11 +124,23 @@ debugMessengerRef = Ref(VkDebugUtilsMessengerEXT(C_NULL))
 
 sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT
 flags = UInt32(0)
-messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
-messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
+messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
+                  VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
+                  VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
+messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | 
+              VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
+              VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
 pfnUserCallback = @cfunction(debug_callback, VkBool32, (VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, Ptr{VkDebugUtilsMessengerCallbackDataEXT},Ptr{Cvoid}))
 pUserData = C_NULL
-debugCreateInfoRef = VkDebugUtilsMessengerCreateInfoEXT(sType, C_NULL, flags, messageSeverity, messageType, pfnUserCallback, pUserData) |> Ref
+debugCreateInfoRef = VkDebugUtilsMessengerCreateInfoEXT(
+    sType,
+    C_NULL, 
+    flags, 
+    messageSeverity, 
+    messageType, 
+    pfnUserCallback, 
+    pUserData
+) |> Ref
 
 function CreateDebugUtilsMessengerEXT(instance::VkInstance, pCreateInfo::Ref{VkDebugUtilsMessengerCreateInfoEXT}, pAllocator, pDebugMessenger::Ref{VkDebugUtilsMessengerEXT})
     fp = vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT")
@@ -135,7 +151,7 @@ function CreateDebugUtilsMessengerEXT(instance::VkInstance, pCreateInfo::Ref{VkD
     end
 end
 
-if CreateDebugUtilsMessengerEXT(instance, debugCreateInfoRef, C_NULL, debugMessengerRef) != VK_SUCCESS
+if CreateDebugUtilsMessengerEXT(instanceRef[], debugCreateInfoRef, C_NULL, debugMessengerRef) != VK_SUCCESS
     @error "failed to set up debug messenger!"
 end
 
@@ -153,8 +169,8 @@ function DestroyDebugUtilsMessengerEXT(instance::VkInstance, debugMessenger::VkD
 end
 
 if enableValidationLayers
-    DestroyDebugUtilsMessengerEXT(instance, debugMessengerRef[], C_NULL)
+    DestroyDebugUtilsMessengerEXT(instanceRef[], debugMessengerRef[], C_NULL)
 end
 
-vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instanceRef[], C_NULL)
 GLFW.DestroyWindow(window)

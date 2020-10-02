@@ -1,7 +1,6 @@
 using GLFW
 using VulkanCore
 using VulkanCore.LibVulkan
-using CSyntax
 
 @assert GLFW.VulkanSupported()
 
@@ -40,10 +39,10 @@ if enableValidationLayers
     push!(requiredExtensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME)  # for debugging, see message callback section
 end
 
-extensionCount = Cuint(0)
-@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, C_NULL)
-extensions = Vector{VkExtensionProperties}(undef, extensionCount)
-@c vkEnumerateInstanceExtensionProperties(C_NULL, &extensionCount, extensions)
+extensionCountRef = Ref(Cuint(0))
+vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, C_NULL)
+extensions = Vector{VkExtensionProperties}(undef, extensionCountRef[])
+vkEnumerateInstanceExtensionProperties(C_NULL, extensionCountRef, extensions)
 extensionNames = map(extensions) do extension
     extension.extensionName |> collect |> String |> x -> strip(x, '\0')
 end
@@ -59,12 +58,17 @@ end
 
 # using validation layers
 requiredLayers = ["VK_LAYER_KHRONOS_validation"]
-layerCount = Cuint(0)
-@c vkEnumerateInstanceLayerProperties(&layerCount, C_NULL)
-availableLayers = Vector{VkLayerProperties}(undef, layerCount)
-@c vkEnumerateInstanceLayerProperties(&layerCount, availableLayers)
-availableLayerNames = [strip(String(collect(layer.layerName)), '\0') for layer in availableLayers]
-availableLayerDescription = [strip(String(collect(layer.description)), '\0') for layer in availableLayers]
+layerCountRef = Ref(Cuint(0))
+vkEnumerateInstanceLayerProperties(layerCountRef, C_NULL)
+availableLayers = Vector{VkLayerProperties}(undef, layerCountRef[])
+vkEnumerateInstanceLayerProperties(layerCountRef, availableLayers)
+availableLayerNames = map(availableLayers) do layer
+    strip(String(collect(layer.layerName)), '\0')
+end
+availableLayerDescription = map(availableLayers) do layer
+    strip(String(collect(layer.description)), '\0')
+end
+
 @info "available layers:"
 for (name,description) in zip(availableLayerNames, availableLayerDescription)
     @info "  $name: $description"
@@ -81,7 +85,7 @@ enabledLayerCount = Cuint(length(requiredLayers))
 ppEnabledLayerNames = Base.unsafe_convert(Ptr{Cstring}, Base.cconvert(Ptr{Cstring}, requiredLayers))
 
 # create instance after setting up the debug messenger
-instance = VkInstance(C_NULL)
+instanceRef = Ref(VkInstance(C_NULL))
 
 ## message callback
 function debug_callback(severity::VkDebugUtilsMessageSeverityFlagBitsEXT, type::VkDebugUtilsMessageTypeFlagsEXT, pCallbackData::Ptr{VkDebugUtilsMessengerCallbackDataEXT}, pUserData::Ptr{Cvoid})::VkBool32
@@ -124,7 +128,7 @@ sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
 flags = UInt32(0)
 pApplicationInfo = Base.unsafe_convert(Ptr{VkApplicationInfo}, appInfoRef)
 pNext = Base.unsafe_convert(Ptr{Cvoid}, debugCreateInfoRef)
-createInfo = VkInstanceCreateInfo(
+createInfoRef = VkInstanceCreateInfo(
     sType,
     pNext,
     flags,
@@ -133,13 +137,13 @@ createInfo = VkInstanceCreateInfo(
     ppEnabledLayerNames,
     enabledExtensionCount,
     ppEnabledExtensionNames,
-)
+) |> Ref
 
-result = GC.@preserve appInfoRef requiredExtensions requiredLayers debugCreateInfoRef @c vkCreateInstance(&createInfo, C_NULL, &instance)
+result = GC.@preserve appInfoRef requiredExtensions requiredLayers debugCreateInfoRef vkCreateInstance(createInfoRef, C_NULL, instanceRef)
 @assert result == VK_SUCCESS "failed to create instance!"
 
 # set debug messenger
-if CreateDebugUtilsMessengerEXT(instance, debugCreateInfoRef, C_NULL, debugMessengerRef) != VK_SUCCESS
+if CreateDebugUtilsMessengerEXT(instanceRef[], debugCreateInfoRef, C_NULL, debugMessengerRef) != VK_SUCCESS
     @error "failed to set up debug messenger!"
 end
 
@@ -158,8 +162,8 @@ end
 
 # intentionally trigger error
 # if enableValidationLayers
-#     DestroyDebugUtilsMessengerEXT(instance, debugMessengerRef[], C_NULL)
+#     DestroyDebugUtilsMessengerEXT(instanceRef[], debugMessengerRef[], C_NULL)
 # end
 
-vkDestroyInstance(instance, C_NULL)
+vkDestroyInstance(instanceRef[], C_NULL)
 GLFW.DestroyWindow(window)
