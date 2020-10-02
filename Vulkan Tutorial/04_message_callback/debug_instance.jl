@@ -35,12 +35,6 @@ end
 layers = ["VK_LAYER_KHRONOS_validation"]
 @assert check_layers(layers)
 
-createInfoRef = VkInstanceCreateInfo(appInfoRef, layers, extensions) |> Ref
-
-instanceRef = Ref(VkInstance(C_NULL)) 
-result = GC.@preserve appInfoRef layers extensions vkCreateInstance(createInfoRef, C_NULL, instanceRef)
-@assert result == VK_SUCCESS "failed to create instance!"
-
 ## message callback
 function debug_callback(severity::VkDebugUtilsMessageSeverityFlagBitsEXT, type::VkDebugUtilsMessageTypeFlagsEXT, pCallbackData::Ptr{VkDebugUtilsMessengerCallbackDataEXT}, pUserData::Ptr{Cvoid})::VkBool32
     data = unsafe_load(pCallbackData)
@@ -59,6 +53,13 @@ end
 pfnUserCallback = @cfunction(debug_callback, VkBool32, (VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, Ptr{VkDebugUtilsMessengerCallbackDataEXT},Ptr{Cvoid}))
 debugCreateInfoRef = VkDebugUtilsMessengerCreateInfoEXT(pfnUserCallback, C_NULL) |> Ref
 
+## create instance
+createInfoRef = VkInstanceCreateInfo(appInfoRef, debugCreateInfoRef, layers, extensions) |> Ref
+
+instanceRef = Ref(VkInstance(C_NULL)) 
+result = GC.@preserve appInfoRef layers extensions debugCreateInfoRef vkCreateInstance(createInfoRef, C_NULL, instanceRef)
+@assert result == VK_SUCCESS "failed to create instance!"
+
 debugMessengerRef = Ref(VkDebugUtilsMessengerEXT(C_NULL))
 if CreateDebugUtilsMessengerEXT(instanceRef[], debugCreateInfoRef, C_NULL, debugMessengerRef) != VK_SUCCESS
     @error "failed to set up debug messenger!"
@@ -70,9 +71,11 @@ while !GLFW.WindowShouldClose(window)
 end
 
 ## cleaning up
-if enableValidationLayers
-    DestroyDebugUtilsMessengerEXT(instanceRef[], debugMessengerRef[], C_NULL)
-end
+
+# intentionally trigger error
+# if enableValidationLayers
+#     DestroyDebugUtilsMessengerEXT(instanceRef[], debugMessengerRef[], C_NULL)
+# end
 
 vkDestroyInstance(instanceRef[], C_NULL)
 GLFW.DestroyWindow(window)

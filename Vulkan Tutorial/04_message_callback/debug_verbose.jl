@@ -106,7 +106,7 @@ result = GC.@preserve appInfoRef requiredExtensions requiredLayers vkCreateInsta
 
 ## message callback
 function debug_callback(severity::VkDebugUtilsMessageSeverityFlagBitsEXT, type::VkDebugUtilsMessageTypeFlagsEXT, pCallbackData::Ptr{VkDebugUtilsMessengerCallbackDataEXT}, pUserData::Ptr{Cvoid})::VkBool32
-    data = unsafe_pointer_to_objref(pCallbackData)
+    data = unsafe_load(pCallbackData)
     if severity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
         @debug "validation layer: $(Base.unsafe_string(data.pMessage))"
     elseif severity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
