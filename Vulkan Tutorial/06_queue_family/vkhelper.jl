@@ -138,6 +138,20 @@ end
 
 
 # debug
+function debug_callback(severity::VkDebugUtilsMessageSeverityFlagBitsEXT, type::VkDebugUtilsMessageTypeFlagsEXT, pCallbackData::Ptr{VkDebugUtilsMessengerCallbackDataEXT}, pUserData::Ptr{Cvoid})::VkBool32
+    data = unsafe_load(pCallbackData)
+    if severity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+        @debug "validation layer: $(Base.unsafe_string(data.pMessage))"
+    elseif severity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
+        @info "validation layer: $(Base.unsafe_string(data.pMessage))"
+    elseif severity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+        @warn "validation layer: $(Base.unsafe_string(data.pMessage))"
+    elseif severity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
+        @error "validation layer: $(Base.unsafe_string(data.pMessage))"
+    end
+    return VK_FALSE
+end
+
 function LibVulkan.VkDebugUtilsMessengerCreateInfoEXT(messageSeverity, messageType, pfnUserCallback, pUserData)
     sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT
     pNext = C_NULL       # reserved for extension-specific structure
