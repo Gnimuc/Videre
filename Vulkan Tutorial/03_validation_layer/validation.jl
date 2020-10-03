@@ -15,7 +15,7 @@ GLFW.WindowHint(GLFW.RESIZABLE, 0)
 window = GLFW.CreateWindow(WIDTH, HEIGHT, "Vulkan")
 
 ## init Vulkan
-# creating instance
+## creating instance
 appInfoRef = VkApplicationInfo(
     "Application Name: Create Instance",
     v"1.0.0",
