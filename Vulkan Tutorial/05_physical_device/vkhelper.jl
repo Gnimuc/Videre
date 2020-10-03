@@ -185,6 +185,6 @@ function get_devices(instance::VkInstance)
         @error "failed to find GPUs with Vulkan support!"
     end
     devices = Vector{VkPhysicalDevice}(undef, count)
-    vkEnumerateInstanceExtensionProperties(C_NULL, count_ref, devices)
+    vkEnumeratePhysicalDevices(instance, count_ref, devices)
     return devices
 end

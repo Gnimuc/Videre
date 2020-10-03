@@ -148,10 +148,19 @@ end
 
 ## physical device
 physicalDeviceRef = Ref(VkPhysicalDevice(VK_NULL_HANDLE))
-devices = get_supported_extensions(instanceRef[])
+
+deviceCountRef = Ref(UInt32(0))
+vkEnumeratePhysicalDevices(instanceRef[], deviceCountRef, C_NULL)
+deviceCount = deviceCountRef[]
+if deviceCount == 0
+    @error "failed to find GPUs with Vulkan support!"
+end
+
+devices = Vector{VkPhysicalDevice}(undef, deviceCount)
+vkEnumeratePhysicalDevices(instanceRef[], deviceCountRef, devices)
 
 # device suitability checks
-function is_device_suitable(x::VkPhysicalDevice)
+function is_device_suitable(device::VkPhysicalDevice)
     devicePropertiesRef = Ref{VkPhysicalDeviceProperties}()
     deviceFeaturesRef = Ref{VkPhysicalDeviceFeatures}()
     vkGetPhysicalDeviceProperties(device, devicePropertiesRef)
@@ -171,7 +180,6 @@ end
 if physicalDeviceRef[] == VkPhysicalDevice(VK_NULL_HANDLE)
     @error "failed to find a suitable GPU!"
 end
-
 
 ## main loop
 while !GLFW.WindowShouldClose(window)

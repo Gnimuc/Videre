@@ -67,6 +67,29 @@ end
 
 ## physical device
 physicalDeviceRef = Ref(VkPhysicalDevice(VK_NULL_HANDLE))
+devices = get_devices(instanceRef[])
+
+# device suitability checks
+function is_device_suitable(device::VkPhysicalDevice)
+    devicePropertiesRef = Ref{VkPhysicalDeviceProperties}()
+    deviceFeaturesRef = Ref{VkPhysicalDeviceFeatures}()
+    vkGetPhysicalDeviceProperties(device, devicePropertiesRef)
+    vkGetPhysicalDeviceFeatures(device, deviceFeaturesRef)
+    return (devicePropertiesRef[].deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ||
+            devicePropertiesRef[].deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ) &&
+            deviceFeaturesRef[].geometryShader == VK_SUCCESS
+end
+
+for device in devices
+    if is_device_suitable(device)
+        physicalDeviceRef[] = device
+        break
+    end
+end
+
+if physicalDeviceRef[] == VkPhysicalDevice(VK_NULL_HANDLE)
+    @error "failed to find a suitable GPU!"
+end
 
 
 ## main loop
