@@ -75,7 +75,7 @@ end
 ## create logical device
 queuePriorityRef = Ref(Cfloat(1.0))
 indices = find_queue_families(physicalDeviceRef[])
-queueCreateInfoRef = VkDeviceQueueCreateInfo(indices, 1, queuePriorityRef) |> Ref
+queueCreateInfoRef = VkDeviceQueueCreateInfo(indices.graphicsFamily, 1, queuePriorityRef) |> Ref
 
 deviceFeaturesRef = Ref(VkPhysicalDeviceFeatures())
 logicalCreateInfoRef = VkDeviceCreateInfo(1, queueCreateInfoRef, deviceFeaturesRef) |> Ref

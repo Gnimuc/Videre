@@ -237,11 +237,11 @@ function find_queue_families(device::VkPhysicalDevice)
     return indices
 end
 
-function LibVulkan.VkDeviceQueueCreateInfo(queue_idxs::QueueFamilyIndices, queue_count::Integer, priority::Ref{Cfloat})
+function LibVulkan.VkDeviceQueueCreateInfo(queue_idx::Cuint, queue_count::Integer, priority::Ref{Cfloat})
     sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO
     pNext = C_NULL       # reserved for extension-specific structure
     flags = UInt32(0)    # reserved for future use
-    queueFamilyIndex = queue_idxs.graphicsFamily
+    queueFamilyIndex = queue_idx
     pQueuePriorities = Base.unsafe_convert(Ptr{Cfloat}, priority)
     return VkDeviceQueueCreateInfo(sType, pNext, flags, queueFamilyIndex, queue_count, pQueuePriorities)
 end
@@ -251,7 +251,7 @@ function LibVulkan.VkDeviceCreateInfo(queue_count::Integer, queue_info::Ref{VkDe
     pNext = C_NULL       # reserved for extension-specific structure
     flags = UInt32(0)    # reserved for future use
     queueCreateInfoCount = queue_count
-    pQueueCreateInfos = Base.unsafe_convert(Ptr{VkDeviceQueueCreateInfo}, queueCreateInfoRef)
+    pQueueCreateInfos = Base.unsafe_convert(Ptr{VkDeviceQueueCreateInfo}, queue_info)
     pEnabledFeatures = Base.unsafe_convert(Ptr{VkPhysicalDeviceFeatures}, deviceFeaturesRef)
     return VkDeviceCreateInfo(sType, pNext, flags, queueCreateInfoCount, pQueueCreateInfos, 0, C_NULL, 0, C_NULL, pEnabledFeatures)
 end
